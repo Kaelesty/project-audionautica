@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <style name="cardview_gradient">
+        <item name="cardCornerRadius">15dp</item>
+        <item name="android:foreground">@drawable/card_gradient_front</item>
+        
+        
+    </style>
+
+</resources>
