@@ -1,4 +1,4 @@
-package com.kaelesty.audionautica.ui.theme
+package com.kaelesty.audionautica.presentation.access.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
