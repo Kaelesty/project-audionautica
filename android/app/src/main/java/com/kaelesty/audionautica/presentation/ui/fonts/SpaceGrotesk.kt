@@ -1,4 +1,4 @@
-package com.kaelesty.audionautica.presentation.access.ui.fonts
+package com.kaelesty.audionautica.presentation.ui.fonts
 
 import android.os.Build
 import androidx.annotation.RequiresApi

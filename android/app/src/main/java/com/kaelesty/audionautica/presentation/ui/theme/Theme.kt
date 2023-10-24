@@ -1,4 +1,4 @@
-package com.kaelesty.audionautica.presentation.access.ui.theme
+package com.kaelesty.audionautica.presentation.ui.theme
 
 import android.app.Activity
 import android.os.Build
@@ -26,7 +26,8 @@ private val DarkColorScheme = darkColorScheme(
 	surface = BackgroundGradientDarkStart,
 	surfaceVariant = BackgroundGradientDarkEnd,
 	outline = CardBorderDark,
-	onSurface = TextDark
+	onSurface = TextDark,
+	primaryContainer = ButtonDark
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -39,7 +40,8 @@ private val LightColorScheme = lightColorScheme(
 	surface = BackgroundGradientLightStart,
 	surfaceVariant = BackgroundGradientLightEnd,
 	outline = CardBorderLight,
-	onSurface = TextLight
+	onSurface = TextLight,
+	primaryContainer = Color.White
 )
 
 @Composable
