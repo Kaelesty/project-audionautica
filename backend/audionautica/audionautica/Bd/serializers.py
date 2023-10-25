@@ -1,30 +1,38 @@
 from rest_framework import serializers
+from django.contrib.auth.hashers import make_password
 from .models import Users
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView
+)
 
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
-        fields = ('Name','Password')
+        fields = ('name','login')
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
-        fields = ('Login', 'Name','Password')
+        fields = ('login', 'name','password')
+        #to hide field password
+        # extra_kwargs = {
+        #     'password' : {'write_only':True}
+        # }
+    def create(self, validated_data):
+        password = validated_data#.pop('password', None)
+        instance = self.Meta.model(**validated_data)
+        if password is not None:
+            Users.password = make_password('password')
+        instance.save()
+        return instance
 
 class LoginSerialiaer(serializers.ModelSerializer):
     class Meta:
         model = Users
         fields = ('Login', 'Password')
-class Tokens(serializers.ModelSerializer):
-
-    def get_tokens_for_user(user):
-        refresh = RefreshToken.for_user(user)
-
-        return {
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }
-
+class TokenSerializer(TokenObtainPairView):
     class Meta:
         model = Users
-        fields = '__all__'
+        fields = ('Login', 'Password')

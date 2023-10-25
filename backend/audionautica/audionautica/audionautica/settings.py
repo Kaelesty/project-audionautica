@@ -40,9 +40,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
+    'djoser',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -114,7 +118,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-
+#AUTH_USER_MODEL = 'Bd.Users'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
@@ -125,6 +129,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+CORS_DRIDIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 REST_FRAMEWORCK = {
     'DEFAULT_RENDER_CLASSES':[
         'rest_frameworck.renderers.JSONRender',
@@ -135,6 +141,7 @@ REST_FRAMEWORCK = {
     ],
     'DEFAULT_AUTHENTICATION_CLASSES':[
         'rest_frameworck_simplejwt.authenticaion.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
         'rest_frameworck.authentication.BasicAuthentication',
         'rest_frameworck.authentication.SessionAuthentication',
     ]
