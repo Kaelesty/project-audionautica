@@ -13,16 +13,21 @@
         android:theme="@style/Theme.Audionautica"
         tools:targetApi="31">
         <activity
-            android:name=".presentation.auth.AuthActivity"
-            android:exported="false" />
-        <activity
-            android:name=".presentation.startup.StartupActivity"
-            android:exported="true">
+            android:name=".presentation.activities.AccessActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Audionautica">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".presentation.activities.MusicActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Audionautica">
         </activity>
     </application>
 
