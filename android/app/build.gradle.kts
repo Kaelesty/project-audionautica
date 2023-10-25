@@ -72,4 +72,12 @@ dependencies {
 	debugImplementation("androidx.compose.ui:ui-test-manifest")
 	implementation("androidx.compose.material3:material3:1.1.1")
 	implementation("androidx.compose.runtime:runtime-livedata:1.5.3")
+
+	implementation("io.reactivex.rxjava3:rxkotlin:3.0.0")
+	implementation("io.reactivex.rxjava3:rxandroid:3.0.2")
+	implementation("com.squareup.retrofit2:retrofit:2.9.0")
+	implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+	implementation("com.google.code.gson:gson:2.10.1")
+
+	implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
 }

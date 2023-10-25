@@ -1,4 +1,4 @@
-package com.kaelesty.audionautica.domain
+package com.kaelesty.audionautica.domain.entities
 
 import com.kaelesty.audionautica.R
 

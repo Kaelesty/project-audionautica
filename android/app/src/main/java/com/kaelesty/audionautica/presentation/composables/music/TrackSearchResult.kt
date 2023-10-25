@@ -25,10 +25,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kaelesty.audionautica.domain.TrackInfo
+import com.kaelesty.audionautica.domain.entities.TrackInfo
 import com.kaelesty.audionautica.presentation.ui.fonts.SpaceGrotesk
 import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
-import com.kaelesty.audionautica.presentation.ui.theme.ButtonDark
 
 @Composable
 fun TrackSearchResult(

@@ -115,9 +115,9 @@ fun MultiparameterInputCard(
 			Spacer(Modifier.height(20.dp))
 			Button(
 				onClick = {
-					val result = mutableListOf<String>()
+					val result = mutableMapOf<String, String>()
 					for (param in parameterStates) {
-						result.add(param.value.value)
+						result[param.key] = param.value.value
 					}
 					mainAction.onCollect(result)
 				},

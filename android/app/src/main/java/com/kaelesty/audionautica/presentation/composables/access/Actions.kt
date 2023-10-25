@@ -8,5 +8,5 @@ data class SimpleNamedAction(
 
 data class CollectNamedAction(
 	val name: String,
-	val onCollect: (List<String>) -> Unit
+	val onCollect: (Map<String, String>) -> Unit
 )
