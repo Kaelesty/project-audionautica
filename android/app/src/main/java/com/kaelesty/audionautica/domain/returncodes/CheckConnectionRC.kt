@@ -1,5 +1,5 @@
 package com.kaelesty.audionautica.domain.returncodes
 
-enum class RegisterRC {
-	OK, BAD_EMAIL, UNKNOWN
+enum class CheckConnectionRC {
+	OK, NOT_OK
 }

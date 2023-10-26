@@ -6,13 +6,19 @@ import com.kaelesty.audionautica.data.remote.entities.RegisterDto
 import com.kaelesty.audionautica.data.remote.entities.RegisterResponse
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 
 interface AccessApiService {
+	@POST("Login/")
+	suspend fun login(@Body loginDto: LoginDto): Response<String>
 
-	@POST("Login")
-	suspend fun login(@Body loginDto: LoginDto): Response<LoginResponse>
-
-	@POST("Register")
+	@POST("Register/")
 	suspend fun register(@Body registerDto: RegisterDto): Response<RegisterResponse>
+
+	@GET("CheckConnection/")
+	suspend fun checkConnection(): Response<Unit>
+
+	//@GET("Logout")
+	//suspend fun logout(): Response<Unit>
 }

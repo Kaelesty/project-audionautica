@@ -25,6 +25,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -84,6 +85,8 @@ fun Register(
 	controllerState: MutableState<AccessScreenMode>,
 	viewModel: AccessViewModel
 ) {
+	var error = viewModel.registerError.observeAsState("")
+
 	MultiparameterInputCard(
 		title = "Register",
 		mainAction = CollectNamedAction(
@@ -98,7 +101,8 @@ fun Register(
 				controllerState.value = AccessScreenMode.LOGIN
 			}
 		),
-		parameters = listOf("Email", "Name", "Password")
+		parameters = listOf("Email", "Name", "Password"),
+		errorMessage = error.value
 	)
 }
 
@@ -107,6 +111,8 @@ fun Login(
 	controllerState: MutableState<AccessScreenMode>,
 	viewModel: AccessViewModel
 ) {
+	val error = viewModel.loginError.observeAsState("")
+
 	MultiparameterInputCard(
 		title = "Sing in",
 		mainAction = CollectNamedAction(
@@ -127,7 +133,8 @@ fun Login(
 				controllerState.value = AccessScreenMode.RESET_PASSWORD
 			}
 		),
-		parameters = listOf("Email", "Password")
+		parameters = listOf("Email", "Password"),
+		errorMessage = error.value
 	)
 }
 

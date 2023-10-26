@@ -1,5 +1,6 @@
 package com.kaelesty.audionautica.presentation.composables.access
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -46,6 +48,7 @@ fun MultiparameterInputCard(
 	mainAction: CollectNamedAction,
 	leftAction: SimpleNamedAction? = null,
 	rightAction: SimpleNamedAction? = null,
+	errorMessage: String? = null
 ) {
 
 	val parameterStates = mutableMapOf<String, MutableState<String>>()
@@ -55,8 +58,7 @@ fun MultiparameterInputCard(
 		}
 	}
 
-	GradientCard(
-	) {
+	GradientCard {
 		Column(
 			modifier = Modifier
 				.padding(6.dp)
@@ -119,6 +121,7 @@ fun MultiparameterInputCard(
 					for (param in parameterStates) {
 						result[param.key] = param.value.value
 					}
+					Log.d("AccessViewModel", result.toString())
 					mainAction.onCollect(result)
 				},
 				modifier = Modifier
@@ -134,6 +137,17 @@ fun MultiparameterInputCard(
 					mainAction.name,
 					color = colorScheme.onSurface,
 					fontFamily = SpaceGrotesk
+				)
+			}
+			errorMessage?.let {
+				Spacer(Modifier.height(6.dp))
+				Text(
+					text = it,
+					color = Color.Red,
+					fontSize = 16.sp,
+					fontFamily = SpaceGrotesk,
+					modifier = Modifier
+						.padding(horizontal=12.dp)
 				)
 			}
 		}
@@ -202,7 +216,8 @@ fun PreviewMICLight() {
 		MultiparameterInputCard(
 			mainAction = CollectNamedAction("Action") { },
 			leftAction = SimpleNamedAction("Action", {}),
-			rightAction = SimpleNamedAction("Action", {})
+			rightAction = SimpleNamedAction("Action", {}),
+			errorMessage = "123"
 		)
 	}
 }
