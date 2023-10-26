@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include, re_path
-from Bd.views import UsersAPIViwe, RegisterUser,CheckConnection, LoginUser, TokenViwe, UserView, LogoutView
+from Bd.views import UsersAPIViwe, RegisterUser,CheckConnection, LoginUser, TokenViwe, UserView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -31,7 +31,7 @@ urlpatterns = [
     path('Auth/Register/', RegisterUser.as_view()),
     path('Auth/Login/', LoginUser.as_view()),
     path('Auth/User/', UserView.as_view()),
-    path('Logout/', LogoutView.as_view()),
+    #path('Logout/', LogoutView.as_view()),
     # path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'), #for login give access & refresh token
     # path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), #refreshing
     # path('token/verify/', TokenVerifyView.as_view(), name = 'token_verify'), #verifykation

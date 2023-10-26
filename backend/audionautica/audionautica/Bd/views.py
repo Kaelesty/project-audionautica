@@ -7,9 +7,6 @@ from rest_framework import status, generics
 from rest_framework.exceptions import AuthenticationFailed
 from .models import Users
 from .serializers import UsersSerializer, RegisterSerializer, LoginSerialiaer, TokenSerializer
-from django.contrib.auth.forms import UserCreationForm
-from django import forms
-from rest_framework_simplejwt.tokens import RefreshToken
 import jwt, datetime
 
 class UsersAPIViwe(generics.ListAPIView):
@@ -49,7 +46,7 @@ class LoginUser(APIView):
 
         payload = {
             'id':user.id,
-            'exp':datetime.datetime.utcnow()+datetime.timedelta(minutes=60),
+            'exp':datetime.datetime.utcnow()+datetime.timedelta(minutes=1440),
             'iat':datetime.datetime.utcnow()
         }
         token = jwt.encode(payload,'secret',algorithm='HS256')
@@ -80,11 +77,11 @@ class UserView(APIView):
         serializer = UsersSerializer(user)
         return Response(serializer.data)
 
-class LogoutView(APIView):
-    def post(self, request):
-        response = Response()
-        response.delete_cookie('jwt')
-        response.data = {
-            'message':'success'
-        }
-        return response
+# class LogoutView(APIView):
+#     def post(self, request):
+#         response = Response()
+#         #response.delete_cookie('jwt')
+#         response.data = {
+#             'message':'success'
+#         }
+#         return response
