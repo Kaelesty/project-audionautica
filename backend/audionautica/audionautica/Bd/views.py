@@ -20,28 +20,32 @@ class TokenViwe(APIView):
     queryset = Users.objects.all()
     serializer_class = TokenSerializer
 class CheckConnection(APIView):
-    queryset = Users.objects.all()
-    serializer_class = UsersSerializer
+    def get(self, request):
+        return Response()
 
 class RegisterUser(APIView):
-    def post(self, request, format = None):
-        serializer = RegisterSerializer(data = request.data)
+    def post(self, request, format=None):
+        serializer = RegisterSerializer(data=request.data)
+        print(request.data)
+        if Users.objects.filter(login=request.data['login']):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        return  Response(serializer.errors)
+        return Response(serializer.errors)
+
 class LoginUser(APIView):
     def post(self, request, format = None):
         login = request.data['login']
         password = request.data['password']
 
-        user = Users.objects.filter(login = login).first()
+        user = Users.objects.filter(login=login).first()
+        user_pass = Users.objects.filter(password=password).first()
         if user is None:
-            raise AuthenticationFailed('User not found')
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        #need to be fixed
-        # if not user.check_password(password):
-        #     raise AuthenticationFailed('Incorrect password')
+        if user_pass is None:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
         payload = {
             'id':user.id,
@@ -52,7 +56,7 @@ class LoginUser(APIView):
 
         response = Response(token)
 
-        #from str to cooki
+        #from str to cookie
         # response.set_cookie(key='jwt', value=token,httponly=True)
         # response.data = {
         #     'jwt':token
@@ -61,7 +65,7 @@ class LoginUser(APIView):
         return response
 
 class UserView(APIView):
-    def get(self, request):
+    def post(self, request):
         token = request.data
         #token = request.COOKIES.get('jwt')
         # if not token:
