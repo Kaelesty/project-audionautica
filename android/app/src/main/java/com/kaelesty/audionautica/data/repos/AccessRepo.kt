@@ -44,7 +44,7 @@ class AccessRepo : IAccessRepo {
 			RegisterDto(email, name, password)
 		)
 		return when (response.code()) {
-			200 -> RegisterRC.OK
+			200 -> autoLogin(email, password)
 			400 -> RegisterRC.BAD_EMAIL
 			else -> RegisterRC.UNKNOWN
 		}
@@ -55,6 +55,14 @@ class AccessRepo : IAccessRepo {
 		return when (response.code()) {
 			200 -> CheckConnectionRC.OK
 			else -> CheckConnectionRC.NOT_OK
+		}
+	}
+
+	private suspend fun autoLogin(email: String, password: String): RegisterRC {
+		return when (login(email, password)) {
+			LoginRC.OK -> RegisterRC.OK
+			LoginRC.BAD_PASSWORD, LoginRC.BAD_LOGIN -> RegisterRC.AUTOLOGIN_FATAL_ERROR
+			LoginRC.UNKNOWN -> RegisterRC.AUTOLOGIN_FAILED
 		}
 	}
 }

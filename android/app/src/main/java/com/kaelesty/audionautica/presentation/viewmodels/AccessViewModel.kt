@@ -40,6 +40,8 @@ class AccessViewModel: ViewModel() {
 				RegisterRC.OK -> _runMusicActivity.postValue(Unit)
 				RegisterRC.BAD_EMAIL -> _registerError.postValue("Email already registered")
 				RegisterRC.UNKNOWN -> _registerError.postValue("Server error")
+				RegisterRC.AUTOLOGIN_FAILED -> _registerError.postValue("Registration was successful, but unable to log in")
+				RegisterRC.AUTOLOGIN_FATAL_ERROR -> _registerError.postValue("Critical server error")
 			}
 		}
 	}

@@ -48,7 +48,8 @@ fun MultiparameterInputCard(
 	mainAction: CollectNamedAction,
 	leftAction: SimpleNamedAction? = null,
 	rightAction: SimpleNamedAction? = null,
-	errorMessage: String? = null
+	errorMessage: String? = null,
+	lastParameterIsPassword: Boolean = true
 ) {
 
 	val parameterStates = mutableMapOf<String, MutableState<String>>()
@@ -73,11 +74,12 @@ fun MultiparameterInputCard(
 				modifier = Modifier
 					.padding(horizontal = 10.dp)
 			)
-			for (param in parameterStates) {
+			parameterStates.keys.forEachIndexed { index, key ->
 				Spacer(modifier = Modifier.height(12.dp))
 				TextInput(
-					value = param.value,
-					hint = param.key
+					value = parameterStates[key] ?: throw IllegalStateException(),
+					hint = key,
+					isPassword = index == parameterStates.size - 1 && lastParameterIsPassword
 				)
 			}
 			Spacer(modifier = Modifier.height(6.dp))
