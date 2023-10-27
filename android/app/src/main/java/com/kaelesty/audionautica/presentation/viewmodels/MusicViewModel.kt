@@ -4,8 +4,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.kaelesty.audionautica.domain.entities.Track
+import javax.inject.Inject
 
-class MusicViewModel: ViewModel() {
+class MusicViewModel @Inject constructor(): ViewModel() {
 
 	private val _tracks = MutableLiveData<List<Track>>()
 	val tracks: LiveData<List<Track>> get() = _tracks

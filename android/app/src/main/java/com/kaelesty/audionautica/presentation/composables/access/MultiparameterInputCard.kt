@@ -123,7 +123,6 @@ fun MultiparameterInputCard(
 					for (param in parameterStates) {
 						result[param.key] = param.value.value
 					}
-					Log.d("AccessViewModel", result.toString())
 					mainAction.onCollect(result)
 				},
 				modifier = Modifier

@@ -70,7 +70,7 @@ fun Register(
 		rightAction = SimpleNamedAction(
 			name = "Continue offline",
 			onAction = {
-				// viewModel.continueOffline()
+				viewModel.continueOffline()
 			},
 		),
 		parameters = listOf("Email", "Name", "Password"),
@@ -102,7 +102,7 @@ fun Login(
 		rightAction = SimpleNamedAction(
 			name = "Continue offline",
 			onAction = {
-				//viewModel.continueOffline()
+				viewModel.continueOffline()
 			},
 		),
 		parameters = listOf("Email", "Password"),
@@ -111,18 +111,18 @@ fun Login(
 }
 
 
-@Preview
-@Composable
-fun PreviewLight() {
-	AudionauticaTheme(darkTheme = false) {
-		AccessScreen(AccessViewModel())
-	}
-}
-
-@Preview
-@Composable
-fun PreviewDark() {
-	AudionauticaTheme(darkTheme = true) {
-		AccessScreen(AccessViewModel())
-	}
-}
+//@Preview
+//@Composable
+//fun PreviewLight() {
+//	AudionauticaTheme(darkTheme = false) {
+//		AccessScreen(AccessViewModel())
+//	}
+//}
+//
+//@Preview
+//@Composable
+//fun PreviewDark() {
+//	AudionauticaTheme(darkTheme = true) {
+//		AccessScreen(AccessViewModel())
+//	}
+//}
