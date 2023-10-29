@@ -93,4 +93,7 @@ dependencies {
 
 	implementation("com.google.dagger:dagger:2.47")
 	kapt("com.google.dagger:dagger-compiler:2.47")
+
+	implementation("com.google.android.exoplayer:exoplayer:2.19.1")
+
 }
