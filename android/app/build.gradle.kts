@@ -95,5 +95,9 @@ dependencies {
 	kapt("com.google.dagger:dagger-compiler:2.47")
 
 	implementation("com.google.android.exoplayer:exoplayer:2.19.1")
+	implementation("androidx.media3:media3-exoplayer:1.1.1")
+	implementation("androidx.media3:media3-exoplayer-dash:1.1.1")
+	implementation("androidx.media3:media3-ui:1.1.1")
+
 
 }

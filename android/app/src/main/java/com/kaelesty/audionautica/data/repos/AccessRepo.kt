@@ -1,9 +1,7 @@
 package com.kaelesty.audionautica.data.repos
 
 import android.content.Context
-import android.util.Log
 import com.kaelesty.audionautica.data.remote.api.AccessApiService
-import com.kaelesty.audionautica.data.remote.api.AccessServiceFactory
 import com.kaelesty.audionautica.data.remote.entities.LoginDto
 import com.kaelesty.audionautica.data.remote.entities.RegisterDto
 import com.kaelesty.audionautica.di.ApplicationScope
