@@ -2,6 +2,7 @@ package com.kaelesty.audionautica.presentation.composables.music
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,11 +16,13 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Warning
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -40,7 +43,10 @@ import com.kaelesty.audionautica.presentation.viewmodels.MusicViewModel
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MusicScreen(
-	viewModel: MusicViewModel
+	viewModel: MusicViewModel,
+	onPlay: () -> Unit,
+	onPause: () -> Unit,
+	onStop: () -> Unit,
 ) {
 
 	val mode = rememberSaveable {
@@ -63,20 +69,42 @@ fun MusicScreen(
 		)
 		when (mode.value) {
 			MusicScreenMode.SEARCH -> Search(viewModel)
-			MusicScreenMode.PLAYLISTS -> Playlists(viewModel)
+			MusicScreenMode.PLAYLISTS -> Playlists(viewModel, onPlay, onPause)
 			MusicScreenMode.MY_TRACKS -> MyTracks(viewModel)
 		}
 	}
 }
 
 @Composable
-fun Playlists(viewModel: MusicViewModel) {
-
+fun Playlists(
+	viewModel: MusicViewModel,
+	onPlay: () -> Unit,
+	onPause: () -> Unit
+) {
+//	Column {
+//		Button(onClick = { viewModel.downloadTrack() }) {
+//			Text("Download")
+//		}
+//		Button(onClick = { viewModel.playTrack() }) {
+//			Text("Play")
+//		}
+//		Button(onClick = { viewModel.stopTrack() }) {
+//			Text("Stop")
+//		}
+//	}
+	TrackCard(
+		onPlay = { onPlay() },
+		onPause = { onPause() },
+	)
 }
 
 @Composable
 fun MyTracks(viewModel: MusicViewModel) {
+	val tracks = viewModel.tracks.observeAsState(mutableListOf())
 
+	LazyColumn {
+
+	}
 }
 
 @OptIn(ExperimentalFoundationApi::class)

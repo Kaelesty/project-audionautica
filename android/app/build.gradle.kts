@@ -1,6 +1,9 @@
+import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
+
 plugins {
 	id("com.android.application")
 	id("org.jetbrains.kotlin.android")
+	id("kotlin-kapt")
 }
 
 android {
@@ -30,11 +33,11 @@ android {
 		}
 	}
 	compileOptions {
-		sourceCompatibility = JavaVersion.VERSION_1_8
-		targetCompatibility = JavaVersion.VERSION_1_8
+		sourceCompatibility = JavaVersion.VERSION_17
+		targetCompatibility = JavaVersion.VERSION_17
 	}
 	kotlinOptions {
-		jvmTarget = "1.8"
+		jvmTarget = "17"
 	}
 	buildFeatures {
 		compose = true
@@ -80,4 +83,21 @@ dependencies {
 	implementation("com.google.code.gson:gson:2.10.1")
 
 	implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+
+	var room_version = "2.5.2"
+
+	implementation("androidx.room:room-runtime:$room_version")
+	annotationProcessor ("androidx.room:room-compiler:$room_version")
+	kapt("androidx.room:room-compiler:$room_version")
+	implementation ("androidx.room:room-ktx:$room_version")
+
+	implementation("com.google.dagger:dagger:2.47")
+	kapt("com.google.dagger:dagger-compiler:2.47")
+
+	implementation("com.google.android.exoplayer:exoplayer:2.19.1")
+	implementation("androidx.media3:media3-exoplayer:1.1.1")
+	implementation("androidx.media3:media3-exoplayer-dash:1.1.1")
+	implementation("androidx.media3:media3-ui:1.1.1")
+
+
 }
