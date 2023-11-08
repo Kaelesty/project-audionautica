@@ -1,7 +1,9 @@
 package com.kaelesty.audionautica.data.mappers
 
+import android.net.Uri
 import com.kaelesty.audionautica.data.local.dbmodels.TrackDbModel
 import com.kaelesty.audionautica.domain.entities.Track
+import java.io.File
 import javax.inject.Inject
 
 class TrackMapper @Inject constructor() {
@@ -11,8 +13,10 @@ class TrackMapper @Inject constructor() {
 		dbModel.title,
 		dbModel.artist,
 		dbModel.duration,
-		dbModel.musicFile,
-		dbModel.posterFile,
+		Uri.fromFile(File(dbModel.musicFile)),
+		dbModel.posterFile?.let {
+								Uri.fromFile(File(it))
+		},
 	)
 
 	fun domainToDbModel(domain: Track): TrackDbModel = TrackDbModel(
@@ -20,7 +24,7 @@ class TrackMapper @Inject constructor() {
 		domain.title,
 		domain.artist,
 		domain.duration,
-		domain.musicFile,
-		domain.posterFile,
+		domain.musicFile.path ?: "",
+		domain.posterFile?.path ?: "",
 	)
 }

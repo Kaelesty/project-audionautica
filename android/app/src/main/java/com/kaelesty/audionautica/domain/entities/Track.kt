@@ -8,5 +8,5 @@ data class Track(
 	val artist: String,
 	val duration: Long,
 	val musicFile: Uri,
-	val posterFile: Uri
+	val posterFile: Uri?
 )

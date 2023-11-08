@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Warning
@@ -47,6 +48,7 @@ fun MusicScreen(
 	onPlay: () -> Unit,
 	onPause: () -> Unit,
 	onStop: () -> Unit,
+	onAddTrack: () -> Unit
 ) {
 
 	val mode = rememberSaveable {
@@ -64,13 +66,15 @@ fun MusicScreen(
 				id = R.drawable.space_background
 			),
 			contentDescription = "Space Background",
-			modifier = Modifier.fillMaxSize(),
-			contentScale = ContentScale.FillHeight
+			modifier = Modifier
+				.fillMaxSize()
+			,
+			contentScale = ContentScale.Crop
 		)
 		when (mode.value) {
 			MusicScreenMode.SEARCH -> Search(viewModel)
 			MusicScreenMode.PLAYLISTS -> Playlists(viewModel, onPlay, onPause)
-			MusicScreenMode.MY_TRACKS -> MyTracks(viewModel)
+			MusicScreenMode.MY_TRACKS -> MyTracks(viewModel, onAddTrack)
 		}
 	}
 }
@@ -99,11 +103,11 @@ fun Playlists(
 }
 
 @Composable
-fun MyTracks(viewModel: MusicViewModel) {
+fun MyTracks(viewModel: MusicViewModel, onAddTrack: () -> Unit) {
 	val tracks = viewModel.tracks.observeAsState(mutableListOf())
 
-	LazyColumn {
-
+	Button(onClick = { onAddTrack() }) {
+		Text("Add track")
 	}
 }
 
@@ -187,7 +191,7 @@ fun MusicNavigationBar(mode: MutableState<MusicScreenMode>) {
 								when (item) {
 									"Search" -> Icons.Outlined.Search
 									"Playlists" -> Icons.Outlined.List
-									"My Tracks" -> Icons.Outlined.Edit
+									"My Tracks" -> Icons.Outlined.FavoriteBorder
 									else -> Icons.Outlined.Warning
 								},
 								"Search Icon"

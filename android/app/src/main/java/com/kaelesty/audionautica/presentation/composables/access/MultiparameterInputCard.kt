@@ -1,5 +1,6 @@
 package com.kaelesty.audionautica.presentation.composables.access
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -49,10 +51,11 @@ fun MultiparameterInputCard(
 	leftAction: SimpleNamedAction? = null,
 	rightAction: SimpleNamedAction? = null,
 	errorMessage: String? = null,
-	lastParameterIsPassword: Boolean = true
+	lastParameterIsPassword: Boolean = true,
 ) {
 
 	val parameterStates = mutableMapOf<String, MutableState<String>>()
+
 	for (param in parameters) {
 		parameterStates[param] = rememberSaveable {
 			mutableStateOf("")
@@ -123,7 +126,7 @@ fun MultiparameterInputCard(
 					for (param in parameterStates) {
 						result[param.key] = param.value.value
 					}
-					mainAction.onCollect(result)
+					mainAction.onCollect(result, null)
 				},
 				modifier = Modifier
 					.fillMaxWidth()
@@ -155,7 +158,6 @@ fun MultiparameterInputCard(
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextInput(value: MutableState<String>, hint: String, isPassword: Boolean = false) {
 	TextField(
@@ -215,10 +217,10 @@ fun GradientCard(
 fun PreviewMICLight() {
 	AudionauticaTheme(darkTheme = false) {
 		MultiparameterInputCard(
-			mainAction = CollectNamedAction("Action") { },
+			mainAction = CollectNamedAction("Action") { map1, map ->  },
 			leftAction = SimpleNamedAction("Action", {}),
 			rightAction = SimpleNamedAction("Action", {}),
-			errorMessage = "123"
+			errorMessage = "123",
 		)
 	}
 }
@@ -228,7 +230,7 @@ fun PreviewMICLight() {
 fun PreviewMICDark() {
 	AudionauticaTheme(darkTheme = true) {
 		MultiparameterInputCard(
-			mainAction = CollectNamedAction("Action") { },
+			mainAction = CollectNamedAction("Action") { map1, map ->  },
 			leftAction = SimpleNamedAction("Action", {}),
 			rightAction = SimpleNamedAction("Action", {})
 		)

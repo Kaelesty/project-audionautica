@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Audionautica</string>
     <string name="title_activity_music">MusicActivity</string>
+    <string name="title_activity_add_track">AddTrackActivity</string>
 </resources>

@@ -14,8 +14,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class AccessViewModel @Inject constructor(
-	var loginUseCase: LoginUseCase,
-	var registerUseCase: RegisterUseCase
+	private var loginUseCase: LoginUseCase,
+	private var registerUseCase: RegisterUseCase
 ): ViewModel() {
 
 	enum class RunMusicActivityMode {

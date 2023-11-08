@@ -94,11 +94,18 @@ class MusicActivity : ComponentActivity() {
 			AudionauticaTheme {
 				MusicScreen(
 					viewModel,
-					onPlay, onPause, onStop
+					onPlay, onPause, onStop,
+					onAddTrack = { launchAddTrackActivity() }
 				)
 			}
 		}
 
+	}
+
+	private fun launchAddTrackActivity() {
+		startActivity(
+			AddTrackActivity.newIntent(this@MusicActivity)
+		)
 	}
 
 	companion object {

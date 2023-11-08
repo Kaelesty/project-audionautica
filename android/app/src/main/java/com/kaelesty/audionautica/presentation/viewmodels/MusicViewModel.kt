@@ -1,18 +1,13 @@
 package com.kaelesty.audionautica.presentation.viewmodels
 
-import android.content.Context
-import android.media.MediaPlayer
-import android.net.Uri
+import android.app.Application
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kaelesty.audionautica.data.remote.api.ApiServiceFactory
-import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.entities.TrackSample
-import com.kaelesty.audionautica.domain.usecases.CreateTrackUseCase
-import com.kaelesty.audionautica.domain.usecases.GetAllTracksUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
@@ -21,9 +16,8 @@ import java.io.InputStream
 import javax.inject.Inject
 
 class MusicViewModel @Inject constructor(
-	private val context: Context,
-	private val getAllTracksUseCase: GetAllTracksUseCase,
-	private val createTrackUseCase: CreateTrackUseCase,
+	private val application: Application,
+	//private val getAllTracksUseCase: GetAllTracksUseCase,
 ): ViewModel() {
 
 	private val FILE_PATH = "/Audionautica"
@@ -33,27 +27,7 @@ class MusicViewModel @Inject constructor(
 	val tracks: LiveData<List<TrackSample>> get() = _tracks
 
 	// ON FAVORITES SCREEN
-	val favorites: LiveData<List<Track>> = getAllTracksUseCase()
-
-	fun addTrack(
-		artist: String,
-		title: String,
-		posterFile: Uri,
-		musicFile: Uri,
-	) {
-		val track = Track(
-			artist = artist,
-			duration = 0,
-			id = -1,
-			musicFile = musicFile,
-			posterFile = posterFile,
-			title = title
-		)
-
-		viewModelScope.launch(Dispatchers.IO) {
-			createTrackUseCase(track)
-		}
-	}
+	// val favorites: LiveData<List<Track>> = getAllTracksUseCase()
 
 	fun search(query: String) {
 		val tracksList = mutableListOf<TrackSample>()
@@ -83,10 +57,9 @@ class MusicViewModel @Inject constructor(
 		var input: InputStream? = null
 		try {
 			input = body.byteStream()
-
 			val fileName="/1234.mp3"
-			val pathWhereYouWantToSaveFile = context.filesDir.absolutePath+fileName
-			Log.e("MusicViewModel", context.filesDir.absolutePath)
+			val pathWhereYouWantToSaveFile = application.filesDir.absolutePath+fileName
+			Log.e("MusicViewModel", application.filesDir.absolutePath)
 			val fos = FileOutputStream(pathWhereYouWantToSaveFile)
 			fos.use {output ->
 				val buffer = ByteArray(4 * 1024)

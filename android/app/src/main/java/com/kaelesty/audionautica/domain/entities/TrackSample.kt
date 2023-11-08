@@ -8,7 +8,7 @@ data class TrackSample(
 )
 
 data class TrackInfo(
-	val name: String = "Idol",
-	val artist: String = "YOASOBI",
-	val poster: Int = R.drawable.example_track_poster
+	val name: String = "Akeboshi",
+	val artist: String = "re:Tye",
+	val poster: Int = R.drawable.example_track_poster_2
 )

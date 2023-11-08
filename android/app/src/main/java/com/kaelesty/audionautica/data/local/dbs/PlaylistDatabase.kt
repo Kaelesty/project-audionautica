@@ -9,7 +9,7 @@ import com.kaelesty.audionautica.data.local.dbmodels.PlaylistDbModel
 import com.kaelesty.audionautica.domain.entities.Track
 
 @Database(
-	entities = [Track::class],
+	entities = [PlaylistDbModel::class],
 	version = 1,
 	exportSchema = false,
 )
@@ -59,7 +59,6 @@ abstract class PlaylistDatabase() : RoomDatabase() {
 							id = 0,
 							posterFile = null,
 							title = "Favorites",
-							mutableListOf()
 						)
 					)
 				}

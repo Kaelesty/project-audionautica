@@ -1,6 +1,5 @@
 package com.kaelesty.audionautica.data.repos
 
-import android.content.Context
 import com.kaelesty.audionautica.data.remote.api.AccessApiService
 import com.kaelesty.audionautica.data.remote.entities.LoginDto
 import com.kaelesty.audionautica.data.remote.entities.RegisterDto
@@ -13,7 +12,6 @@ import javax.inject.Inject
 
 @ApplicationScope
 class AccessRepo @Inject constructor(
-	val context: Context,
 	val accessApiService: AccessApiService
 ) : IAccessRepo {
 

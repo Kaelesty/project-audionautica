@@ -5,10 +5,11 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.kaelesty.audionautica.data.local.daos.TrackDao
+import com.kaelesty.audionautica.data.local.dbmodels.TrackDbModel
 import com.kaelesty.audionautica.domain.entities.Track
 
 @Database(
-	entities = [Track::class],
+	entities = [TrackDbModel::class],
 	version = 1,
 	exportSchema = false,
 )

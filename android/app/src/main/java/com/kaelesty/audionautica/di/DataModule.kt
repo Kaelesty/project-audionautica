@@ -7,6 +7,7 @@ import com.kaelesty.audionautica.data.local.dbs.PlaylistDatabase
 import com.kaelesty.audionautica.data.local.dbs.TrackDatabase
 import com.kaelesty.audionautica.data.remote.api.AccessApiService
 import com.kaelesty.audionautica.data.remote.api.ApiServiceFactory
+import com.kaelesty.audionautica.data.remote.api.MusicApiService
 import dagger.Module
 import dagger.Provides
 
@@ -21,13 +22,19 @@ class DataModule {
 
 	@Provides
 	@ApplicationScope
-	fun provideTrackDao(context: Context): TrackDao {
-		return TrackDatabase.getInstance(context).dao()
+	fun provideMusicApiService(): MusicApiService {
+		return ApiServiceFactory.musicService
 	}
 
 	@Provides
 	@ApplicationScope
-	fun providePlaylistDao(context: Context): PlaylistDao {
-		return PlaylistDatabase.getInstance(context).dao()
+	fun provideTrackDao(db: TrackDatabase): TrackDao {
+		return db.dao()
+	}
+
+	@Provides
+	@ApplicationScope
+	fun providePlaylistDao(db: PlaylistDatabase): PlaylistDao {
+		return db.dao()
 	}
 }
