@@ -102,9 +102,9 @@ class MusicPlayerService : Service() {
 				id = 0,
 				duration = 42422,
 				title = "Akeboshi",
-				musicFile = File(
+				musicFile = Uri.fromFile(File(
 					applicationContext.filesDir.absolutePath + "/1234.mp3"
-				),
+				)),
 				posterFile = Uri.fromFile(
 					File(
 						applicationContext.filesDir.absolutePath + "/1234.mp3"
@@ -131,7 +131,7 @@ class MusicPlayerService : Service() {
 			)
 			player.addMediaItem(
 				MediaItem.fromUri(
-					track.musicFile.toUri()
+					track.musicFile
 				)
 			)
 			player.prepare()

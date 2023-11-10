@@ -14,7 +14,7 @@ class TrackMapper @Inject constructor() {
 		dbModel.title,
 		dbModel.artist,
 		dbModel.duration,
-		File(dbModel.musicFile),
+		File(dbModel.musicFile).toUri(),
 		dbModel.posterFile?.let {
 								Uri.fromFile(File(it))
 		},

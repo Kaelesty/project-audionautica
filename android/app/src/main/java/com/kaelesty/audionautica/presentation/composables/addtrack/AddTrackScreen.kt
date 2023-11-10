@@ -88,7 +88,7 @@ fun AddTrackScreen(
 
 @Composable
 fun FileBrowser(
-	file: File?,
+	uri: Uri?,
 	fileBrowser: () -> Unit,
 	hint: String
 ) {
@@ -100,7 +100,7 @@ fun FileBrowser(
 			verticalAlignment = Alignment.CenterVertically
 		) {
 			TextField(
-				value = file?.name ?: "",
+				value = uri?.lastPathSegment ?: "",
 				onValueChange = {},
 				modifier = Modifier
 					.weight(1f)

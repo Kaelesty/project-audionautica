@@ -18,8 +18,8 @@ class AddTrackViewModel @Inject constructor(
 	private val uploadTrackUseCase: UploadTrackUseCase
 ): ViewModel() {
 
-	private val _musicFile = MutableLiveData<File>()
-	val musicFile: LiveData<File> get() = _musicFile
+	private val _musicFile = MutableLiveData<Uri>()
+	val musicFile: LiveData<Uri> get() = _musicFile
 
 	private val _posterFile = MutableLiveData<Uri>()
 	val posterFile: LiveData<Uri> get() = _posterFile
@@ -30,8 +30,8 @@ class AddTrackViewModel @Inject constructor(
 	private val _finish = MutableLiveData<Unit>()
 	val finish: LiveData<Unit> get() = _finish
 
-	fun musicFileBrowsed(file: File) {
-		_musicFile.postValue(file)
+	fun musicFileBrowsed(uri: Uri) {
+		_musicFile.postValue(uri)
 	}
 
 	fun posterFileBrowsed(uri: Uri) {

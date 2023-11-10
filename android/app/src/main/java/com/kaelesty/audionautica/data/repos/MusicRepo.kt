@@ -1,10 +1,14 @@
 package com.kaelesty.audionautica.data.repos
 
+import android.app.Application
 import android.content.ContentResolver
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.os.FileUtils
+import android.provider.OpenableColumns
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
@@ -20,7 +24,12 @@ import com.kaelesty.audionautica.domain.returncodes.UploadTrackRC
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okio.BufferedSink
 import java.io.File
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
 import java.net.URI
 import javax.inject.Inject
 
@@ -30,7 +39,8 @@ class MusicRepo @Inject constructor(
 	private val playlistDao: PlaylistDao,
 	private val trackMapper: TrackMapper,
 	private val musicApiService: MusicApiService,
-	private val contentResolver: ContentResolver
+	private val contentResolver: ContentResolver,
+	private val application: Application,
 ) : IMusicRepo {
 
 
@@ -46,21 +56,35 @@ class MusicRepo @Inject constructor(
 		// TODO upload to Server Database
 		trackDao.createTrack(trackMapper.domainToDbModel(track))
 	}
-
+	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	override suspend fun uploadTrack(track: Track): UploadTrackRC {
 		try {
-			Log.e("MYTAG", track.musicFile.name)
-			val uri = track.musicFile.toUri()
-			val type = contentResolver.getType(uri)
-			val requestFile = RequestBody.create(
-				MediaType.parse(
-					"audio"
-				),
-				track.musicFile
+			track.musicFile.path?.let { Log.e("MYTAG", it) }
+			val uri = track.musicFile
+
+			val tempFile = File(application.cacheDir, "tempfile")
+			try {
+				val inputstream: InputStream = contentResolver.openInputStream(uri)!!
+				val output = FileOutputStream(tempFile)
+				val buffer = ByteArray(1024)
+				var size: Int
+				while (inputstream.read(buffer).also { size = it } != -1) {
+					output.write(buffer, 0, size)
+				}
+				inputstream.close()
+				output.close()
+			} catch (e: IOException) {
+				Log.e("MYTAG", "COPYCODE ERROR")
+			}
+
+
+			val file = tempFile
+			val requestBody = RequestBody.create(
+				MediaType.parse("Audio"),
+				file
 			)
-			val body = MultipartBody.Part.createFormData(
-				"track", track.musicFile.name, requestFile
-			)
+			val body = MultipartBody.Part.create(requestBody)
+
 			val description = RequestBody.create(
 				MultipartBody.FORM, "description"
 			)
@@ -73,7 +97,7 @@ class MusicRepo @Inject constructor(
 				else -> UploadTrackRC.SERVER_ERROR
 			}
 		}
-		catch (e: Exception) {
+		catch (e: IOException) {
 			Log.e("MYTAG", e.message.toString())
 			return UploadTrackRC.SERVER_ERROR
 		}
