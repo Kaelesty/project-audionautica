@@ -5,19 +5,25 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.graphics.BitmapFactory
 import android.media.AudioManager
 import android.media.AudioManager.OnAudioFocusChangeListener
 import android.media.MediaMetadata
+import android.media.session.MediaController
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.Binder
 import android.os.Build
+import android.os.IBinder
+import android.os.RemoteException
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import com.kaelesty.audionautica.R
 import com.kaelesty.audionautica.domain.entities.Track
@@ -96,10 +102,8 @@ class MusicPlayerService : Service() {
 				id = 0,
 				duration = 42422,
 				title = "Akeboshi",
-				musicFile = Uri.fromFile(
-					File(
-						applicationContext.filesDir.absolutePath + "/1234.mp3"
-					)
+				musicFile = File(
+					applicationContext.filesDir.absolutePath + "/1234.mp3"
 				),
 				posterFile = Uri.fromFile(
 					File(
@@ -127,7 +131,7 @@ class MusicPlayerService : Service() {
 			)
 			player.addMediaItem(
 				MediaItem.fromUri(
-					track.musicFile
+					track.musicFile.toUri()
 				)
 			)
 			player.prepare()
@@ -238,4 +242,6 @@ class MusicPlayerService : Service() {
 	): Binder() {
 		fun getMediasessionToken() = mediaSession.sessionToken
 	}
+
+
 }

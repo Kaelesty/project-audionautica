@@ -7,17 +7,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kaelesty.audionautica.data.repos.MusicRepo
 import com.kaelesty.audionautica.domain.entities.Track
+import com.kaelesty.audionautica.domain.returncodes.UploadTrackRC
 import com.kaelesty.audionautica.domain.usecases.UploadTrackUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 class AddTrackViewModel @Inject constructor(
 	private val uploadTrackUseCase: UploadTrackUseCase
 ): ViewModel() {
 
-	private val _musicFile = MutableLiveData<Uri>()
-	val musicFile: LiveData<Uri> get() = _musicFile
+	private val _musicFile = MutableLiveData<File>()
+	val musicFile: LiveData<File> get() = _musicFile
 
 	private val _posterFile = MutableLiveData<Uri>()
 	val posterFile: LiveData<Uri> get() = _posterFile
@@ -25,8 +27,11 @@ class AddTrackViewModel @Inject constructor(
 	private val _error = MutableLiveData<String>()
 	val error: LiveData<String> get() = _error
 
-	fun musicFileBrowsed(uri: Uri) {
-		_musicFile.postValue(uri)
+	private val _finish = MutableLiveData<Unit>()
+	val finish: LiveData<Unit> get() = _finish
+
+	fun musicFileBrowsed(file: File) {
+		_musicFile.postValue(file)
 	}
 
 	fun posterFileBrowsed(uri: Uri) {
@@ -53,7 +58,11 @@ class AddTrackViewModel @Inject constructor(
 			)
 
 			viewModelScope.launch(Dispatchers.IO) {
-				uploadTrackUseCase(track)
+				when(uploadTrackUseCase(track)) {
+					UploadTrackRC.OK -> _finish.postValue(Unit)
+					UploadTrackRC.NOT_CONNECTED -> _error.postValue("Not available in offline mode")
+					UploadTrackRC.SERVER_ERROR -> _error.postValue("Unknown server error")
+				}
 			}
 		}
 	}

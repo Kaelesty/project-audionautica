@@ -8,7 +8,5 @@ import javax.inject.Inject
 class UploadTrackUseCase @Inject constructor(
 	private val repo: IMusicRepo
 ) {
-	suspend operator fun invoke(track: Track) {
-		repo.uploadTrack(track)
-	}
+	suspend operator fun invoke(track: Track) = repo.uploadTrack(track)
 }

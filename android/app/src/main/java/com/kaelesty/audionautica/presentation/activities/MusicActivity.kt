@@ -31,49 +31,50 @@ class MusicActivity : ComponentActivity() {
 	}
 
 	private var isOffline: Boolean = false
-
+	private var serviceConn: ServiceConnection? = null
 	override fun onCreate(savedInstanceState: Bundle?) {
+		Log.e("MYTAG", "OnCreate")
 		super.onCreate(savedInstanceState)
 		component.inject(this)
 
 		var playerMediaController: MediaController? = null
 		var binder: IBinder? = null
 
-		isOffline = intent.getBooleanExtra(IS_OFFLINE_EXTRA_KEY, false)
+		serviceConn = object: ServiceConnection {
 
-		bindService(
-			Intent(this@MusicActivity, MusicPlayerService::class.java),
-			object: ServiceConnection {
+			override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
+				binder = p1 as MusicPlayerService.MusicPlayerServiceBinder
+				try {
+					playerMediaController = MediaController(
+						this@MusicActivity,
+						(binder as MusicPlayerService.MusicPlayerServiceBinder).getMediasessionToken()
+					)
+					playerMediaController?.registerCallback(
+						object: MediaController.Callback() {
+							override fun onPlaybackStateChanged(state: PlaybackState?) {
+								super.onPlaybackStateChanged(state)
+								state?.let {
+									val playing = it.state == PlaybackState.STATE_PLAYING
 
-				override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
-					binder = p1 as MusicPlayerService.MusicPlayerServiceBinder
-					try {
-						playerMediaController = MediaController(
-							this@MusicActivity,
-							(binder as MusicPlayerService.MusicPlayerServiceBinder).getMediasessionToken()
-						)
-						playerMediaController?.registerCallback(
-							object: MediaController.Callback() {
-								override fun onPlaybackStateChanged(state: PlaybackState?) {
-									super.onPlaybackStateChanged(state)
-									state?.let {
-										val playing = it.state == PlaybackState.STATE_PLAYING
-
-									}
 								}
 							}
-						)
-					}
-					catch (e: RemoteException) {
-						playerMediaController = null
-					}
+						}
+					)
 				}
-
-				override fun onServiceDisconnected(p0: ComponentName?) {
+				catch (e: RemoteException) {
 					playerMediaController = null
-					binder = null
 				}
-			},
+			}
+
+			override fun onServiceDisconnected(p0: ComponentName?) {
+				playerMediaController = null
+				binder = null
+			}
+		}
+		isOffline = intent.getBooleanExtra(IS_OFFLINE_EXTRA_KEY, false)
+		bindService(
+			MusicPlayerService.newIntent(this@MusicActivity),
+			serviceConn as ServiceConnection,
 			BIND_AUTO_CREATE
 		)
 
@@ -106,6 +107,12 @@ class MusicActivity : ComponentActivity() {
 		startActivity(
 			AddTrackActivity.newIntent(this@MusicActivity)
 		)
+	}
+
+	override fun onDestroy() {
+		super.onDestroy()
+		serviceConn?.let { unbindService(it) }
+		Log.e("MYTAG", "OnDestroy")
 	}
 
 	companion object {

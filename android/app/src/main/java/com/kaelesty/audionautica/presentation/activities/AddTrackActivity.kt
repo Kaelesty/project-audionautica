@@ -6,14 +6,17 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
+import androidx.core.net.toFile
 import com.kaelesty.audionautica.presentation.composables.addtrack.AddTrackScreen
 import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
 import com.kaelesty.audionautica.presentation.viewmodels.AddTrackViewModel
 import com.kaelesty.audionautica.system.ModifiedApplication
+import java.io.File
 import javax.inject.Inject
 
 class AddTrackActivity : ComponentActivity() {
@@ -35,6 +38,10 @@ class AddTrackActivity : ComponentActivity() {
 		component.inject(this@AddTrackActivity)
 
 		super.onCreate(savedInstanceState)
+
+		viewModel.finish.observe(this) {
+			finish()
+		}
 		setContent {
 			AudionauticaTheme {
 				AddTrackScreen(
@@ -85,9 +92,18 @@ class AddTrackActivity : ComponentActivity() {
 	}
 
 	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+
+		val uri: Uri = data?.data ?: throw IllegalStateException("Illegal!")
+		val path = uri.path.toString()
+		val file = File(path)
+		Log.e("MYTAG1", file.absolutePath)
+		Log.e("MYTAG1", file.name)
+		Log.e("MYTAG1", file.canonicalPath)
+		Log.e("MYTAG1", file.extension)
+
 		super.onActivityResult(requestCode, resultCode, data)
 		when (requestCode) {
-			FilesToBrowse.MUSIC.requestCode -> { viewModel.musicFileBrowsed(data?.data ?: Uri.EMPTY) }
+			FilesToBrowse.MUSIC.requestCode -> { viewModel.musicFileBrowsed(file.canonicalFile) }
 			FilesToBrowse.POSTER.requestCode -> { viewModel.posterFileBrowsed(data?.data ?: Uri.EMPTY) }
 		}
 	}

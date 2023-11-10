@@ -32,6 +32,7 @@ import com.kaelesty.audionautica.presentation.composables.access.GradientCard
 import com.kaelesty.audionautica.presentation.composables.access.MultiparameterInputCard
 import com.kaelesty.audionautica.presentation.ui.fonts.SpaceGrotesk
 import com.kaelesty.audionautica.presentation.viewmodels.AddTrackViewModel
+import java.io.File
 
 @Composable
 fun AddTrackScreen(
@@ -60,7 +61,7 @@ fun AddTrackScreen(
 				mainAction = CollectNamedAction(
 					name = "Upload",
 				) { params, files ->
-					viewModel?.addTrack(
+					viewModel.addTrack(
 						params["Artist"] ?: return@CollectNamedAction,
 						params["Title"] ?: return@CollectNamedAction
 					)
@@ -76,18 +77,18 @@ fun AddTrackScreen(
 				{ fileBrowser(AddTrackActivity.FilesToBrowse.MUSIC) },
 				"Music file"
 			)
-			FileBrowser(
-				posterFile,
-				{ fileBrowser(AddTrackActivity.FilesToBrowse.POSTER) },
-				"Poster file"
-			)
+//			FileBrowser(
+//				posterFile,
+//				{ fileBrowser(AddTrackActivity.FilesToBrowse.POSTER) },
+//				"Poster file"
+//			)
 		}
 	}
 }
 
 @Composable
 fun FileBrowser(
-	uri: Uri?,
+	file: File?,
 	fileBrowser: () -> Unit,
 	hint: String
 ) {
@@ -99,7 +100,7 @@ fun FileBrowser(
 			verticalAlignment = Alignment.CenterVertically
 		) {
 			TextField(
-				value = uri?.lastPathSegment ?: "",
+				value = file?.name ?: "",
 				onValueChange = {},
 				modifier = Modifier
 					.weight(1f)

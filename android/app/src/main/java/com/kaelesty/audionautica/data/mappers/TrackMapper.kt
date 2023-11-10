@@ -1,6 +1,7 @@
 package com.kaelesty.audionautica.data.mappers
 
 import android.net.Uri
+import androidx.core.net.toUri
 import com.kaelesty.audionautica.data.local.dbmodels.TrackDbModel
 import com.kaelesty.audionautica.domain.entities.Track
 import java.io.File
@@ -13,7 +14,7 @@ class TrackMapper @Inject constructor() {
 		dbModel.title,
 		dbModel.artist,
 		dbModel.duration,
-		Uri.fromFile(File(dbModel.musicFile)),
+		File(dbModel.musicFile),
 		dbModel.posterFile?.let {
 								Uri.fromFile(File(it))
 		},
