@@ -5,8 +5,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kaelesty.audionautica.data.repos.AccessRepo
+import com.kaelesty.audionautica.domain.returncodes.CheckAuthRC
+import com.kaelesty.audionautica.domain.returncodes.CheckConnectionRC
 import com.kaelesty.audionautica.domain.returncodes.LoginRC
 import com.kaelesty.audionautica.domain.returncodes.RegisterRC
+import com.kaelesty.audionautica.domain.usecases.CheckAuthUseCase
+import com.kaelesty.audionautica.domain.usecases.CheckConnectionUseCase
 import com.kaelesty.audionautica.domain.usecases.LoginUseCase
 import com.kaelesty.audionautica.domain.usecases.RegisterUseCase
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +19,9 @@ import javax.inject.Inject
 
 class AccessViewModel @Inject constructor(
 	private var loginUseCase: LoginUseCase,
-	private var registerUseCase: RegisterUseCase
+	private var registerUseCase: RegisterUseCase,
+	private val checkConnectionUseCase: CheckConnectionUseCase,
+	private val checkAuthUseCase: CheckAuthUseCase,
 ): ViewModel() {
 
 	enum class RunMusicActivityMode {
@@ -66,5 +72,27 @@ class AccessViewModel @Inject constructor(
 
 	fun continueOffline() {
 		_runMusicActivity.postValue(RunMusicActivityMode.OFFLINE)
+	}
+
+	fun checkConnectionAndAuth() {
+		viewModelScope.launch(Dispatchers.IO) {
+			when(checkConnectionUseCase()) {
+				CheckConnectionRC.NOT_OK -> {
+					_runMusicActivity.postValue(RunMusicActivityMode.OFFLINE)
+				}
+				CheckConnectionRC.OK -> {
+
+					when(checkAuthUseCase()) {
+						CheckAuthRC.NOT_OK -> {
+							// nothing, just show login screen
+						}
+						CheckAuthRC.OK -> {
+							_runMusicActivity.postValue(RunMusicActivityMode.ONLINE)
+						}
+					}
+
+				}
+			}
+		}
 	}
 }

@@ -1,10 +1,20 @@
 package com.kaelesty.audionautica.data.repos
 
+import android.app.Application
+import android.content.Context
+import android.util.Log
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import com.kaelesty.audionautica.data.remote.api.AccessApiService
 import com.kaelesty.audionautica.data.remote.entities.LoginDto
 import com.kaelesty.audionautica.data.remote.entities.RegisterDto
+import com.kaelesty.audionautica.data.repos.tools.JwtTool
 import com.kaelesty.audionautica.di.ApplicationScope
 import com.kaelesty.audionautica.domain.repos.IAccessRepo
+import com.kaelesty.audionautica.domain.returncodes.CheckAuthRC
 import com.kaelesty.audionautica.domain.returncodes.CheckConnectionRC
 import com.kaelesty.audionautica.domain.returncodes.LoginRC
 import com.kaelesty.audionautica.domain.returncodes.RegisterRC
@@ -12,7 +22,8 @@ import javax.inject.Inject
 
 @ApplicationScope
 class AccessRepo @Inject constructor(
-	val accessApiService: AccessApiService
+	private val accessApiService: AccessApiService,
+	private val jwtTool: JwtTool
 ) : IAccessRepo {
 
 
@@ -23,7 +34,8 @@ class AccessRepo @Inject constructor(
 			)
 			return when (response.code()) {
 				200 -> {
-					// TODO save user's jwt to database and etc...
+					val jwt = response.body() ?: throw IllegalStateException("EMPTY JWT")
+					jwtTool.saveToken(jwt)
 					LoginRC.OK
 				}
 
@@ -42,6 +54,27 @@ class AccessRepo @Inject constructor(
 		}
 		catch (exception: Exception) {
 			return LoginRC.UNKNOWN
+		}
+	}
+
+	override suspend fun logout() {
+		jwtTool.delToken()
+	}
+
+	override suspend fun checkAuth(): CheckAuthRC {
+		return try {
+			val response = accessApiService.checkAuth(
+				jwtTool.getToken()
+			)
+			if (response.code() != 200) {
+				CheckAuthRC.NOT_OK
+			}
+			if (response.body()?.auth?: throw IllegalStateException("Empty body")) {
+				CheckAuthRC.OK
+			}
+			CheckAuthRC.NOT_OK
+		} catch (exception: Exception) {
+			CheckAuthRC.NOT_OK
 		}
 	}
 
@@ -80,4 +113,5 @@ class AccessRepo @Inject constructor(
 			LoginRC.UNKNOWN -> RegisterRC.AUTOLOGIN_FAILED
 		}
 	}
+
 }

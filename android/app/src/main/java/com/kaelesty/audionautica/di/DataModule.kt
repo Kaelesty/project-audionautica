@@ -1,5 +1,6 @@
 package com.kaelesty.audionautica.di
 
+import android.app.Application
 import android.content.Context
 import com.kaelesty.audionautica.data.local.daos.PlaylistDao
 import com.kaelesty.audionautica.data.local.daos.TrackDao
@@ -8,6 +9,7 @@ import com.kaelesty.audionautica.data.local.dbs.TrackDatabase
 import com.kaelesty.audionautica.data.remote.api.AccessApiService
 import com.kaelesty.audionautica.data.remote.api.ApiServiceFactory
 import com.kaelesty.audionautica.data.remote.api.MusicApiService
+import com.kaelesty.audionautica.data.repos.tools.JwtTool
 import dagger.Module
 import dagger.Provides
 
@@ -37,4 +39,8 @@ class DataModule {
 	fun providePlaylistDao(db: PlaylistDatabase): PlaylistDao {
 		return db.dao()
 	}
+
+	@Provides
+	@ApplicationScope
+	fun provideJwtTool(application: Application) = JwtTool(application)
 }

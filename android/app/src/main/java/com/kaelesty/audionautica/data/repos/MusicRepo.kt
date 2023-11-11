@@ -36,17 +36,11 @@ import javax.inject.Inject
 @ApplicationScope
 class MusicRepo @Inject constructor(
 	private val trackDao: TrackDao,
-	private val playlistDao: PlaylistDao,
 	private val trackMapper: TrackMapper,
 	private val musicApiService: MusicApiService,
 	private val contentResolver: ContentResolver,
 	private val application: Application,
 ) : IMusicRepo {
-
-
-	override suspend fun logout() {
-		// TODO delete JWT
-	}
 
 	override fun getTracks(): LiveData<List<Track>> {
 		return trackDao.getAll().map { it.map { dbModel -> trackMapper.dbModelToDomain(dbModel) } }

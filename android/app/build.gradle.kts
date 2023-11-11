@@ -96,6 +96,8 @@ dependencies {
 	implementation("com.google.dagger:dagger:2.47")
 	kapt("com.google.dagger:dagger-compiler:2.47")
 
+	implementation("androidx.datastore:datastore-preferences:1.1.0-alpha06")
+
 	implementation("com.google.android.exoplayer:exoplayer:2.19.1")
 	implementation("androidx.media3:media3-exoplayer:1.1.1")
 	implementation("androidx.media3:media3-exoplayer-dash:1.1.1")

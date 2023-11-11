@@ -7,8 +7,6 @@ import com.kaelesty.audionautica.domain.returncodes.UploadTrackRC
 
 interface IMusicRepo {
 
-	suspend fun logout()
-
 	fun getTracks(): LiveData<List<Track>>
 
 	suspend fun addTrack(track: Track)
