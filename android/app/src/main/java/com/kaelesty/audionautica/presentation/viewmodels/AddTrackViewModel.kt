@@ -5,13 +5,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kaelesty.audionautica.data.repos.MusicRepo
-import com.kaelesty.audionautica.domain.entities.Track
+import com.kaelesty.audionautica.domain.entities.TrackExp
 import com.kaelesty.audionautica.domain.returncodes.UploadTrackRC
 import com.kaelesty.audionautica.domain.usecases.UploadTrackUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
 
 class AddTrackViewModel @Inject constructor(
@@ -48,7 +46,7 @@ class AddTrackViewModel @Inject constructor(
 		}
 
 		musicFile.value?.let {
-			val track = Track(
+			val track = TrackExp(
 				artist = artist,
 				duration = 0,
 				id = -1,

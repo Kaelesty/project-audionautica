@@ -5,13 +5,11 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(
-	tableName = "tracks"
+	tableName = "tracks-"
 )
 data class TrackDbModel(
 	@PrimaryKey val id: Int,
 	val title: String,
 	val artist: String,
-	val duration: Long,
-	val musicFile: String,
-	val posterFile: String?
+	val poster: String
 )

@@ -13,6 +13,6 @@ interface TrackDao {
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
 	fun createTrack(track: TrackDbModel)
 
-	@Query("SELECT * FROM tracks")
+	@Query("SELECT * FROM `tracks-`")
 	fun getAll(): LiveData<List<TrackDbModel>>
 }

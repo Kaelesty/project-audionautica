@@ -1,13 +1,16 @@
 package com.kaelesty.audionautica.presentation.viewmodels
 
 import android.app.Application
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kaelesty.audionautica.data.remote.api.ApiServiceFactory
-import com.kaelesty.audionautica.domain.entities.TrackSample
+import com.kaelesty.audionautica.domain.entities.Track
+import com.kaelesty.audionautica.domain.usecases.GetTrackUriUseCase
+import com.kaelesty.audionautica.domain.usecases.SearchTracksUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
@@ -17,40 +20,32 @@ import javax.inject.Inject
 
 class MusicViewModel @Inject constructor(
 	private val application: Application,
-	//private val getAllTracksUseCase: GetAllTracksUseCase,
+	private val searchTracksUseCase: SearchTracksUseCase,
+	private val getTrackUriUseCase: GetTrackUriUseCase
 ): ViewModel() {
 
-	private val FILE_PATH = "/Audionautica"
+	private val _tracksSearchResults = MutableLiveData<List<Track>>()
+	val tracksSearchResults: LiveData<List<Track>> get() = _tracksSearchResults
 
-	// ON SEARCH SCREEN
-	private val _tracks = MutableLiveData<List<TrackSample>>()
-	val tracks: LiveData<List<TrackSample>> get() = _tracks
-
-	// ON FAVORITES SCREEN
-	// val favorites: LiveData<List<Track>> = getAllTracksUseCase()
+	private val _playedTrackUri = MutableLiveData<Uri>()
+	val playedTrackUri: LiveData<Uri> get() = _playedTrackUri
 
 	fun search(query: String) {
-		val tracksList = mutableListOf<TrackSample>()
-		repeat(15) {
-			tracksList.add(TrackSample(it))
+		viewModelScope.launch {
+			val searchResults = searchTracksUseCase(query)
+			_tracksSearchResults.postValue(searchResults)
 		}
-		_tracks.value = tracksList
 	}
 
-	fun downloadTrack() {
-		viewModelScope.launch(Dispatchers.IO) {
-			try {
-				val request = ApiServiceFactory.musicService.downloadTrackSample()
-				Log.e("MusicViewModel", request.code().toString())
-				val responseBody = request.body()
-				responseBody?.let {
-					saveFile(it)
-				}
-			}
-			catch (e: Exception) {
-				Log.e("MusicViewModel", e.toString())
-			}
+	fun playTrack(id: Int) {
+		viewModelScope.launch {
+			val uri = getTrackUriUseCase(id)
+			_playedTrackUri.postValue(uri)
 		}
+	}
+
+	fun addTrackToPlaylist(id: Int) {
+
 	}
 
 	private fun saveFile(body: ResponseBody) {

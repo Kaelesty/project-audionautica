@@ -2,7 +2,6 @@ package com.kaelesty.audionautica.presentation.composables.music
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.Search
@@ -41,7 +39,6 @@ import com.kaelesty.audionautica.R
 import com.kaelesty.audionautica.presentation.composables.access.GradientCard
 import com.kaelesty.audionautica.presentation.viewmodels.MusicViewModel
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MusicScreen(
 	viewModel: MusicViewModel,
@@ -67,8 +64,7 @@ fun MusicScreen(
 			),
 			contentDescription = "Space Background",
 			modifier = Modifier
-				.fillMaxSize()
-			,
+				.fillMaxSize(),
 			contentScale = ContentScale.Crop
 		)
 		when (mode.value) {
@@ -85,26 +81,11 @@ fun Playlists(
 	onPlay: () -> Unit,
 	onPause: () -> Unit
 ) {
-//	Column {
-//		Button(onClick = { viewModel.downloadTrack() }) {
-//			Text("Download")
-//		}
-//		Button(onClick = { viewModel.playTrack() }) {
-//			Text("Play")
-//		}
-//		Button(onClick = { viewModel.stopTrack() }) {
-//			Text("Stop")
-//		}
-//	}
-	TrackCard(
-		onPlay = { onPlay() },
-		onPause = { onPause() },
-	)
 }
 
 @Composable
 fun MyTracks(viewModel: MusicViewModel, onAddTrack: () -> Unit) {
-	val tracks = viewModel.tracks.observeAsState(mutableListOf())
+	val tracks = viewModel.tracksSearchResults.observeAsState(mutableListOf())
 
 	Button(onClick = { onAddTrack() }) {
 		Text("Add track")
@@ -116,14 +97,22 @@ fun MyTracks(viewModel: MusicViewModel, onAddTrack: () -> Unit) {
 fun Search(
 	viewModel: MusicViewModel
 ) {
-	val tracks by viewModel.tracks.observeAsState(listOf())
+	val tracks by viewModel.tracksSearchResults.observeAsState(listOf())
 	LazyColumn(
 		modifier = Modifier
 			.fillMaxSize(),
 		content = {
 			stickyHeader { MusicSearchBar(viewModel) }
 			items(tracks, key = { it.id }) {
-				TrackSearchResult(it.info)
+				TrackSearchResult(
+					track = it,
+					onPlay = {
+						viewModel.playTrack(it.id)
+					},
+					onAdd = {
+						viewModel.addTrackToPlaylist(it.id)
+					}
+				)
 			}
 			item {
 				Spacer(modifier = Modifier.height(100.dp))
@@ -181,9 +170,17 @@ fun MusicNavigationBar(mode: MutableState<MusicScreenMode>) {
 						onClick = {
 							selectedItem = index
 							when (index) {
-								0 -> { mode.value = MusicScreenMode.SEARCH }
-								1 -> { mode.value = MusicScreenMode.PLAYLISTS }
-								2 -> { mode.value = MusicScreenMode.MY_TRACKS }
+								0 -> {
+									mode.value = MusicScreenMode.SEARCH
+								}
+
+								1 -> {
+									mode.value = MusicScreenMode.PLAYLISTS
+								}
+
+								2 -> {
+									mode.value = MusicScreenMode.MY_TRACKS
+								}
 							}
 						},
 						icon = {

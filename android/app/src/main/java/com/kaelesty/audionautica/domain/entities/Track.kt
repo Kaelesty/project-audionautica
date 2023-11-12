@@ -1,13 +1,14 @@
 package com.kaelesty.audionautica.domain.entities
 
-import android.net.Uri
-import java.io.File
-
 data class Track(
-	val id: Int,
+	val id: Int, // id from backend DB
+
+	// string-contents
 	val title: String,
 	val artist: String,
-	val duration: Long,
-	val musicFile: Uri,
-	val posterFile: Uri?
+
+	val poster: String // url-string for use with AsyncImage
+
+	// This class does not contain any music bytes or a file link.
+	// To get the Uri for playback in ExoPlayer, use GetTrackUriUseCase
 )

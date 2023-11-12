@@ -33,7 +33,7 @@ class MusicActivity : ComponentActivity() {
 	private var isOffline: Boolean = false
 	private var serviceConn: ServiceConnection? = null
 	override fun onCreate(savedInstanceState: Bundle?) {
-		Log.e("MYTAG", "OnCreate")
+
 		super.onCreate(savedInstanceState)
 		component.inject(this)
 
@@ -77,6 +77,10 @@ class MusicActivity : ComponentActivity() {
 			serviceConn as ServiceConnection,
 			BIND_AUTO_CREATE
 		)
+
+		viewModel.playedTrackUri.observe(this) {
+
+		}
 
 
 		val onPause: () -> Unit = {

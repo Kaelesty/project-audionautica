@@ -6,7 +6,6 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.kaelesty.audionautica.data.local.daos.PlaylistDao
 import com.kaelesty.audionautica.data.local.dbmodels.PlaylistDbModel
-import com.kaelesty.audionautica.domain.entities.Track
 
 @Database(
 	entities = [PlaylistDbModel::class],
@@ -20,7 +19,7 @@ abstract class PlaylistDatabase() : RoomDatabase() {
 	companion object {
 
 		private var instance: PlaylistDatabase? = null
-		private const val DB_NAME = "coin_db"
+		private const val DB_NAME = "playlist_db"
 
 		private val LOCK = Any()
 

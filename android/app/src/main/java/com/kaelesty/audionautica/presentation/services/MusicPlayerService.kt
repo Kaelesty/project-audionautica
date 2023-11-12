@@ -5,28 +5,22 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
 import android.graphics.BitmapFactory
 import android.media.AudioManager
 import android.media.AudioManager.OnAudioFocusChangeListener
 import android.media.MediaMetadata
-import android.media.session.MediaController
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.Binder
 import android.os.Build
-import android.os.IBinder
-import android.os.RemoteException
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import com.kaelesty.audionautica.R
-import com.kaelesty.audionautica.domain.entities.Track
+import com.kaelesty.audionautica.domain.entities.TrackExp
 import com.kaelesty.audionautica.presentation.activities.MusicActivity
 import com.kaelesty.audionautica.system.ModifiedApplication
 import kotlinx.coroutines.CoroutineScope
@@ -87,7 +81,6 @@ class MusicPlayerService : Service() {
 
 	private val mediaSessionCallback = object : MediaSession.Callback() {
 		override fun onPlay() {
-			Log.d("MusicService", "onPlay")
 			val audioFocusResult = audioManager.requestAudioFocus(
 				audioFocusChangeListener,
 				AudioManager.STREAM_MUSIC,
@@ -97,7 +90,7 @@ class MusicPlayerService : Service() {
 				return
 			}
 			// SAMPLE TODO REMOVE
-			val track = Track(
+			val track = TrackExp(
 				artist = "re:Tye",
 				id = 0,
 				duration = 42422,

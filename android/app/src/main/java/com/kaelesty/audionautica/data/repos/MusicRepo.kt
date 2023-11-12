@@ -2,35 +2,27 @@ package com.kaelesty.audionautica.data.repos
 
 import android.app.Application
 import android.content.ContentResolver
-import android.net.Uri
 import android.os.Build
-import android.os.Environment
-import android.os.FileUtils
-import android.provider.OpenableColumns
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.core.net.toFile
-import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
-import com.kaelesty.audionautica.data.local.daos.PlaylistDao
 import com.kaelesty.audionautica.data.local.daos.TrackDao
 import com.kaelesty.audionautica.data.mappers.TrackMapper
 import com.kaelesty.audionautica.data.remote.api.MusicApiService
 import com.kaelesty.audionautica.di.ApplicationScope
 import com.kaelesty.audionautica.domain.entities.Track
+import com.kaelesty.audionautica.domain.entities.TrackExp
 import com.kaelesty.audionautica.domain.repos.IMusicRepo
 import com.kaelesty.audionautica.domain.returncodes.UploadTrackRC
 import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import okio.BufferedSink
 import java.io.File
-import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
-import java.net.URI
 import javax.inject.Inject
 
 @ApplicationScope
@@ -46,12 +38,13 @@ class MusicRepo @Inject constructor(
 		return trackDao.getAll().map { it.map { dbModel -> trackMapper.dbModelToDomain(dbModel) } }
 	}
 
-	override suspend fun addTrack(track: Track) {
+	override suspend fun addTrack(track: TrackExp) {
 		// TODO upload to Server Database
-		trackDao.createTrack(trackMapper.domainToDbModel(track))
+		//trackDao.createTrack(trackMapper.domainToDbModel(track))
 	}
+
 	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
-	override suspend fun uploadTrack(track: Track): UploadTrackRC {
+	override suspend fun uploadTrack(track: TrackExp): UploadTrackRC {
 		try {
 			track.musicFile.path?.let { Log.e("MYTAG", it) }
 			val uri = track.musicFile
@@ -74,7 +67,7 @@ class MusicRepo @Inject constructor(
 
 			val file = tempFile
 			val requestBody = RequestBody.create(
-				MediaType.parse("Audio"),
+				"Audio".toMediaTypeOrNull(),
 				file
 			)
 			val body = MultipartBody.Part.create(requestBody)
@@ -94,6 +87,21 @@ class MusicRepo @Inject constructor(
 		catch (e: IOException) {
 			Log.e("MYTAG", e.message.toString())
 			return UploadTrackRC.SERVER_ERROR
+		}
+	}
+
+	override suspend fun search(query: String): List<Track> {
+		try {
+			val response = musicApiService.searchTracks()
+			response.body()?.let { body ->
+				if (response.code() == 200) {
+					return body.tracks.map { trackMapper.dtoToDomain(it) }
+				}
+			}
+			throw IllegalStateException("Tracks search failed.")
+		} catch (e: Exception) {
+			Log.e("AudionauticaLog", e.message.toString())
+			return listOf()
 		}
 	}
 }

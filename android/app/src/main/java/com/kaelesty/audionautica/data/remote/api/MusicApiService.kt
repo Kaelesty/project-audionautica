@@ -4,6 +4,7 @@ import com.kaelesty.audionautica.data.remote.entities.LoginDto
 import com.kaelesty.audionautica.data.remote.entities.LoginResponse
 import com.kaelesty.audionautica.data.remote.entities.RegisterDto
 import com.kaelesty.audionautica.data.remote.entities.RegisterResponse
+import com.kaelesty.audionautica.data.remote.entities.TracksSearchResponse
 import com.kaelesty.audionautica.di.ApplicationScope
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -24,10 +25,15 @@ interface MusicApiService {
 	@GET("GetTrack")
 	suspend fun downloadTrackSample(): Response<ResponseBody>
 
+	@GET("Search")
+	suspend fun searchTracks(): Response<TracksSearchResponse>
+
 	@Multipart
 	@POST("UploadTrack")
 	suspend fun uploadTrack(
 		@Part("description") description: RequestBody,
 		@Part file: MultipartBody.Part
 	): Response<ResponseBody>
+
+
 }
