@@ -1,14 +1,16 @@
-import rest_framework_simplejwt.tokens
-from django.contrib.auth.hashers import check_password
-from django.shortcuts import render
+import os
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.exceptions import AuthenticationFailed
-from .models import Users
-from .serializers import UsersSerializer, RegisterSerializer, LoginSerialiaer, TokenSerializer
+from .models import Users, Traks
+from .serializers import UsersSerializer, RegisterSerializer, LoginSerialiaer, TokenSerializer, TrackUploadSerializer, FilepathSerializer
 import jwt, datetime
+from django.http import HttpResponse, HttpResponseNotFound, FileResponse
 
+
+file_path = "C:\\Users\\greg\\Desktop\\"
 class UsersAPIViwe(generics.ListAPIView):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
@@ -23,7 +25,7 @@ class CheckConnection(APIView):
 class RegisterUser(APIView):
     def post(self, request, format=None):
         serializer = RegisterSerializer(data=request.data)
-        print(request.data)
+        #print(request.data)
         if Users.objects.filter(login=request.data['login']):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         if serializer.is_valid():
@@ -85,3 +87,62 @@ class UserView(APIView):
 #             'message':'success'
 #         }
 #         return response
+
+class GetTrack(APIView):
+    def post(self, request):
+        id = request.data
+        track = Traks.objects.filter(id = id['id']).first()
+        serializer = FilepathSerializer(track)
+        path = serializer['filepath'].value
+        try:
+            with open(path, 'rb') as f:
+                file_data = f.read()
+
+            # sending response
+            # response = FileResponse(file_data)
+            response = HttpResponse(file_data, content_type='audio/mpeg')
+            #response['Content-Disposition'] = 'attachment; filename="succes.mp3"'
+
+        except IOError:
+            # handle file not exist case here
+            response = HttpResponseNotFound('<h1>File not exist</h1>')
+
+        return response
+
+class TrackUpload(APIView):
+    def post(self, request):
+        if request.method == "POST":
+            data = request.data
+            meta = data['headers']
+            file = data['file']
+            meta_data = meta.split('&')
+            if Traks.objects.filter(title=meta_data[0], artist=meta_data[1]):
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            else:
+                track = Traks()
+                track.title = meta_data[0]
+                track.artist = meta_data[1]
+                track.tags = meta_data[2]
+                with open(file_path+meta_data[0]+'.mp3', 'w') as f:
+                    f.write(file)
+                f.close()
+                track.filepath = file_path+meta_data[0]+'.mp3'
+                track.save()
+        return Response(track.pk, status=status.HTTP_200_OK)
+class TrackDelete(APIView):
+    def post(self, request):
+        try:
+            data = request.data
+            meta = data['headers']
+            file = data['file']
+            meta_data = meta.split('&')
+            track = Traks.objects.get(title = meta_data[0], artist = meta_data[1])
+            os.remove(track.filepath)
+            track.delete()
+            return Response(status=status.HTTP_200_OK)
+        except:
+            return Response(status = status.HTTP_400_BAD_REQUEST)
+class TrackSearch(APIView):
+    pass
+class Test(APIView):
+    pass
