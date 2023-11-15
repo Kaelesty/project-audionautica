@@ -161,16 +161,18 @@ class TrackDeleteId(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 class TrackSearch(APIView):
     def post(self, request):
-        query = request.data["query"]
+        query = request.data["query"].lower()
         result = Traks.objects.filter(artist=query)
         all_tracks = Traks.objects.all()
         list = []
         response = []
+        json_response = {}
         for i in range(Traks.objects.count()):
             res = []
             res.append(all_tracks[i].title)
             res.append(all_tracks[i].artist)
             res.append(all_tracks[i].tags)
+            res.append(str(all_tracks[i].pk))
             list.append(res)
         for i in range(len(list)):
             string = ''.join(list[i])
@@ -179,7 +181,16 @@ class TrackSearch(APIView):
         if len(response) == 0:
             return HttpResponse('<h1>Track not exist</h1>')
         else:
-            json_responce = json.dumps(response)
-            return Response(json_responce)
+            array = []
+            for i in range(len(response)):
+                track = {}
+                track['title'] = response[i][0]
+                track['artist'] = response[i][1]
+                track['tags'] = response[i][2]
+                track['id'] = response[i][3]
+                array.append(track)
+            print(array)
+            json_response['tracks'] = array
+        return Response(json_response)
 class Test(APIView):
     pass
