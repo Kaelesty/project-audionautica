@@ -1,4 +1,5 @@
 import os
+import json
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -10,7 +11,7 @@ import jwt, datetime
 from django.http import HttpResponse, HttpResponseNotFound, FileResponse
 
 
-file_path = "C:\\Users\\greg\\Desktop\\"
+file_path = "C:/Users/greg/Desktop/"
 class UsersAPIViwe(generics.ListAPIView):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
@@ -112,7 +113,7 @@ class GetTrack(APIView):
 class TrackUpload(APIView):
     def post(self, request):
         if request.method == "POST":
-            file = request.data["file"]
+            file = request.body
             meta_data = []
             meta_data.append(request.headers["title"])
             meta_data.append(request.headers["artist"])
@@ -126,7 +127,7 @@ class TrackUpload(APIView):
                 track.artist = meta_data[1]
                 track.tags = meta_data[2]
                 #replace w to wb
-                with open(file_path+meta_data[0]+'.mp3', 'w') as f:
+                with open(file_path+meta_data[0]+'.mp3', 'wb') as f:
                     f.write(file)
                 f.close()
                 track.filepath = file_path+meta_data[0]+'.mp3'
@@ -159,6 +160,26 @@ class TrackDeleteId(APIView):
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 class TrackSearch(APIView):
-    pass
+    def post(self, request):
+        query = request.data["query"]
+        result = Traks.objects.filter(artist=query)
+        all_tracks = Traks.objects.all()
+        list = []
+        response = []
+        for i in range(Traks.objects.count()):
+            res = []
+            res.append(all_tracks[i].title)
+            res.append(all_tracks[i].artist)
+            res.append(all_tracks[i].tags)
+            list.append(res)
+        for i in range(len(list)):
+            string = ''.join(list[i])
+            if query in string:
+                response.append(list[i])
+        if len(response) == 0:
+            return HttpResponse('<h1>Track not exist</h1>')
+        else:
+            json_responce = json.dumps(response)
+            return Response(json_responce)
 class Test(APIView):
     pass
