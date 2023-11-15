@@ -112,10 +112,12 @@ class GetTrack(APIView):
 class TrackUpload(APIView):
     def post(self, request):
         if request.method == "POST":
-            data = request.data
-            meta = data['headers']
-            file = data['file']
-            meta_data = meta.split('&')
+            file = request.data["file"]
+            meta_data = []
+            meta_data.append(request.headers["title"])
+            meta_data.append(request.headers["artist"])
+            meta_data.append(request.headers["tags"])
+            print(meta_data)
             if Traks.objects.filter(title=meta_data[0], artist=meta_data[1]):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             else:
@@ -123,12 +125,15 @@ class TrackUpload(APIView):
                 track.title = meta_data[0]
                 track.artist = meta_data[1]
                 track.tags = meta_data[2]
+                #replace w to wb
                 with open(file_path+meta_data[0]+'.mp3', 'w') as f:
                     f.write(file)
                 f.close()
                 track.filepath = file_path+meta_data[0]+'.mp3'
                 track.save()
         return Response(track.pk, status=status.HTTP_200_OK)
+
+#rewrite Delete
 class TrackDelete(APIView):
     def post(self, request):
         try:
@@ -142,6 +147,17 @@ class TrackDelete(APIView):
             return Response(status=status.HTTP_200_OK)
         except:
             return Response(status = status.HTTP_400_BAD_REQUEST)
+class TrackDeleteId(APIView):
+    def post(self, request):
+        try:
+            id = request.data["id"]
+            print(id)
+            track = Traks.objects.get(id = id)
+            os.remove(track.filepath)
+            track.delete()
+            return Response(status = status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 class TrackSearch(APIView):
     pass
 class Test(APIView):
