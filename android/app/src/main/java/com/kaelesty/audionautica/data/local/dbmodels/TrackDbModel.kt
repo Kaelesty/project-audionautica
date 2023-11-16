@@ -11,5 +11,5 @@ data class TrackDbModel(
 	@PrimaryKey val id: Int,
 	val title: String,
 	val artist: String,
-	val poster: String
+	val tags: String
 )

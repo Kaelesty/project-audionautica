@@ -1,8 +1,10 @@
 package com.kaelesty.audionautica.data.remote.entities
 
+import com.google.gson.annotations.SerializedName
+
 data class TrackDto(
-	val id: Int,
-	val artist: String,
-	val title: String,
-	val poster: String // url
+	@SerializedName("artist") val artist: String,
+	@SerializedName("title") val title: String,
+	@SerializedName("tags") val tags: String,
+	@SerializedName("id") val id: Int,
 )

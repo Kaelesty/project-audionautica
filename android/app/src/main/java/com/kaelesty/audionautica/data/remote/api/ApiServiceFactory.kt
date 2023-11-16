@@ -5,8 +5,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiServiceFactory {
 
-	private const val ACCESS_URL = "https://15a6-193-32-202-124.ngrok-free.app" + "/Auth/"
-	private const val MUSIC_URL = " https://15a6-193-32-202-124.ngrok-free.app" + "/Music/"
+	private const val ACCESS_URL = "https://ca2f-188-244-132-75.ngrok-free.app" + "/Auth/"
+	private const val MUSIC_URL = "https://055d-193-32-202-60.ngrok-free.app" + "/Music/"
 
 	val accessService: AccessApiService = Retrofit.Builder()
 		.baseUrl(ACCESS_URL)

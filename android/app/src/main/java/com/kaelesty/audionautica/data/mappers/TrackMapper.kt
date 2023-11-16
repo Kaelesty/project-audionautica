@@ -11,24 +11,26 @@ import javax.inject.Inject
 
 class TrackMapper @Inject constructor() {
 
+	val TRACK_TAGS_STRINGIFICATION_DELIMITER = "%"
+
 	fun dbModelToDomain(dbModel: TrackDbModel): Track = Track(
 		dbModel.id,
 		dbModel.title,
 		dbModel.artist,
-		dbModel.poster,
+		tags = dbModel.tags.split(TRACK_TAGS_STRINGIFICATION_DELIMITER),
 	)
 
 	fun domainToDbModel(domain: Track): TrackDbModel = TrackDbModel(
 		domain.id,
 		domain.title,
 		domain.artist,
-		domain.poster
+		tags = domain.tags.joinToString(TRACK_TAGS_STRINGIFICATION_DELIMITER)
 	)
 
 	fun dtoToDomain(dto: TrackDto) = Track(
 		dto.id,
 		dto.title,
 		dto.artist,
-		dto.poster,
+		tags = dto.tags.split(TRACK_TAGS_STRINGIFICATION_DELIMITER),
 	)
 }

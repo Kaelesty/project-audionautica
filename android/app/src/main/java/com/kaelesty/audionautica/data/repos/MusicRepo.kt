@@ -2,23 +2,30 @@ package com.kaelesty.audionautica.data.repos
 
 import android.app.Application
 import android.content.ContentResolver
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import com.kaelesty.audionautica.data.local.daos.TrackDao
 import com.kaelesty.audionautica.data.mappers.TrackMapper
 import com.kaelesty.audionautica.data.remote.api.MusicApiService
+import com.kaelesty.audionautica.data.remote.entities.DownloadTrackDto
+import com.kaelesty.audionautica.data.remote.entities.SearchDto
 import com.kaelesty.audionautica.di.ApplicationScope
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.entities.TrackExp
+import com.kaelesty.audionautica.domain.entities.TracksToPlay
 import com.kaelesty.audionautica.domain.repos.IMusicRepo
 import com.kaelesty.audionautica.domain.returncodes.UploadTrackRC
-import okhttp3.MediaType
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -34,8 +41,53 @@ class MusicRepo @Inject constructor(
 	private val application: Application,
 ) : IMusicRepo {
 
+	private val _tracksQueue = MutableSharedFlow<TracksToPlay>()
+	val tracksQueue: SharedFlow<TracksToPlay> get() = _tracksQueue
+
+
 	override fun getTracks(): LiveData<List<Track>> {
 		return trackDao.getAll().map { it.map { dbModel -> trackMapper.dbModelToDomain(dbModel) } }
+	}
+
+	suspend fun downloadTrack(id: Int) {
+		Log.d("AudionauticaTag", "Downloading $id")
+		try {
+			val response = musicApiService.downloadTrackSample(
+				DownloadTrackDto(id)
+			)
+			val body = response.body()?: throw IOException("Empty body!")
+			saveFile(body, id)
+
+		} catch (e: Exception) {
+			Log.d("AudionauticaTag", e.message.toString())
+		}
+	}
+
+	private fun saveFile(body: ResponseBody, id: Int) {
+		var input: InputStream? = null
+		try {
+			input = body.byteStream()
+			val fileName="/$id.mp3"
+			val pathWhereYouWantToSaveFile = application.filesDir.absolutePath+fileName
+			Log.e("MusicViewModel", application.filesDir.absolutePath)
+			val fos = FileOutputStream(pathWhereYouWantToSaveFile)
+			fos.use {output ->
+				val buffer = ByteArray(4 * 1024)
+				var read: Int
+				while(input.read(buffer).also { read = it } != -1) {
+					output.write(buffer, 0, read)
+				}
+
+				output.flush()
+
+			}
+		}
+		catch (exception: Exception) {
+			Log.e("MusicViewModel", exception.toString())
+		}
+		finally {
+			input?.close()
+		}
 	}
 
 	override suspend fun addTrack(track: TrackExp) {
@@ -63,8 +115,6 @@ class MusicRepo @Inject constructor(
 			} catch (e: IOException) {
 				Log.e("MYTAG", "COPYCODE ERROR")
 			}
-
-
 			val file = tempFile
 			val requestBody = RequestBody.create(
 				"Audio".toMediaTypeOrNull(),
@@ -75,10 +125,12 @@ class MusicRepo @Inject constructor(
 			val description = RequestBody.create(
 				MultipartBody.FORM, "description"
 			)
+
+			// TODO check possibility to send more than one file via multipart body
+			// TODO there i send music file twice, it should be replaced by poster file
 			val request = musicApiService.uploadTrack(
-				description, body
+				track.title, track.artist, "tag1%tag2", description, body
 			)
-			// TODO check offline mode
 			return when(request.code()) {
 				200 -> UploadTrackRC.OK
 				else -> UploadTrackRC.SERVER_ERROR
@@ -92,7 +144,9 @@ class MusicRepo @Inject constructor(
 
 	override suspend fun search(query: String): List<Track> {
 		try {
-			val response = musicApiService.searchTracks()
+			val response = musicApiService.searchTracks(
+				SearchDto(query)
+			)
 			response.body()?.let { body ->
 				if (response.code() == 200) {
 					return body.tracks.map { trackMapper.dtoToDomain(it) }
@@ -100,8 +154,40 @@ class MusicRepo @Inject constructor(
 			}
 			throw IllegalStateException("Tracks search failed.")
 		} catch (e: Exception) {
-			Log.e("AudionauticaLog", e.message.toString())
+			Log.e("AudionauticaTag", e.message.toString())
 			return listOf()
 		}
+	}
+
+	override suspend fun addToTracksQueue(track: List<Track>, dropQueue: Boolean) {
+		_tracksQueue.emit(
+			TracksToPlay(track, dropQueue)
+		)
+	}
+
+	override suspend fun getTrackUri(id: Int): Uri {
+
+		if (!checkFileDownloaded(id)) {
+			downloadTrack(id)
+		}
+		Log.d("AudionauticaTag", "Downloaded $id")
+		return getFileUri(id)
+	}
+
+	private fun checkFileDownloaded(id: Int): Boolean {
+		val fileName="/$id.mp3"
+		val path = application.filesDir.absolutePath+fileName
+		val file = File(path)
+		return file.exists()
+	}
+
+	private fun getFileUri(id: Int): Uri {
+		val fileName="/$id.mp3"
+		val path = application.filesDir.absolutePath+fileName
+		return File(path).toUri()
+	}
+
+	override fun getTracksQueueFlow(): SharedFlow<TracksToPlay> {
+		return tracksQueue
 	}
 }

@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.PlaybackState
 import android.os.Bundle
@@ -12,19 +13,24 @@ import android.os.RemoteException
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
+import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.presentation.composables.music.MusicScreen
 import com.kaelesty.audionautica.presentation.services.MusicPlayerService
 import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
 import com.kaelesty.audionautica.presentation.viewmodels.MusicViewModel
 import com.kaelesty.audionautica.system.ModifiedApplication
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.properties.Delegates
 
 class MusicActivity : ComponentActivity() {
 
 
-	@Inject lateinit var viewModel: MusicViewModel
+	@Inject
+	lateinit var viewModel: MusicViewModel
 
 	private val component by lazy {
 		(application as ModifiedApplication).component
@@ -32,6 +38,12 @@ class MusicActivity : ComponentActivity() {
 
 	private var isOffline: Boolean = false
 	private var serviceConn: ServiceConnection? = null
+
+	private val scope = CoroutineScope(Dispatchers.IO)
+
+	private val playingFlow = MutableSharedFlow<Boolean>()
+	private val trackFlow = MutableSharedFlow<Track>()
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 
 		super.onCreate(savedInstanceState)
@@ -40,7 +52,7 @@ class MusicActivity : ComponentActivity() {
 		var playerMediaController: MediaController? = null
 		var binder: IBinder? = null
 
-		serviceConn = object: ServiceConnection {
+		serviceConn = object : ServiceConnection {
 
 			override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
 				binder = p1 as MusicPlayerService.MusicPlayerServiceBinder
@@ -50,18 +62,32 @@ class MusicActivity : ComponentActivity() {
 						(binder as MusicPlayerService.MusicPlayerServiceBinder).getMediasessionToken()
 					)
 					playerMediaController?.registerCallback(
-						object: MediaController.Callback() {
+						object : MediaController.Callback() {
 							override fun onPlaybackStateChanged(state: PlaybackState?) {
 								super.onPlaybackStateChanged(state)
 								state?.let {
 									val playing = it.state == PlaybackState.STATE_PLAYING
+									scope.launch {
+										playingFlow.emit(playing)
+									}
+								}
+							}
 
+							override fun onMetadataChanged(metadata: MediaMetadata?) {
+								super.onMetadataChanged(metadata)
+								val track = Track(
+									-1,
+									metadata?.getString(MediaMetadata.METADATA_KEY_TITLE) ?: return,
+									metadata.getString(MediaMetadata.METADATA_KEY_ARTIST) ?: return,
+									listOf()
+								)
+								scope.launch {
+									trackFlow.emit(track)
 								}
 							}
 						}
 					)
-				}
-				catch (e: RemoteException) {
+				} catch (e: RemoteException) {
 					playerMediaController = null
 				}
 			}
@@ -78,29 +104,25 @@ class MusicActivity : ComponentActivity() {
 			BIND_AUTO_CREATE
 		)
 
-		viewModel.playedTrackUri.observe(this) {
-
-		}
-
-
-		val onPause: () -> Unit = {
-			Log.d("MusicService", "UI onPause")
-			playerMediaController?.transportControls?.pause()
-		}
-		val onPlay: () -> Unit = {
-			Log.d("MusicService", "UI onPlay")
-			playerMediaController?.transportControls?.play()
-		}
-		val onStop: () -> Unit = {
-			playerMediaController?.transportControls?.stop()
-		}
-
 		setContent {
 			AudionauticaTheme {
 				MusicScreen(
-					viewModel,
-					onPlay, onPause, onStop,
-					onAddTrack = { launchAddTrackActivity() }
+					tracksSearchResults = viewModel.tracksSearchResults,
+					onSearch = { query -> viewModel.search(query) },
+					onPlay = { track ->
+						viewModel.playTrack(track)
+						playerMediaController?.transportControls?.play()
+					},
+					onPause = {
+						viewModel.pause()
+						playerMediaController?.transportControls?.pause()
+					},
+					onResume = {
+						playerMediaController?.transportControls?.play()
+					},
+					onAddTrackToPlaylist = { track -> viewModel.addTrackToPlaylist(track) },
+					playingFlow = playingFlow,
+					trackFlow = trackFlow,
 				)
 			}
 		}
@@ -116,7 +138,7 @@ class MusicActivity : ComponentActivity() {
 	override fun onDestroy() {
 		super.onDestroy()
 		serviceConn?.let { unbindService(it) }
-		Log.e("MYTAG", "OnDestroy")
+		scope.cancel()
 	}
 
 	companion object {

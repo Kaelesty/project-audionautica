@@ -1,9 +1,7 @@
 package com.kaelesty.audionautica.data.remote.api
 
-import com.kaelesty.audionautica.data.remote.entities.LoginDto
-import com.kaelesty.audionautica.data.remote.entities.LoginResponse
-import com.kaelesty.audionautica.data.remote.entities.RegisterDto
-import com.kaelesty.audionautica.data.remote.entities.RegisterResponse
+import com.kaelesty.audionautica.data.remote.entities.DownloadTrackDto
+import com.kaelesty.audionautica.data.remote.entities.SearchDto
 import com.kaelesty.audionautica.data.remote.entities.TracksSearchResponse
 import com.kaelesty.audionautica.di.ApplicationScope
 import okhttp3.MultipartBody
@@ -12,27 +10,30 @@ import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Streaming
-import retrofit2.http.Url
 
 @ApplicationScope
 interface MusicApiService {
 
 	@Streaming
-	@GET("GetTrack")
-	suspend fun downloadTrackSample(): Response<ResponseBody>
+	@POST("GetTrack/")
+	suspend fun downloadTrackSample(@Body body: DownloadTrackDto): Response<ResponseBody>
 
-	@GET("Search")
-	suspend fun searchTracks(): Response<TracksSearchResponse>
+	@POST("Search/")
+	suspend fun searchTracks(@Body body: SearchDto): Response<TracksSearchResponse>
 
 	@Multipart
-	@POST("UploadTrack")
+	@POST("Upload/")
 	suspend fun uploadTrack(
+		@Header("title") title: String,
+		@Header("artist") artist: String,
+		@Header("tags") tags: String,
 		@Part("description") description: RequestBody,
-		@Part file: MultipartBody.Part
+		@Part musicFile: MultipartBody.Part,
 	): Response<ResponseBody>
 
 

@@ -20,19 +20,27 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.media3.common.MediaItem
 import com.kaelesty.audionautica.R
+import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.entities.TrackExp
+import com.kaelesty.audionautica.domain.entities.TracksToPlay
+import com.kaelesty.audionautica.domain.usecases.GetTrackQueueUseCase
+import com.kaelesty.audionautica.domain.usecases.GetTrackUriUseCase
 import com.kaelesty.audionautica.presentation.activities.MusicActivity
 import com.kaelesty.audionautica.system.ModifiedApplication
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 import java.io.File
+import javax.inject.Inject
 
 class MusicPlayerService : Service() {
 
 	private val component by lazy {
 		(application as ModifiedApplication).component
 	}
+
 
 	private val player by lazy {
 		androidx.media3.exoplayer.ExoPlayer
@@ -49,6 +57,8 @@ class MusicPlayerService : Service() {
 
 	val scope = CoroutineScope(Dispatchers.IO)
 
+	var playerdFlag = false
+
 	val metadataBuilder = MediaMetadata.Builder()
 	val stateBuilder = PlaybackState
 		.Builder()
@@ -62,6 +72,12 @@ class MusicPlayerService : Service() {
 		)
 
 	lateinit var mediaSession: MediaSession
+
+	@Inject lateinit var getTrackQueueUseCase: GetTrackQueueUseCase
+	@Inject lateinit var getTrackUriUseCase: GetTrackUriUseCase
+
+	private val dropQueueFlow = MutableSharedFlow<Unit>()
+	private val addMediaItemFlow = MutableSharedFlow<Track>()
 
 	private val audioFocusChangeListener: OnAudioFocusChangeListener = object: OnAudioFocusChangeListener {
 		override fun onAudioFocusChange(focusChange: Int) {
@@ -89,31 +105,15 @@ class MusicPlayerService : Service() {
 			if (audioFocusResult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
 				return
 			}
-			// SAMPLE TODO REMOVE
-			val track = TrackExp(
-				artist = "re:Tye",
-				id = 0,
-				duration = 42422,
-				title = "Akeboshi",
-				musicFile = Uri.fromFile(File(
-					applicationContext.filesDir.absolutePath + "/1234.mp3"
-				)),
-				posterFile = Uri.fromFile(
-					File(
-						applicationContext.filesDir.absolutePath + "/1234.mp3"
-					)
-				)
-			)
-			//
-			val metadata = metadataBuilder
-				.putBitmap(
-					MediaMetadata.METADATA_KEY_ART,
-					BitmapFactory.decodeResource(resources, R.drawable.example_track_poster_2)
-				)
-				.putString(MediaMetadata.METADATA_KEY_TITLE, track.title)
-				.putString(MediaMetadata.METADATA_KEY_ARTIST, track.artist)
-				.build()
-			mediaSession.setMetadata(metadata)
+//			val metadata = metadataBuilder
+//				.putBitmap(
+//					MediaMetadata.METADATA_KEY_ART,
+//					BitmapFactory.decodeResource(resources, R.drawable.example_track_poster_2)
+//				)
+//				.putString(MediaMetadata.METADATA_KEY_TITLE, track.title)
+//				.putString(MediaMetadata.METADATA_KEY_ARTIST, track.artist)
+//				.build()
+//			mediaSession.setMetadata(metadata)
 
 			mediaSession.isActive = true
 			mediaSession.setPlaybackState(
@@ -122,13 +122,14 @@ class MusicPlayerService : Service() {
 					PlaybackState.PLAYBACK_POSITION_UNKNOWN, 1F
 				).build()
 			)
-			player.addMediaItem(
-				MediaItem.fromUri(
-					track.musicFile
-				)
-			)
+//			player.addMediaItem(
+//				MediaItem.fromUri(
+//					track.musicFile
+//				)
+//			)
 			player.prepare()
 			player.playWhenReady = true
+			Log.d("AudionauticaTag", "Player Ready")
 		}
 
 		override fun onPause() {
@@ -145,7 +146,6 @@ class MusicPlayerService : Service() {
 
 		override fun onStop() {
 			super.onStop()
-
 			player.playWhenReady = false
 			mediaSession.isActive = false
 
@@ -164,8 +164,6 @@ class MusicPlayerService : Service() {
 		component.inject(this@MusicPlayerService)
 
 		super.onCreate()
-		Log.e("MusicService", "onCreate")
-		//startForeground(22, getNotification("Foreground service", "in progress..."))
 
 		mediaSession = MediaSession(this@MusicPlayerService, "MusicPlayerService")
 		mediaSession.setCallback(mediaSessionCallback)
@@ -179,6 +177,50 @@ class MusicPlayerService : Service() {
 				PendingIntent.FLAG_IMMUTABLE
 			)
 		)
+
+		with(scope) {
+			launch(Dispatchers.IO) {
+				getTrackQueueUseCase().collect {
+					playTracks(it)
+				}
+			}
+
+			launch(Dispatchers.Main) {
+				dropQueueFlow.collect {
+					player.clearMediaItems()
+				}
+			}
+
+			launch(Dispatchers.Main) {
+				addMediaItemFlow.collect {
+					player.addMediaItem(MediaItem.fromUri(
+						getTrackUriUseCase(it.id)
+					))
+					if (!playerdFlag) {
+						player.play()
+						playerdFlag = true
+					}
+					val metadata = metadataBuilder
+						.putBitmap(
+							MediaMetadata.METADATA_KEY_ART,
+							BitmapFactory.decodeResource(resources, R.drawable.example_track_poster_2)
+						)
+						.putString(MediaMetadata.METADATA_KEY_TITLE, it.title)
+						.putString(MediaMetadata.METADATA_KEY_ARTIST, it.artist)
+						.build()
+			mediaSession.setMetadata(metadata)
+				}
+			}
+		}
+	}
+
+	private suspend fun playTracks(tracksToPlay: TracksToPlay) {
+		if (tracksToPlay.dropQueue) {
+			dropQueueFlow.emit(Unit)
+		}
+		tracksToPlay.tracks.forEach {
+			addMediaItemFlow.emit(it)
+		}
 	}
 
 	private fun getNotification(title: String, text: String): Notification {
@@ -222,8 +264,6 @@ class MusicPlayerService : Service() {
 	override fun onBind(p0: Intent?) = MusicPlayerServiceBinder(mediaSession)
 
 	companion object {
-
-		const val TAG = "MyService - Foreground"
 
 		fun newIntent(connext: Context): Intent {
 			return Intent(connext, MusicPlayerService::class.java)

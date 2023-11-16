@@ -2,26 +2,19 @@ package com.kaelesty.audionautica.presentation.viewmodels
 
 import android.app.Application
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kaelesty.audionautica.data.remote.api.ApiServiceFactory
 import com.kaelesty.audionautica.domain.entities.Track
-import com.kaelesty.audionautica.domain.usecases.GetTrackUriUseCase
+import com.kaelesty.audionautica.domain.usecases.AddToTracksQueueUseCase
 import com.kaelesty.audionautica.domain.usecases.SearchTracksUseCase
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import okhttp3.ResponseBody
-import java.io.FileOutputStream
-import java.io.InputStream
 import javax.inject.Inject
 
 class MusicViewModel @Inject constructor(
-	private val application: Application,
 	private val searchTracksUseCase: SearchTracksUseCase,
-	private val getTrackUriUseCase: GetTrackUriUseCase
+	private val addToTracksQueueUseCase: AddToTracksQueueUseCase,
 ): ViewModel() {
 
 	private val _tracksSearchResults = MutableLiveData<List<Track>>()
@@ -30,6 +23,8 @@ class MusicViewModel @Inject constructor(
 	private val _playedTrackUri = MutableLiveData<Uri>()
 	val playedTrackUri: LiveData<Uri> get() = _playedTrackUri
 
+
+
 	fun search(query: String) {
 		viewModelScope.launch {
 			val searchResults = searchTracksUseCase(query)
@@ -37,42 +32,20 @@ class MusicViewModel @Inject constructor(
 		}
 	}
 
-	fun playTrack(id: Int) {
+	fun playTrack(track: Track) {
 		viewModelScope.launch {
-			val uri = getTrackUriUseCase(id)
-			_playedTrackUri.postValue(uri)
+			addToTracksQueueUseCase(
+				tracks = listOf(track),
+				dropQueue = true,
+			)
 		}
 	}
 
-	fun addTrackToPlaylist(id: Int) {
+	fun addTrackToPlaylist(track: Track) {
 
 	}
 
-	private fun saveFile(body: ResponseBody) {
-		var input: InputStream? = null
-		try {
-			input = body.byteStream()
-			val fileName="/1234.mp3"
-			val pathWhereYouWantToSaveFile = application.filesDir.absolutePath+fileName
-			Log.e("MusicViewModel", application.filesDir.absolutePath)
-			val fos = FileOutputStream(pathWhereYouWantToSaveFile)
-			fos.use {output ->
-				val buffer = ByteArray(4 * 1024)
-				var read: Int
-				while(input.read(buffer).also { read = it } != -1) {
-					output.write(buffer, 0, read)
-				}
+	fun pause() {
 
-				output.flush()
-
-			}
-		}
-		catch (exception: Exception) {
-			Log.e("MusicViewModel", exception.toString())
-		}
-		finally {
-			input?.close()
-		}
 	}
-
 }
