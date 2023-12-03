@@ -1,19 +1,23 @@
 package com.kaelesty.audionautica.presentation.composables.music
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.List
@@ -21,11 +25,14 @@ import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -45,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.kaelesty.audionautica.R
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.presentation.composables.access.GradientCard
@@ -66,6 +74,7 @@ fun MusicScreenPreview() {
 			tracksSearchResults = MutableLiveData(),
 			playingFlow = MutableSharedFlow(),
 			trackFlow = MutableSharedFlow(),
+			onRequestTrackCreation = {},
 		)
 	}
 }
@@ -80,12 +89,18 @@ fun MusicScreen(
 	onAddTrackToPlaylist: (Track) -> Unit,
 	tracksSearchResults: LiveData<List<Track>>,
 	playingFlow: SharedFlow<Boolean>,
-	trackFlow: SharedFlow<Track>
+	trackFlow: SharedFlow<Track>,
+	onRequestTrackCreation: () -> Unit,
 ) {
 
 	val mode = rememberSaveable {
 		mutableStateOf(MusicScreenMode.SEARCH)
 	}
+
+	val systemUiController = rememberSystemUiController()
+	systemUiController.setSystemBarsColor(
+		color = Color.White
+	)
 
 
 	Scaffold(
@@ -120,10 +135,13 @@ fun MusicScreen(
 				onPlay = onPlay,
 				onPause = onPause,
 				onAddTrack = onAddTrackToPlaylist,
+				playingFlow = playingFlow
 			)
 
 			MusicScreenMode.PLAYLISTS -> Playlists()
-			MusicScreenMode.MY_TRACKS -> MyTracks()
+			MusicScreenMode.MY_TRACKS -> MyTracks(
+				onCreateTrack = { onRequestTrackCreation() }
+			)
 		}
 	}
 }
@@ -134,12 +152,33 @@ fun Playlists(
 }
 
 @Composable
-fun MyTracks() {
-//	val tracks = viewModel.tracksSearchResults.observeAsState(mutableListOf())
-//
-//	Button(onClick = { onAddTrack() }) {
-//		Text("Add track")
-//	}
+fun MyTracks(
+	onCreateTrack: () -> Unit
+) {
+	Column(
+		modifier = Modifier
+			.fillMaxSize()
+			.padding(12.dp)
+		,
+		horizontalAlignment = Alignment.End
+	) {
+		Spacer(Modifier.weight(1f))
+		IconButton(
+			onClick = { onCreateTrack() },
+			modifier = Modifier
+				.background(
+					color = MaterialTheme.colorScheme.surface,
+					shape = RoundedCornerShape(4.dp)
+				)
+
+		) {
+			Icon(
+				imageVector = Icons.Filled.Add,
+				contentDescription = null
+			)
+		}
+		Spacer(Modifier.height(160.dp))
+	}
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -150,8 +189,11 @@ fun Search(
 	onPlay: (Track) -> Unit,
 	onPause: () -> Unit,
 	onAddTrack: (Track) -> Unit,
+	playingFlow: SharedFlow<Boolean>,
 ) {
 	val tracks by tracksSearchResults.observeAsState(listOf())
+	val playing by playingFlow.collectAsState(initial = false)
+
 	LazyColumn(
 		modifier = Modifier
 			.fillMaxSize(),
@@ -160,8 +202,12 @@ fun Search(
 			items(tracks, key = { it.id }) {
 				TrackSearchResult(
 					track = it,
-					onClick = {
-						onPlay(it)
+					onClick = { track ->
+						if (playing) {
+							onPause()
+						} else {
+							onPlay(it)
+						}
 					},
 					onAdd = {
 						onAddTrack(it)
@@ -201,7 +247,7 @@ fun PlayerBar(
 					.weight(1f)
 			)
 			Icon(
-				imageVector = if (!playing) Icons.Outlined.PlayArrow else Icons.Outlined.Done,
+				imageVector = if (!playing) Icons.Outlined.PlayArrow else Icons.Outlined.Clear,
 				contentDescription = null,
 				modifier = Modifier
 					.clickable {

@@ -1,52 +1,82 @@
 package com.kaelesty.audionautica.presentation.composables.addtrack
 
 import android.net.Uri
+import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.kaelesty.audionautica.R
 import com.kaelesty.audionautica.presentation.activities.AddTrackActivity
+import com.kaelesty.audionautica.presentation.composables.LoadingDialog
+import com.kaelesty.audionautica.presentation.composables.MinimalDialog
 import com.kaelesty.audionautica.presentation.composables.access.CollectNamedAction
 import com.kaelesty.audionautica.presentation.composables.access.GradientCard
 import com.kaelesty.audionautica.presentation.composables.access.MultiparameterInputCard
 import com.kaelesty.audionautica.presentation.ui.fonts.SpaceGrotesk
-import com.kaelesty.audionautica.presentation.viewmodels.AddTrackViewModel
-import java.io.File
+import kotlinx.coroutines.flow.SharedFlow
 
 @Composable
 fun AddTrackScreen(
-	viewModel: AddTrackViewModel,
-	fileBrowser: (AddTrackActivity.FilesToBrowse) -> Unit,
+	errorFlow: SharedFlow<String>,
+	loadingFlow: SharedFlow<Boolean>,
+
+	musicFilesList: List<AddTrackActivity.NamedUri>,
+	onUpload: (String, String, Uri, List<String>) -> Unit
 ) {
-	val error by viewModel.error.observeAsState()
-	val musicFile by viewModel.musicFile.observeAsState()
-	val posterFile by viewModel.posterFile.observeAsState()
+	val error by errorFlow.collectAsState(initial = "")
+	val loading by loadingFlow.collectAsState(initial = false)
+	var selectedPositionState = rememberSaveable {
+		mutableIntStateOf(0)
+	}
+
+	var tags = remember {
+		mutableStateListOf<String>()
+	}
+
+
+
+	val dialogState = rememberSaveable {
+		mutableStateOf(false)
+	}
 
 	Box(
 		modifier = Modifier
 			.fillMaxSize(),
-		contentAlignment = Alignment.Center
 	) {
 		Image(
 			painter = painterResource(id = R.drawable.space_background),
@@ -56,14 +86,30 @@ fun AddTrackScreen(
 				.fillMaxSize()
 		)
 
+		if (dialogState.value) {
+			MinimalDialog(
+				onAcceptRequest = {
+					tags.add(it)
+					dialogState.value = false
+				},
+				onDimissRequest = { dialogState.value = false }
+			)
+		}
+
+		if (loading) {
+			LoadingDialog()
+		}
+
 		Column {
 			MultiparameterInputCard(
 				mainAction = CollectNamedAction(
 					name = "Upload",
-				) { params, files ->
-					viewModel.addTrack(
+				) { params, _ ->
+					onUpload(
+						params["Title"] ?: return@CollectNamedAction,
 						params["Artist"] ?: return@CollectNamedAction,
-						params["Title"] ?: return@CollectNamedAction
+						musicFilesList[selectedPositionState.value].uri,
+						tags
 					)
 				},
 				parameters = listOf("Title", "Artist"),
@@ -72,68 +118,148 @@ fun AddTrackScreen(
 				lastParameterIsPassword = false,
 			)
 
-			FileBrowser(
-				musicFile,
-				{ fileBrowser(AddTrackActivity.FilesToBrowse.MUSIC) },
-				"Music file"
+			TagsList(
+				tags,
+				dialogState
 			)
-//			FileBrowser(
-//				posterFile,
-//				{ fileBrowser(AddTrackActivity.FilesToBrowse.POSTER) },
-//				"Poster file"
-//			)
+
+			FileList(
+				musicFilesList,
+				selectedPositionState
+			)
+		}
+	}
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun TagsList(
+	tags: MutableList<String>,
+	dialogState: MutableState<Boolean>
+) {
+	GradientCard {
+		Column {
+			Text(
+				text = "Set tags",
+				fontSize = 24.sp,
+				fontStyle = FontStyle.Normal,
+				fontFamily = SpaceGrotesk,
+				fontWeight = FontWeight.SemiBold,
+				color = MaterialTheme.colorScheme.onSurface,
+				modifier = Modifier
+					.padding(horizontal = 10.dp)
+			)
+			Spacer(Modifier.height(6.dp))
+			LazyRow(
+				modifier = Modifier
+					.height(70.dp)
+					.padding(horizontal = 10.dp),
+				content = {
+					stickyHeader {
+						Box(
+							modifier = Modifier
+								.height(45.dp)
+								.background(
+									color = MaterialTheme.colorScheme.primaryContainer,
+									shape = RoundedCornerShape(16.dp)
+								)
+								.clickable {
+									dialogState.value = true
+								}
+								.padding(8.dp)
+						) {
+							Text(
+								text = " + ",
+								color = MaterialTheme.colorScheme.onSurface,
+								fontFamily = SpaceGrotesk,
+								fontSize = 18.sp
+							)
+						}
+						Spacer(Modifier.width(4.dp))
+					}
+					itemsIndexed(tags) { index, item ->
+						Row(
+							modifier = Modifier
+								.fillMaxWidth()
+								.clickable {
+									tags.remove(item)
+								}
+						) {
+							Box(
+								modifier = Modifier
+									.height(45.dp)
+									.background(
+										color = MaterialTheme.colorScheme.primaryContainer,
+										shape = RoundedCornerShape(16.dp)
+									)
+									.padding(8.dp)
+							) {
+								Text(
+									text = item,
+									color = MaterialTheme.colorScheme.onSurface,
+									fontFamily = SpaceGrotesk,
+									fontSize = 18.sp
+								)
+							}
+						}
+						Spacer(Modifier.width(4.dp))
+					}
+				}
+			)
 		}
 	}
 }
 
 @Composable
-fun FileBrowser(
-	uri: Uri?,
-	fileBrowser: () -> Unit,
-	hint: String
+fun FileList(
+	tracksList: List<AddTrackActivity.NamedUri>,
+	selectedPositionState: MutableState<Int>
 ) {
 	GradientCard {
-		Row(
-			Modifier
-				.fillMaxWidth()
-				.padding(6.dp),
-			verticalAlignment = Alignment.CenterVertically
-		) {
-			TextField(
-				value = uri?.lastPathSegment ?: "",
-				onValueChange = {},
+		Column {
+			Text(
+				text = "Select file",
+				fontSize = 24.sp,
+				fontStyle = FontStyle.Normal,
+				fontFamily = SpaceGrotesk,
+				fontWeight = FontWeight.SemiBold,
+				color = MaterialTheme.colorScheme.onSurface,
 				modifier = Modifier
-					.weight(1f)
-					.padding(horizontal = 10.dp),
-				label = {
-					Text(
-						hint,
-						color = MaterialTheme.colorScheme.onSurface,
-						fontFamily = SpaceGrotesk
-					)
-				},
-				singleLine = true,
-				readOnly = true
+					.padding(horizontal = 10.dp)
 			)
-			Button(
-				onClick = {
-					fileBrowser()
-				},
+			LazyColumn(
 				modifier = Modifier
-					.height(50.dp)
-					.padding(horizontal = 6.dp),
-				shape = RoundedCornerShape(8.dp),
-				colors = ButtonDefaults.buttonColors(
-					containerColor = MaterialTheme.colorScheme.primaryContainer,
-					contentColor = MaterialTheme.colorScheme.surface
-				)
-			) {
-				Text(
-					"Browse",
-					color = MaterialTheme.colorScheme.onSurface,
-					fontFamily = SpaceGrotesk
-				)
-			}
+					.height(400.dp)
+					.padding(horizontal = 10.dp),
+				content = {
+					itemsIndexed(tracksList) { index, item ->
+						Row(
+							modifier = Modifier
+								.fillMaxWidth()
+								.clickable {
+									selectedPositionState.value = index
+								}
+						) {
+							Box(
+								modifier = Modifier.height(60.dp)
+							) {
+								if (selectedPositionState.value == index) {
+									Icon(
+										imageVector = Icons.Filled.Check,
+										contentDescription = "Selected"
+									)
+								}
+							}
+							Spacer(Modifier.width(12.dp))
+							Text(
+								item.name,
+								color = MaterialTheme.colorScheme.onSurface,
+								fontFamily = SpaceGrotesk
+							)
+						}
+					}
+				}
+			)
 		}
 	}
 }

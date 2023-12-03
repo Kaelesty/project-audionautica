@@ -5,10 +5,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.entities.TrackExp
 import com.kaelesty.audionautica.domain.returncodes.UploadTrackRC
 import com.kaelesty.audionautica.domain.usecases.UploadTrackUseCase
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,51 +19,44 @@ class AddTrackViewModel @Inject constructor(
 	private val uploadTrackUseCase: UploadTrackUseCase
 ): ViewModel() {
 
-	private val _musicFile = MutableLiveData<Uri>()
-	val musicFile: LiveData<Uri> get() = _musicFile
+	private val _errorFlow = MutableSharedFlow<String>()
+	val errorFlow: SharedFlow<String> get() = _errorFlow
 
-	private val _posterFile = MutableLiveData<Uri>()
-	val posterFile: LiveData<Uri> get() = _posterFile
-
-	private val _error = MutableLiveData<String>()
-	val error: LiveData<String> get() = _error
+	private val _loadingFlow = MutableSharedFlow<Boolean>()
+	val loadingFlow: SharedFlow<Boolean> get() = _loadingFlow
 
 	private val _finish = MutableLiveData<Unit>()
 	val finish: LiveData<Unit> get() = _finish
 
-	fun musicFileBrowsed(uri: Uri) {
-		_musicFile.postValue(uri)
-	}
-
-	fun posterFileBrowsed(uri: Uri) {
-		_posterFile.postValue(uri)
-	}
-
 	fun addTrack(
 		artist: String,
 		title: String,
+		uri: Uri,
+		tags: List<String>,
 	) {
-
-		if (musicFile.value == null) {
-			_error.postValue("Choose music file")
+		viewModelScope.launch {
+			_loadingFlow.emit(true)
+		}
+		if (uri == Uri.EMPTY) {
+			viewModelScope.launch(Dispatchers.IO) {
+				_errorFlow.emit("Choose music file")
+				_loadingFlow.emit(false)
+			}
+			return
 		}
 
-		musicFile.value?.let {
-			val track = TrackExp(
-				artist = artist,
-				duration = 0,
-				id = -1,
-				musicFile = it,
-				posterFile = posterFile.value,
-				title = title
-			)
+		val track = Track(
+			id = -1,
+			title = title,
+			artist = artist,
+			tags
+		)
 
-			viewModelScope.launch(Dispatchers.IO) {
-				when(uploadTrackUseCase(track)) {
-					UploadTrackRC.OK -> _finish.postValue(Unit)
-					UploadTrackRC.NOT_CONNECTED -> _error.postValue("Not available in offline mode")
-					UploadTrackRC.SERVER_ERROR -> _error.postValue("Unknown server error")
-				}
+		viewModelScope.launch(Dispatchers.IO) {
+			when(uploadTrackUseCase(track, uri)) {
+				UploadTrackRC.OK -> _finish.postValue(Unit)
+				UploadTrackRC.NOT_CONNECTED -> _errorFlow.emit("Not available in offline mode")
+				UploadTrackRC.SERVER_ERROR -> _errorFlow.emit("Unknown server error")
 			}
 		}
 	}

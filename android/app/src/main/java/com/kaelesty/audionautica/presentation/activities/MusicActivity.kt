@@ -123,6 +123,7 @@ class MusicActivity : ComponentActivity() {
 					onAddTrackToPlaylist = { track -> viewModel.addTrackToPlaylist(track) },
 					playingFlow = playingFlow,
 					trackFlow = trackFlow,
+					onRequestTrackCreation = { launchAddTrackActivity() }
 				)
 			}
 		}

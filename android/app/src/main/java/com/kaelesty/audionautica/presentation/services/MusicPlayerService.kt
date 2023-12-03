@@ -208,7 +208,7 @@ class MusicPlayerService : Service() {
 						.putString(MediaMetadata.METADATA_KEY_TITLE, it.title)
 						.putString(MediaMetadata.METADATA_KEY_ARTIST, it.artist)
 						.build()
-			mediaSession.setMetadata(metadata)
+						mediaSession.setMetadata(metadata)
 				}
 			}
 		}

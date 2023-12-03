@@ -49,6 +49,8 @@ class MusicRepo @Inject constructor(
 		return trackDao.getAll().map { it.map { dbModel -> trackMapper.dbModelToDomain(dbModel) } }
 	}
 
+
+
 	suspend fun downloadTrack(id: Int) {
 		Log.d("AudionauticaTag", "Downloading $id")
 		try {
@@ -96,10 +98,8 @@ class MusicRepo @Inject constructor(
 	}
 
 	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
-	override suspend fun uploadTrack(track: TrackExp): UploadTrackRC {
+	override suspend fun uploadTrack(track: Track, uri: Uri): UploadTrackRC {
 		try {
-			track.musicFile.path?.let { Log.e("MYTAG", it) }
-			val uri = track.musicFile
 
 			val tempFile = File(application.cacheDir, "tempfile")
 			try {
@@ -129,7 +129,11 @@ class MusicRepo @Inject constructor(
 			// TODO check possibility to send more than one file via multipart body
 			// TODO there i send music file twice, it should be replaced by poster file
 			val request = musicApiService.uploadTrack(
-				track.title, track.artist, "tag1%tag2", description, body
+				track.title,
+				track.artist,
+				track.tags.joinToString(trackMapper.TRACK_TAGS_STRINGIFICATION_DELIMITER),
+				description,
+				body
 			)
 			return when(request.code()) {
 				200 -> UploadTrackRC.OK
@@ -170,7 +174,7 @@ class MusicRepo @Inject constructor(
 		if (!checkFileDownloaded(id)) {
 			downloadTrack(id)
 		}
-		Log.d("AudionauticaTag", "Downloaded $id")
+		Log.d("AudionauticaTag", "Ready $id")
 		return getFileUri(id)
 	}
 

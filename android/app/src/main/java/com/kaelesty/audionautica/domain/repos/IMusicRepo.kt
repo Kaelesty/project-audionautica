@@ -14,7 +14,7 @@ interface IMusicRepo {
 
 	suspend fun addTrack(track: TrackExp)
 
-	suspend fun uploadTrack(track: TrackExp): UploadTrackRC
+	suspend fun uploadTrack(track: Track, uri: Uri): UploadTrackRC
 
 	suspend fun search(query: String): List<Track>
 

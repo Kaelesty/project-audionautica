@@ -39,7 +39,6 @@ class AddTrackActivity : ComponentActivity() {
 	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		component.inject(this@AddTrackActivity)
-		logAllMusicFiles()
 		super.onCreate(savedInstanceState)
 
 		viewModel.finish.observe(this) {
@@ -48,11 +47,10 @@ class AddTrackActivity : ComponentActivity() {
 		setContent {
 			AudionauticaTheme {
 				AddTrackScreen(
-					viewModel = viewModel,
-					fileBrowser = {
-						askPermissions()
-						browseFile(it)
-					}
+					errorFlow = viewModel.errorFlow,
+					loadingFlow = viewModel.loadingFlow,
+					onUpload = { title, artist, uri, tags -> viewModel.addTrack(artist, title, uri, tags) },
+					musicFilesList = collectAllMusicFiles(),
 				)
 			}
 		}
@@ -86,12 +84,8 @@ class AddTrackActivity : ComponentActivity() {
 	}
 
 	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
-	private fun logAllMusicFiles() {
+	private fun collectAllMusicFiles(): List<NamedUri> {
 		askPermissions()
-		Log.e("MYTAG", "logAllMusicFiles")
-		Log.e("MYTAG", "file://" + Environment.getExternalStorageDirectory())
-		//sendBroadcast(Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://"
-				//+ Environment.getExternalStorageDirectory())))
 		val collection =
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 				MediaStore.Audio.Media.getContentUri(
@@ -114,6 +108,9 @@ class AddTrackActivity : ComponentActivity() {
 			null,
 			sortOrder
 		)
+
+		val searchResult = mutableListOf<NamedUri>()
+
 		query?.use { cursor ->
 			val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
 			val nameColumn =
@@ -124,62 +121,67 @@ class AddTrackActivity : ComponentActivity() {
 			while (cursor.moveToNext()) {
 				val id = cursor.getLong(idColumn)
 				val name = cursor.getString(nameColumn)
-				val duration = cursor.getInt(durationColumn)
-				val size = cursor.getInt(sizeColumn)
 
 				val contentUri: Uri = ContentUris.withAppendedId(
 					MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
 					id
 				)
-				Log.e("MYTAG", name)
-				viewModel.musicFileBrowsed(contentUri)
+
+				searchResult.add(
+					NamedUri(name, contentUri)
+				)
 			}
 		}
 
-
+		return searchResult
 	}
 
-	private fun browseFile(fileType: FilesToBrowse) {
-//		val chooseFileIntent = Intent.createChooser(
-//			Intent(Intent.ACTION_GET_CONTENT).apply {
-//				type = "*/*"
-//				addCategory(Intent.CATEGORY_OPENABLE)
-//			},
-//			"Choose a file"
-//		)
+//	private fun browseFile(fileType: FilesToBrowse) {
+////		val chooseFileIntent = Intent.createChooser(
+////			Intent(Intent.ACTION_GET_CONTENT).apply {
+////				type = "*/*"
+////				addCategory(Intent.CATEGORY_OPENABLE)
+////			},
+////			"Choose a file"
+////		)
+////		startActivityForResult(
+////			chooseFileIntent,
+////			fileType.requestCode
+////		)
+//		val intent = Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
+//		intent.type = "Audio/*"
 //		startActivityForResult(
-//			chooseFileIntent,
-//			fileType.requestCode
+//			Intent.createChooser(
+//				intent,
+//				"Selecione a foto "
+//			), FilesToBrowse.MUSIC.requestCode
 //		)
-		val intent = Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
-		intent.type = "Audio/*"
-		startActivityForResult(
-			Intent.createChooser(
-				intent,
-				"Selecione a foto "
-			), FilesToBrowse.MUSIC.requestCode
-		)
-	}
-
-	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-
-		val uri: Uri = data?.data ?: throw IllegalStateException("Illegal!")
-		val path = uri.path.toString()
-		val file = File(path)
-		Log.e("MYTAG1", file.absolutePath)
-		Log.e("MYTAG1", file.name)
-		Log.e("MYTAG1", file.canonicalPath)
-		Log.e("MYTAG1", file.extension)
-
-		super.onActivityResult(requestCode, resultCode, data)
-		when (requestCode) {
-			FilesToBrowse.MUSIC.requestCode -> { viewModel.musicFileBrowsed(uri) }
-			FilesToBrowse.POSTER.requestCode -> { viewModel.posterFileBrowsed(data?.data ?: Uri.EMPTY) }
-		}
-	}
+//	}
+//
+//	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//
+//		val uri: Uri = data?.data ?: throw IllegalStateException("Illegal!")
+//		val path = uri.path.toString()
+//		val file = File(path)
+//		Log.e("MYTAG1", file.absolutePath)
+//		Log.e("MYTAG1", file.name)
+//		Log.e("MYTAG1", file.canonicalPath)
+//		Log.e("MYTAG1", file.extension)
+//
+//		super.onActivityResult(requestCode, resultCode, data)
+////		when (requestCode) {
+////			FilesToBrowse.MUSIC.requestCode -> { viewModel.musicFileBrowsed(uri) }
+////			FilesToBrowse.POSTER.requestCode -> { viewModel.posterFileBrowsed(data?.data ?: Uri.EMPTY) }
+////		}
+//	}
 
 
 	companion object {
 		fun newIntent(context: Context) = Intent(context, AddTrackActivity::class.java)
 	}
+
+	data class NamedUri(
+		val name: String,
+		val uri: Uri
+	)
 }
