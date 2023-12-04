@@ -9,12 +9,15 @@ import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
+import com.kaelesty.audionautica.data.local.daos.PlaylistDao
 import com.kaelesty.audionautica.data.local.daos.TrackDao
+import com.kaelesty.audionautica.data.mappers.PlaylistMapper
 import com.kaelesty.audionautica.data.mappers.TrackMapper
 import com.kaelesty.audionautica.data.remote.api.MusicApiService
 import com.kaelesty.audionautica.data.remote.entities.DownloadTrackDto
 import com.kaelesty.audionautica.data.remote.entities.SearchDto
 import com.kaelesty.audionautica.di.ApplicationScope
+import com.kaelesty.audionautica.domain.entities.Playlist
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.entities.TrackExp
 import com.kaelesty.audionautica.domain.entities.TracksToPlay
@@ -35,7 +38,9 @@ import javax.inject.Inject
 @ApplicationScope
 class MusicRepo @Inject constructor(
 	private val trackDao: TrackDao,
+	private val playlistDao: PlaylistDao,
 	private val trackMapper: TrackMapper,
+	private val playlistMapper: PlaylistMapper,
 	private val musicApiService: MusicApiService,
 	private val contentResolver: ContentResolver,
 	private val application: Application,
@@ -50,14 +55,13 @@ class MusicRepo @Inject constructor(
 	}
 
 
-
 	suspend fun downloadTrack(id: Int) {
 		Log.d("AudionauticaTag", "Downloading $id")
 		try {
 			val response = musicApiService.downloadTrackSample(
 				DownloadTrackDto(id)
 			)
-			val body = response.body()?: throw IOException("Empty body!")
+			val body = response.body() ?: throw IOException("Empty body!")
 			saveFile(body, id)
 
 		} catch (e: Exception) {
@@ -69,25 +73,23 @@ class MusicRepo @Inject constructor(
 		var input: InputStream? = null
 		try {
 			input = body.byteStream()
-			val fileName="/$id.mp3"
-			val pathWhereYouWantToSaveFile = application.filesDir.absolutePath+fileName
+			val fileName = "/$id.mp3"
+			val pathWhereYouWantToSaveFile = application.filesDir.absolutePath + fileName
 			Log.e("MusicViewModel", application.filesDir.absolutePath)
 			val fos = FileOutputStream(pathWhereYouWantToSaveFile)
-			fos.use {output ->
+			fos.use { output ->
 				val buffer = ByteArray(4 * 1024)
 				var read: Int
-				while(input.read(buffer).also { read = it } != -1) {
+				while (input.read(buffer).also { read = it } != - 1) {
 					output.write(buffer, 0, read)
 				}
 
 				output.flush()
 
 			}
-		}
-		catch (exception: Exception) {
+		} catch (exception: Exception) {
 			Log.e("MusicViewModel", exception.toString())
-		}
-		finally {
+		} finally {
 			input?.close()
 		}
 	}
@@ -103,11 +105,11 @@ class MusicRepo @Inject constructor(
 
 			val tempFile = File(application.cacheDir, "tempfile")
 			try {
-				val inputstream: InputStream = contentResolver.openInputStream(uri)!!
+				val inputstream: InputStream = contentResolver.openInputStream(uri) !!
 				val output = FileOutputStream(tempFile)
 				val buffer = ByteArray(1024)
 				var size: Int
-				while (inputstream.read(buffer).also { size = it } != -1) {
+				while (inputstream.read(buffer).also { size = it } != - 1) {
 					output.write(buffer, 0, size)
 				}
 				inputstream.close()
@@ -135,12 +137,11 @@ class MusicRepo @Inject constructor(
 				description,
 				body
 			)
-			return when(request.code()) {
+			return when (request.code()) {
 				200 -> UploadTrackRC.OK
 				else -> UploadTrackRC.SERVER_ERROR
 			}
-		}
-		catch (e: IOException) {
+		} catch (e: IOException) {
 			Log.e("MYTAG", e.message.toString())
 			return UploadTrackRC.SERVER_ERROR
 		}
@@ -171,7 +172,8 @@ class MusicRepo @Inject constructor(
 
 	override suspend fun getTrackUri(id: Int): Uri {
 
-		if (!checkFileDownloaded(id)) {
+		if (! checkFileDownloaded(id)) {
+			Log.d("AudionauticaTag", "Not downloaded $id")
 			downloadTrack(id)
 		}
 		Log.d("AudionauticaTag", "Ready $id")
@@ -179,19 +181,48 @@ class MusicRepo @Inject constructor(
 	}
 
 	private fun checkFileDownloaded(id: Int): Boolean {
-		val fileName="/$id.mp3"
-		val path = application.filesDir.absolutePath+fileName
+		val fileName = "/$id.mp3"
+		val path = application.filesDir.absolutePath + fileName
 		val file = File(path)
 		return file.exists()
 	}
 
 	private fun getFileUri(id: Int): Uri {
-		val fileName="/$id.mp3"
-		val path = application.filesDir.absolutePath+fileName
+		val fileName = "/$id.mp3"
+		val path = application.filesDir.absolutePath + fileName
 		return File(path).toUri()
 	}
 
 	override fun getTracksQueueFlow(): SharedFlow<TracksToPlay> {
 		return tracksQueue
+	}
+
+	override suspend fun addTrackToPlaylist(track: Track, playlistId: Int) {
+		trackDao.createTrack(trackMapper.domainToDbModel(track))
+
+		val playlist = playlistMapper.DbModelToDomain(
+			playlistDao.getPlaylist(playlistId)
+		)
+
+		val newTrackIds = playlist.trackIds.toMutableList()
+		newTrackIds.add(track.id)
+
+		val newPlaylist = Playlist(
+			id = playlist.id,
+			title = playlist.title,
+			trackIds = newTrackIds
+		)
+
+		playlistDao.createPlaylist(
+			playlistMapper.DomainToDbModel(newPlaylist) // Will be replaced by OnConflictStrategy.REPLACE
+		)
+	}
+
+	override fun getPlaylists(): LiveData<List<Playlist>> {
+		return playlistDao.getAll().map { list ->
+			list.map { dbModel ->
+				playlistMapper.DbModelToDomain(dbModel)
+			}
+		}
 	}
 }

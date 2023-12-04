@@ -9,7 +9,6 @@ import androidx.room.PrimaryKey
 )
 class PlaylistDbModel(
 	@PrimaryKey val id: Int,
-	val posterFile: String?,
 	val title: String,
-	//val trackIds: List<Int>
+	val trackIds: String
 )

@@ -4,7 +4,6 @@ import android.net.Uri
 
 data class Playlist(
 	val id: Int,
-	val posterFile: Uri,
-	val title: Uri,
+	val title: String,
 	val trackIds: List<Int>
 )

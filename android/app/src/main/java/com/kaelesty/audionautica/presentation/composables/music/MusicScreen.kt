@@ -54,7 +54,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.kaelesty.audionautica.R
+import com.kaelesty.audionautica.domain.entities.Playlist
 import com.kaelesty.audionautica.domain.entities.Track
+import com.kaelesty.audionautica.presentation.composables.AddTrackToPlalistDialog
 import com.kaelesty.audionautica.presentation.composables.access.GradientCard
 import com.kaelesty.audionautica.presentation.ui.fonts.SpaceGrotesk
 import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
@@ -70,27 +72,28 @@ fun MusicScreenPreview() {
 			onPause = { },
 			onResume = { },
 			onSearch = {},
-			onAddTrackToPlaylist = {},
+			onAddTrackToPlaylist = { track, id -> },
 			tracksSearchResults = MutableLiveData(),
 			playingFlow = MutableSharedFlow(),
 			trackFlow = MutableSharedFlow(),
 			onRequestTrackCreation = {},
+			playlistsLiveData = MutableLiveData()
 		)
 	}
 }
 
 @Composable
 fun MusicScreen(
-	//viewModel: MusicViewModel,
 	onPlay: (Track) -> Unit,
 	onPause: () -> Unit,
 	onResume: () -> Unit,
 	onSearch: (String) -> Unit,
-	onAddTrackToPlaylist: (Track) -> Unit,
+	onAddTrackToPlaylist: (Track, Int) -> Unit,
 	tracksSearchResults: LiveData<List<Track>>,
 	playingFlow: SharedFlow<Boolean>,
 	trackFlow: SharedFlow<Track>,
 	onRequestTrackCreation: () -> Unit,
+	playlistsLiveData: LiveData<List<Playlist>>
 ) {
 
 	val mode = rememberSaveable {
@@ -102,6 +105,24 @@ fun MusicScreen(
 		color = Color.White
 	)
 
+	val selectPlaylistDialog = rememberSaveable {
+		mutableStateOf<Track?>(null)
+	}
+
+	val playlists by playlistsLiveData.observeAsState(listOf())
+
+	selectPlaylistDialog.value?.let { track ->
+		AddTrackToPlalistDialog(
+			onDimissRequest = { selectPlaylistDialog.value = null },
+			onAcceptRequest = { playlistId ->
+				onAddTrackToPlaylist(
+					track, playlistId
+				)
+				selectPlaylistDialog.value = null
+			},
+			playlists = playlists
+		)
+	}
 
 	Scaffold(
 		modifier = Modifier
@@ -134,8 +155,9 @@ fun MusicScreen(
 				tracksSearchResults = tracksSearchResults,
 				onPlay = onPlay,
 				onPause = onPause,
-				onAddTrack = onAddTrackToPlaylist,
-				playingFlow = playingFlow
+				onAddTrackToPlaylist = onAddTrackToPlaylist,
+				playingFlow = playingFlow,
+				selectPlaylistDialog = selectPlaylistDialog
 			)
 
 			MusicScreenMode.PLAYLISTS -> Playlists()
@@ -188,8 +210,9 @@ fun Search(
 	tracksSearchResults: LiveData<List<Track>>,
 	onPlay: (Track) -> Unit,
 	onPause: () -> Unit,
-	onAddTrack: (Track) -> Unit,
+	onAddTrackToPlaylist: (Track, Int) -> Unit,
 	playingFlow: SharedFlow<Boolean>,
+	selectPlaylistDialog: MutableState<Track?>
 ) {
 	val tracks by tracksSearchResults.observeAsState(listOf())
 	val playing by playingFlow.collectAsState(initial = false)
@@ -210,7 +233,7 @@ fun Search(
 						}
 					},
 					onAdd = {
-						onAddTrack(it)
+						selectPlaylistDialog.value = it
 					}
 				)
 			}

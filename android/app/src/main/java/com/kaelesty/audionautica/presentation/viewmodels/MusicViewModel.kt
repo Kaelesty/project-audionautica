@@ -6,15 +6,21 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kaelesty.audionautica.domain.entities.Playlist
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.usecases.AddToTracksQueueUseCase
+import com.kaelesty.audionautica.domain.usecases.AddTrackToPlaylistUseCase
+import com.kaelesty.audionautica.domain.usecases.GetAllPlaylistsUseCase
 import com.kaelesty.audionautica.domain.usecases.SearchTracksUseCase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class MusicViewModel @Inject constructor(
 	private val searchTracksUseCase: SearchTracksUseCase,
 	private val addToTracksQueueUseCase: AddToTracksQueueUseCase,
+	private val getAllPlaylistsUseCase: GetAllPlaylistsUseCase,
+	private val addTrackToPlaylistUseCase: AddTrackToPlaylistUseCase
 ): ViewModel() {
 
 	private val _tracksSearchResults = MutableLiveData<List<Track>>()
@@ -41,8 +47,14 @@ class MusicViewModel @Inject constructor(
 		}
 	}
 
-	fun addTrackToPlaylist(track: Track) {
+	fun addTrackToPlaylist(track: Track, playlistId: Int) {
+		viewModelScope.launch(Dispatchers.IO) {
+			addTrackToPlaylistUseCase(track, playlistId)
+		}
+	}
 
+	fun getPlaylists(): LiveData<List<Playlist>> {
+		return getAllPlaylistsUseCase()
 	}
 
 	fun pause() {

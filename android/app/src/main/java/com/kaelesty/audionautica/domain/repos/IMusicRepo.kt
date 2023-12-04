@@ -2,6 +2,7 @@ package com.kaelesty.audionautica.domain.repos
 
 import android.net.Uri
 import androidx.lifecycle.LiveData
+import com.kaelesty.audionautica.domain.entities.Playlist
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.entities.TrackExp
 import com.kaelesty.audionautica.domain.entities.TracksToPlay
@@ -11,6 +12,8 @@ import kotlinx.coroutines.flow.SharedFlow
 interface IMusicRepo {
 
 	fun getTracks(): LiveData<List<Track>>
+
+	fun getPlaylists(): LiveData<List<Playlist>>
 
 	suspend fun addTrack(track: TrackExp)
 
@@ -26,4 +29,6 @@ interface IMusicRepo {
 	suspend fun getTrackUri(id: Int): Uri
 
 	fun getTracksQueueFlow(): SharedFlow<TracksToPlay>
+
+	suspend fun addTrackToPlaylist(track: Track, playlistId: Int)
 }

@@ -120,10 +120,13 @@ class MusicActivity : ComponentActivity() {
 					onResume = {
 						playerMediaController?.transportControls?.play()
 					},
-					onAddTrackToPlaylist = { track -> viewModel.addTrackToPlaylist(track) },
+					onAddTrackToPlaylist = { track, playlistId ->
+						viewModel.addTrackToPlaylist(track, playlistId)
+					},
 					playingFlow = playingFlow,
 					trackFlow = trackFlow,
-					onRequestTrackCreation = { launchAddTrackActivity() }
+					onRequestTrackCreation = { launchAddTrackActivity() },
+					playlistsLiveData = viewModel.getPlaylists()
 				)
 			}
 		}

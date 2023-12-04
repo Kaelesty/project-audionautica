@@ -18,7 +18,9 @@ class ModifiedApplication: Application() {
 				this@ModifiedApplication,
 				contentResolver,
 				Room.databaseBuilder(this, TrackDatabase::class.java, "trackdb").build(),
-				Room.databaseBuilder(this, PlaylistDatabase::class.java, "playlistdb").build()
+				Room.databaseBuilder(this, PlaylistDatabase::class.java, "playlistdb").build().apply {
+					checkFavoritesCreated()
+				}
 			)
 	}
 }

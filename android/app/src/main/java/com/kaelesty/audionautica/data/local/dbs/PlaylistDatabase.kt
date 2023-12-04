@@ -6,6 +6,9 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.kaelesty.audionautica.data.local.daos.PlaylistDao
 import com.kaelesty.audionautica.data.local.dbmodels.PlaylistDbModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Database(
 	entities = [PlaylistDbModel::class],
@@ -15,6 +18,31 @@ import com.kaelesty.audionautica.data.local.dbmodels.PlaylistDbModel
 abstract class PlaylistDatabase() : RoomDatabase() {
 
 	abstract fun dao(): PlaylistDao
+
+	private val dbSetupScope = CoroutineScope(Dispatchers.IO)
+
+	fun checkFavoritesCreated() {
+		/*
+		Adding tracks to favorites is done through a special playlist "Favorites",
+		which is not displayed in the general list of playlists.
+		It must always exist, therefore, every time we create a database instance,
+		we check whether it has been created.
+		 */
+		with(this.dao()) {
+			val value = getAll().value
+			if (value.isNullOrEmpty()) {
+				dbSetupScope.launch {
+					createPlaylist(
+						PlaylistDbModel(
+							id = 0,
+							title = "Favorites",
+							trackIds = "",
+						)
+					)
+				}
+			}
+		}
+	}
 
 	companion object {
 
@@ -36,31 +64,11 @@ abstract class PlaylistDatabase() : RoomDatabase() {
 					PlaylistDatabase::class.java,
 					DB_NAME
 				).build()
-				checkFavoritesCreated(db)
+				//checkFavoritesCreated(db)
 
 				instance = db
 
 				return db
-			}
-		}
-
-		private fun checkFavoritesCreated(db: PlaylistDatabase) {
-			/*
-			Adding tracks to favorites is done through a special playlist "Favorites",
-			which is not displayed in the general list of playlists.
-			It must always exist, therefore, every time we create a database instance,
-			we check whether it has been created.
-			 */
-			with(db.dao()) {
-				if (getAll().isEmpty()) {
-					createPlaylist(
-						PlaylistDbModel(
-							id = 0,
-							posterFile = null,
-							title = "Favorites",
-						)
-					)
-				}
 			}
 		}
 	}

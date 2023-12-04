@@ -10,7 +10,7 @@ import com.kaelesty.audionautica.data.local.dbmodels.TrackDbModel
 @Dao
 interface TrackDao {
 
-	@Insert(onConflict = OnConflictStrategy.REPLACE)
+	@Insert(onConflict = OnConflictStrategy.IGNORE)
 	fun createTrack(track: TrackDbModel)
 
 	@Query("SELECT * FROM `tracks-`")
