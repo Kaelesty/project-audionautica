@@ -126,7 +126,17 @@ class MusicActivity : ComponentActivity() {
 					playingFlow = playingFlow,
 					trackFlow = trackFlow,
 					onRequestTrackCreation = { launchAddTrackActivity() },
-					playlistsLiveData = viewModel.getPlaylists()
+					playlistsLiveData = viewModel.getPlaylists(),
+					getPlaylistTracks = { viewModel.getPlaylistTracks(it) },
+					onRemoveTrackFromPlaylist = { track, id ->
+						viewModel.removeTrackFromPlaylist(track, id)
+					},
+					createPlaylist = {
+						viewModel.createPlaylist(it)
+					},
+					onDeleteTrackFromPlaylist = { track, playlistId ->
+						viewModel.removeTrackFromPlaylist(track, playlistId)
+					},
 				)
 			}
 		}

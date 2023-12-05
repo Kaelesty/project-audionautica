@@ -31,4 +31,10 @@ interface IMusicRepo {
 	fun getTracksQueueFlow(): SharedFlow<TracksToPlay>
 
 	suspend fun addTrackToPlaylist(track: Track, playlistId: Int)
+
+	suspend fun removeTrackFromPlaylist(track: Track, playlistId: Int)
+
+	fun getPlaylistTracks(id: Int): List<Track>
+
+	suspend fun createPlaylist(playlist: Playlist)
 }

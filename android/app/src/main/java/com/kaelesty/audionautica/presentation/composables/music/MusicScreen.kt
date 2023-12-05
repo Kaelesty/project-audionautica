@@ -7,23 +7,26 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Clear
-import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Warning
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,7 +35,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -56,31 +58,34 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.kaelesty.audionautica.R
 import com.kaelesty.audionautica.domain.entities.Playlist
 import com.kaelesty.audionautica.domain.entities.Track
-import com.kaelesty.audionautica.presentation.composables.AddTrackToPlalistDialog
+import com.kaelesty.audionautica.presentation.composables.dialogues.AddTrackToPlalistDialog
 import com.kaelesty.audionautica.presentation.composables.access.GradientCard
+import com.kaelesty.audionautica.presentation.composables.dialogues.EditPlaylistDialog
 import com.kaelesty.audionautica.presentation.ui.fonts.SpaceGrotesk
 import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 
-@Preview
-@Composable
-fun MusicScreenPreview() {
-	AudionauticaTheme {
-		MusicScreen(
-			onPlay = {},
-			onPause = { },
-			onResume = { },
-			onSearch = {},
-			onAddTrackToPlaylist = { track, id -> },
-			tracksSearchResults = MutableLiveData(),
-			playingFlow = MutableSharedFlow(),
-			trackFlow = MutableSharedFlow(),
-			onRequestTrackCreation = {},
-			playlistsLiveData = MutableLiveData()
-		)
-	}
-}
+//@Preview
+//@Composable
+//fun MusicScreenPreview() {
+//	AudionauticaTheme {
+//		MusicScreen(
+//			onPlay = {},
+//			onPause = { },
+//			onResume = { },
+//			onSearch = {},
+//			onAddTrackToPlaylist = { track, id -> },
+//			onRemoveTrackFromPlaylist = { track, id -> },
+//			tracksSearchResults = MutableLiveData(),
+//			playingFlow = MutableSharedFlow(),
+//			trackFlow = MutableSharedFlow(),
+//			onRequestTrackCreation = {},
+//			playlistsLiveData = MutableLiveData(),
+//			getPlaylistTracks = { MutableLiveData() },
+//		)
+//	}
+//}
 
 @Composable
 fun MusicScreen(
@@ -89,11 +94,15 @@ fun MusicScreen(
 	onResume: () -> Unit,
 	onSearch: (String) -> Unit,
 	onAddTrackToPlaylist: (Track, Int) -> Unit,
+	onRemoveTrackFromPlaylist: (Track, Int) -> Unit,
 	tracksSearchResults: LiveData<List<Track>>,
 	playingFlow: SharedFlow<Boolean>,
 	trackFlow: SharedFlow<Track>,
 	onRequestTrackCreation: () -> Unit,
-	playlistsLiveData: LiveData<List<Playlist>>
+	playlistsLiveData: LiveData<List<Playlist>>,
+	getPlaylistTracks: (Int) -> List<Track>,
+	onDeleteTrackFromPlaylist: (Track, Int) -> Unit,
+	createPlaylist: (Playlist) -> Unit,
 ) {
 
 	val mode = rememberSaveable {
@@ -109,6 +118,10 @@ fun MusicScreen(
 		mutableStateOf<Track?>(null)
 	}
 
+	val editPlaylistDialog = rememberSaveable {
+		mutableStateOf<Playlist?>(null)
+	}
+
 	val playlists by playlistsLiveData.observeAsState(listOf())
 
 	selectPlaylistDialog.value?.let { track ->
@@ -121,6 +134,15 @@ fun MusicScreen(
 				selectPlaylistDialog.value = null
 			},
 			playlists = playlists
+		)
+	}
+
+	editPlaylistDialog.value?.let { playlist ->
+		EditPlaylistDialog(
+			onDismissRequest = { editPlaylistDialog.value = null },
+			playlist = playlist,
+			playlistTracks = getPlaylistTracks(playlist.id),
+			onDeleteTrackFromPlaylist = onDeleteTrackFromPlaylist,
 		)
 	}
 
@@ -160,7 +182,12 @@ fun MusicScreen(
 				selectPlaylistDialog = selectPlaylistDialog
 			)
 
-			MusicScreenMode.PLAYLISTS -> Playlists()
+			MusicScreenMode.PLAYLISTS -> Playlists(
+				playlistsLiveData =  playlistsLiveData,
+				editPlaylistDialog =  editPlaylistDialog,
+				onPlayPlaylist = {},
+				onDeleteTrackFromPlaylist = onRemoveTrackFromPlaylist
+			)
 			MusicScreenMode.MY_TRACKS -> MyTracks(
 				onCreateTrack = { onRequestTrackCreation() }
 			)
@@ -168,9 +195,72 @@ fun MusicScreen(
 	}
 }
 
+//@Preview
+//@Composable
+//fun PlaylistsPreview() {
+//	AudionauticaTheme {
+//		Playlists(playlistsLiveData = MutableLiveData(
+//			listOf(
+//				Playlist(0, "Favorites", listOf()),
+//				Playlist(1, "Playlist 1", listOf()),
+//				Playlist(2, "Playlist 2", listOf()),
+//			)
+//		))
+//	}
+//}
+
 @Composable
 fun Playlists(
+	playlistsLiveData: LiveData<List<Playlist>>,
+	onPlayPlaylist: (Int) -> Unit = {},
+	onDeleteTrackFromPlaylist: (Track, Int) -> Unit = {track, id ->},
+	editPlaylistDialog: MutableState<Playlist?>
 ) {
+	val playlists by playlistsLiveData.observeAsState(listOf())
+
+	LazyColumn(
+		modifier = Modifier
+			.padding(12.dp),
+		content = {
+			itemsIndexed(playlists) { index, item ->
+				Card(
+					colors = CardDefaults.cardColors(
+						containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+					),
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(8.dp)
+						.clickable {
+							onPlayPlaylist(item.id)
+						}
+				) {
+					Row(
+						modifier = Modifier
+							.padding(8.dp)
+							,
+						verticalAlignment = Alignment.CenterVertically
+					) {
+						Text(
+							text = item.title,
+							fontFamily = SpaceGrotesk,
+							fontSize = 22.sp,
+							modifier = Modifier
+								.weight(1f)
+						)
+						Icon(
+							imageVector = Icons.Filled.Edit,
+							contentDescription = "Edit",
+							modifier = Modifier
+								.size(30.dp)
+								.clickable {
+									editPlaylistDialog.value = item
+								}
+						)
+					}
+				}
+			}
+		}
+	)
 }
 
 @Composable

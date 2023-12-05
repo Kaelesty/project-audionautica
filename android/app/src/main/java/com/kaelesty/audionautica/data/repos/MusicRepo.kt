@@ -212,7 +212,6 @@ class MusicRepo @Inject constructor(
 			title = playlist.title,
 			trackIds = newTrackIds
 		)
-
 		playlistDao.createPlaylist(
 			playlistMapper.DomainToDbModel(newPlaylist) // Will be replaced by OnConflictStrategy.REPLACE
 		)
@@ -224,5 +223,32 @@ class MusicRepo @Inject constructor(
 				playlistMapper.DbModelToDomain(dbModel)
 			}
 		}
+	}
+
+	override suspend fun removeTrackFromPlaylist(track: Track, playlistId: Int) {
+		val playlist = playlistMapper.DbModelToDomain(playlistDao.getPlaylist(playlistId))
+		val newPlaylist = Playlist(
+			id = playlist.id,
+			title = playlist.title,
+			trackIds = playlist.trackIds.toMutableList().apply {
+				remove(track.id)
+			}
+		)
+		playlistDao.createPlaylist(
+			playlistMapper.DomainToDbModel(newPlaylist)
+		)
+		Log.d("AudionauticaTag", "Removing ${track.title} from ${playlist.title}")
+	}
+
+	override fun getPlaylistTracks(id: Int): List<Track> {
+		val playlist = playlistMapper.DbModelToDomain(playlistDao.getPlaylist(id))
+		val result = trackDao.getById(playlist.trackIds)
+		return result.map { trackMapper.dbModelToDomain(it) }
+	}
+
+	override suspend fun createPlaylist(playlist: Playlist) {
+		playlistDao.createPlaylist(
+			playlistMapper.DomainToDbModel(playlist)
+		)
 	}
 }

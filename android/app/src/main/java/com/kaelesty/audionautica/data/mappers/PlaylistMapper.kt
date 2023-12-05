@@ -18,16 +18,12 @@ class PlaylistMapper @Inject constructor() {
 	fun DbModelToDomain(dbModel: PlaylistDbModel) = Playlist(
 		id = dbModel.id,
 		title = dbModel.title,
-		trackIds = if (dbModel.trackIds == "") {
-			listOf()
-		} else {
-			dbModel.trackIds.split(TRACK_IDS_STRINGIFICATION_DELIMITER).map { it.toInt() }
-		}
+		trackIds = dbModel.trackIds
 	)
 
 	fun DomainToDbModel(domain: Playlist) = PlaylistDbModel(
 		id = domain.id,
 		title = domain.title,
-		trackIds = domain.trackIds.joinToString(TRACK_IDS_STRINGIFICATION_DELIMITER)
+		trackIds = domain.trackIds
 	)
 }

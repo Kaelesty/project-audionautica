@@ -1,7 +1,6 @@
 package com.kaelesty.audionautica.presentation.composables.addtrack
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -42,8 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaelesty.audionautica.R
 import com.kaelesty.audionautica.presentation.activities.AddTrackActivity
-import com.kaelesty.audionautica.presentation.composables.LoadingDialog
-import com.kaelesty.audionautica.presentation.composables.MinimalDialog
+import com.kaelesty.audionautica.presentation.composables.dialogues.LoadingDialog
+import com.kaelesty.audionautica.presentation.composables.dialogues.MinimalDialog
 import com.kaelesty.audionautica.presentation.composables.access.CollectNamedAction
 import com.kaelesty.audionautica.presentation.composables.access.GradientCard
 import com.kaelesty.audionautica.presentation.composables.access.MultiparameterInputCard

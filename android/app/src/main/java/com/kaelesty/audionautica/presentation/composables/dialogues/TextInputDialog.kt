@@ -1,23 +1,17 @@
-package com.kaelesty.audionautica.presentation.composables
+package com.kaelesty.audionautica.presentation.composables.dialogues
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -29,10 +23,20 @@ import androidx.compose.ui.window.Dialog
 import com.kaelesty.audionautica.presentation.ui.fonts.SpaceGrotesk
 import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
 
+@Preview
 @Composable
-fun LoadingDialog(
+fun previewMinimalDialog() {
+	AudionauticaTheme {
+		MinimalDialog(onAcceptRequest = {}, {})
+	}
+}
+
+@Composable
+fun MinimalDialog(
+	onAcceptRequest: (String) -> Unit,
+	onDimissRequest: () -> Unit,
 	) {
-	Dialog({}) {
+	Dialog({ onDimissRequest() }) {
 
 		val text = rememberSaveable {
 			mutableStateOf("")
@@ -40,27 +44,43 @@ fun LoadingDialog(
 
 		Card(
 			modifier = Modifier
-				.width(200.dp)
+				.fillMaxWidth()
 				.height(200.dp)
 				.padding(16.dp),
 			shape = RoundedCornerShape(16.dp),
 		) {
-			Box(modifier = Modifier
-				.align(Alignment.CenterHorizontally)
-				.fillMaxSize()
-			) {
-				CircularProgressIndicator(
-					modifier = Modifier.fillMaxSize().padding(18.dp)
-				)
-			}
-		}
-	}
-}
+			Text(
+				text = "Enter your tag",
+				fontSize = 24.sp,
+				fontStyle = FontStyle.Normal,
+				fontFamily = SpaceGrotesk,
+				fontWeight = FontWeight.SemiBold,
+				color = MaterialTheme.colorScheme.onSurface,
+				modifier = Modifier
+					.padding(horizontal = 10.dp)
+					.padding(top = 8.dp)
+			)
+			TextField(
+				modifier = Modifier
+					.padding(horizontal = 8.dp)
+					.fillMaxWidth(),
+				value = text.value,
+				onValueChange = { text.value = it }
+			)
 
-@Preview
-@Composable
-fun preview(){
-	AudionauticaTheme {
-		LoadingDialog()
+			Text(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(horizontal = 12.dp)
+					.padding(top = 24.dp)
+					.clickable {
+						onAcceptRequest(text.value)
+					},
+				text = "OK",
+				textAlign = TextAlign.End,
+				fontSize = 20.sp,
+				fontFamily = SpaceGrotesk,
+			)
+		}
 	}
 }

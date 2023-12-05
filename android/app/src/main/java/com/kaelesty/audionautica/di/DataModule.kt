@@ -1,11 +1,9 @@
 package com.kaelesty.audionautica.di
 
 import android.app.Application
-import android.content.Context
 import com.kaelesty.audionautica.data.local.daos.PlaylistDao
 import com.kaelesty.audionautica.data.local.daos.TrackDao
-import com.kaelesty.audionautica.data.local.dbs.PlaylistDatabase
-import com.kaelesty.audionautica.data.local.dbs.TrackDatabase
+import com.kaelesty.audionautica.data.local.dbs.MusicDatabase
 import com.kaelesty.audionautica.data.remote.api.AccessApiService
 import com.kaelesty.audionautica.data.remote.api.ApiServiceFactory
 import com.kaelesty.audionautica.data.remote.api.MusicApiService
@@ -30,14 +28,14 @@ class DataModule {
 
 	@Provides
 	@ApplicationScope
-	fun provideTrackDao(db: TrackDatabase): TrackDao {
-		return db.dao()
+	fun provideTrackDao(db: MusicDatabase): TrackDao {
+		return db.trackDao()
 	}
 
 	@Provides
 	@ApplicationScope
-	fun providePlaylistDao(db: PlaylistDatabase): PlaylistDao {
-		return db.dao()
+	fun providePlaylistDao(db: MusicDatabase): PlaylistDao {
+		return db.playlistDao()
 	}
 
 	@Provides

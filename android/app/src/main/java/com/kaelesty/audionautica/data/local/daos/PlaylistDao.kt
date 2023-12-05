@@ -14,9 +14,13 @@ interface PlaylistDao {
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
 	fun createPlaylist(playlist: PlaylistDbModel)
 
-	@Query("SELECT * FROM playlists")
+	@Insert(onConflict = OnConflictStrategy.IGNORE)
+	fun createPlaylistWithoutReplacing(playlist: PlaylistDbModel)
+
+	@Query("SELECT * FROM `playlists-`")
 	fun getAll(): LiveData<List<PlaylistDbModel>>
 
-	@Query("SELECT * from playlists WHERE id= :playlistId")
+	@Query("SELECT * from `playlists-` WHERE id= :playlistId")
 	fun getPlaylist(playlistId: Int): PlaylistDbModel
+
 }
