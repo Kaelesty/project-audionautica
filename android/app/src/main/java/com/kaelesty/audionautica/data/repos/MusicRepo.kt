@@ -62,9 +62,15 @@ class MusicRepo @Inject constructor(
 
 	private val scope = CoroutineScope(Dispatchers.IO)
 
+	private var skipPlayingEnded = false
+
 	init {
 		scope.launch {
 			playingEndedFlow.collect {
+				if (skipPlayingEnded) {
+					skipPlayingEnded = false
+					return@collect
+				}
 				Log.d("AudionauticaTag1", "PlayingEnded!")
 				queueCursor += 1
 				if (queueCursor < trackQueue.size) {
@@ -73,6 +79,23 @@ class MusicRepo @Inject constructor(
 					)
 				}
 			}
+		}
+	}
+
+	override suspend fun playNext() {
+		queueCursor += 1
+		Log.d("AudionauticaTag", "Now cursor is $queueCursor")
+		if (queueCursor >= 0 && queueCursor < trackQueue.size) {
+			playingTrackFlow.emit(trackQueue[queueCursor])
+			skipPlayingEnded = true
+		}
+	}
+
+	override suspend fun playPrev() {
+		queueCursor -= 1
+		if (queueCursor >= 0 && queueCursor < trackQueue.size) {
+			playingTrackFlow.emit(trackQueue[queueCursor])
+			skipPlayingEnded = true
 		}
 	}
 
@@ -109,7 +132,6 @@ class MusicRepo @Inject constructor(
 			input = body.byteStream()
 			val fileName = "/$id.mp3"
 			val pathWhereYouWantToSaveFile = application.filesDir.absolutePath + fileName
-			Log.e("MusicViewModel", application.filesDir.absolutePath)
 			val fos = FileOutputStream(pathWhereYouWantToSaveFile)
 			fos.use { output ->
 				val buffer = ByteArray(4 * 1024)
@@ -126,6 +148,12 @@ class MusicRepo @Inject constructor(
 		} finally {
 			input?.close()
 		}
+	}
+
+	fun deleteTrackFile(trackId: Int) {
+		val fileName = "/$trackId.mp3"
+		val filepath = application.filesDir.absolutePath + fileName
+		File(filepath).delete()
 	}
 
 	override suspend fun addTrack(track: TrackExp) {
@@ -201,10 +229,12 @@ class MusicRepo @Inject constructor(
 	override suspend fun addToTracksQueue(track: List<Track>) {
 		trackQueue = track
 		queueCursor = 0
+		Log.d("AudionauticaTag", "Cursor dropped!")
 		playingTrackFlow.emit(
 			trackQueue[queueCursor]
 		)
 	}
+
 
 	override suspend fun getTrackUri(id: Int): Uri {
 
@@ -291,5 +321,31 @@ class MusicRepo @Inject constructor(
 	override suspend fun deletePlaylist(playlistId: Int) {
 		playlistDao.deletePlaylist(playlistId)
 		Log.d("AudionauticaTag", "deleting playlist $playlistId")
+	}
+
+	override suspend fun saveTrack(track: Track) {
+		trackDao.createTrack(
+			trackMapper.domainToDbModel(track)
+		)
+		downloadTrack(track.id)
+	}
+
+	override suspend fun deleteTrack(track: Track) {
+		trackDao.deleteTrack(track.id)
+		deleteTrackFile(trackId = track.id)
+		val playlists = playlistDao.getAll().value?: return
+
+		playlists.forEach { playlist ->
+			if (track.id in playlist.trackIds) {
+				val newPlaylist = Playlist(
+					id = playlist.id!!, // playlist is taken from db so its id definitely cant be null
+					title = playlist.title,
+					trackIds = playlist.trackIds.toMutableList().apply {
+						remove(track.id)
+					}
+				)
+				playlistDao.createPlaylist(playlist)
+			}
+		}
 	}
 }

@@ -1,21 +1,21 @@
+@file:JvmName("TrackCardKt")
+
 package com.kaelesty.audionautica.presentation.composables.music
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -25,25 +25,23 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kaelesty.audionautica.R
-import com.kaelesty.audionautica.domain.entities.TrackInfo
+import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.presentation.ui.fonts.SpaceGrotesk
 import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
 
 @Composable
 fun TrackCard(
-	onPlay: (() -> Unit)? = null,
-	onPause: (() -> Unit)? = null,
-	onStop: (() -> Unit)? = null,
-) {
+	track: Track,
+	onClick: (Track) -> Unit,
+	onAdd: (Track) -> Unit,
+	onSecondary: ((Track) -> Unit)? = {}, // Secondary action is different in Search and Library screens therefore it called Secondary
+	secondaryIcon: Int,
+	) {
 	Card(
 		colors = CardDefaults.cardColors(
 			containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
@@ -51,95 +49,109 @@ fun TrackCard(
 		modifier = Modifier
 			.fillMaxWidth()
 			.padding(8.dp)
+			.clickable {
+				onClick(track)
+			}
 	) {
-		Column(
+		Row(
 			modifier = Modifier
-				.align(Alignment.CenterHorizontally)
-				.fillMaxWidth()
+				.padding(
+					horizontal = 4.dp,
+					vertical = 4.dp
+				),
+			verticalAlignment = Alignment.CenterVertically
 		) {
-			Box(
+			Spacer(Modifier.width(12.dp))
+			Column(
 				modifier = Modifier
-					.fillMaxWidth()
-					.size(350.dp)
-					.padding(12.dp)
-				,
-				contentAlignment = Alignment.Center
+					.align(Alignment.CenterVertically)
+					.weight(1f)
 			) {
-				Image(
-					painter = painterResource(id = R.drawable.example_track_poster_2),
-					contentDescription = "Track Poster",
-					contentScale = ContentScale.Crop,
+				Text(
+					text = track.title,
+					fontFamily = SpaceGrotesk,
+					fontWeight = FontWeight.ExtraBold,
+					fontSize = 24.sp,
 					modifier = Modifier
-						.size(350.dp)
-						.clip(RoundedCornerShape(12.dp))
-						,
+						.fillMaxWidth()
+				)
+				Text(
+					text = track.artist,
+					fontFamily = SpaceGrotesk,
+					fontWeight = FontWeight.Normal,
+					fontSize = 16.sp,
+					modifier = Modifier
+						.fillMaxWidth()
+				)
+				Spacer(Modifier.height(4.dp))
+				Row(
+					modifier = Modifier
+						.height(30.dp)
+						.fillMaxWidth()
+				) {
+					track.tags.forEach { tag ->
+						Box(
+							modifier = Modifier
+								.background(
+									color = MaterialTheme.colorScheme.surfaceVariant,
+									shape = RoundedCornerShape(10.dp)
+								)
+						) {
+							Text(
+								text = tag,
+								fontFamily = SpaceGrotesk,
+								fontWeight = FontWeight.Light,
+								fontSize = 12.sp,
+								modifier = Modifier
+									.padding(4.dp)
+							)
+						}
+						Spacer(Modifier.width(2.dp))
+					}
+				}
+			}
+			Spacer(Modifier.width(12.dp))
+			IconButton(
+				onClick = { onAdd(track) },
+				modifier = Modifier
+					.size(40.dp)
+			) {
+				Icon(
+					painterResource(id = android.R.drawable.ic_input_add),
+					contentDescription = null,
+					modifier = Modifier
+						.fillMaxSize()
 				)
 			}
-			Text(
-				text = "Akeboshi",
-				fontFamily = SpaceGrotesk,
-				fontWeight = FontWeight.Bold,
-				fontSize = 30.sp,
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(horizontal = 12.dp)
-			)
-			Text(
-				text = "re:Tye",
-				fontFamily = SpaceGrotesk,
-				fontWeight = FontWeight.Bold,
-				fontSize = 20.sp,
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(horizontal = 12.dp)
-			)
-			Row(
-				modifier = Modifier
-					.padding(12.dp)
-					.fillMaxWidth(),
-				horizontalArrangement = Arrangement.Center,
-			) {
+
+			onSecondary?.let {
 				IconButton(
-					onClick = { onPlay?.let { it() } },
-					Modifier.padding(6.dp)
+					onClick = { it(track) },
+					modifier = Modifier
+						.size(40.dp)
 				) {
 					Icon(
-						painter = painterResource(
-							id = com.google.android.exoplayer2.R.drawable.exo_controls_play
-						),
-						contentDescription = "Play button",
-						modifier = Modifier.background(
-							color = MaterialTheme.colorScheme.primaryContainer,
-							shape = CircleShape
-						),
-						tint = MaterialTheme.colorScheme.onSurface
-					)
-				}
-				IconButton(
-					onClick = { onPause?.let { it() } },
-					Modifier.padding(6.dp)
-				) {
-					Icon(
-						painter = painterResource(
-							id = com.google.android.exoplayer2.R.drawable.exo_controls_pause
-						),
-						contentDescription = "Pause button",
-						modifier = Modifier.background(
-							color = MaterialTheme.colorScheme.primaryContainer,
-							shape = CircleShape
-						),
-						tint = MaterialTheme.colorScheme.onSurface
+						painterResource(id = secondaryIcon),
+						contentDescription = null,
+						modifier = Modifier
+							.fillMaxSize(),
 					)
 				}
 			}
+			Spacer(Modifier.width(12.dp))
 		}
 	}
 }
 
 @Preview
 @Composable
-fun TrackCardPreview() {
+fun TrackSearchResultPreview() {
 	AudionauticaTheme {
-		TrackCard()
+		TrackCard(track = Track(
+			id = 1,
+			title = "Akeboshi",
+			artist = "re:Tye",
+			tags = listOf("Rock!", "Demon Slayer", "Cover")
+		), {}, {}, {}, android.R.drawable.ic_menu_save)
 	}
 }

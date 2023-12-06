@@ -60,9 +60,8 @@ class MusicPlayerService : Service() {
 	val CHANNEL_ID = "MusicPlayerService"
 	val CHANNEL_NAME = "MusicPlayerService"
 
-	val scope = CoroutineScope(Dispatchers.IO)
 
-	var playerdFlag = false
+	val scope = CoroutineScope(Dispatchers.IO)
 
 	val metadataBuilder = MediaMetadata.Builder()
 	val stateBuilder = PlaybackState
@@ -78,14 +77,13 @@ class MusicPlayerService : Service() {
 
 	lateinit var mediaSession: MediaSession
 
+	private var nullTrack = true
+
 	@Inject lateinit var getTrackQueueUseCase: GetTrackQueueUseCase
 	@Inject lateinit var getTrackUriUseCase: GetTrackUriUseCase
 
 	@Inject lateinit var getPlayingEndedFlowUseCase: GetPlayingEndedFlowUseCase
 	@Inject lateinit var getPlayingTrackFlowUseCase: GetPlayingTrackFlowUseCase
-
-	private val dropQueueFlow = MutableSharedFlow<Unit>()
-	private val addMediaItemFlow = MutableSharedFlow<Track>()
 
 	private val audioFocusChangeListener: OnAudioFocusChangeListener = object: OnAudioFocusChangeListener {
 		override fun onAudioFocusChange(focusChange: Int) {
@@ -175,16 +173,9 @@ class MusicPlayerService : Service() {
 							Log.d("AudionauticaTag1", "STATE_IDLE")
 						}
 					}
-//					mediaSession.setPlaybackState(
-//						stateBuilder.setState(
-//							playbackState,
-//							PlaybackState.PLAYBACK_POSITION_UNKNOWN, 1F
-//						).build()
-//					)
 
 					if (playbackState == ExoPlayer.STATE_ENDED) {
 						scope.launch {
-							delay(500)
 							getPlayingEndedFlowUseCase().emit(Unit)
 						}
 					}
@@ -195,14 +186,29 @@ class MusicPlayerService : Service() {
 		scope.launch(Dispatchers.Main) {
 			getPlayingTrackFlowUseCase().collect {
 				Log.d("AudionauticaTag1", "Player received new track: ${it.title}")
+				if (it.id == -1) {
+					if (nullTrack) {
+						return@collect
+					}
+					else {
+						nullTrack = true
+					}
+				}
+				else {
+					nullTrack = false
+				}
 				player.clearMediaItems()
-				player.addMediaItem(MediaItem.fromUri(
-					getTrackUriUseCase(it.id)
-				))
+				if (it.id != -1) {
+					player.addMediaItem(MediaItem.fromUri(
+						getTrackUriUseCase(it.id)
+					))
+				}
 				mediaSessionCallback.onPlay()
 				val metadata = metadataBuilder
 					.putString(MediaMetadata.METADATA_KEY_TITLE, it.title)
 					.putString(MediaMetadata.METADATA_KEY_ARTIST, it.artist)
+					.putLong(CUSTOM_METADATA_KEY_ID, it.id.toLong())
+					.putString(CUSTOM_METADATA_KEY_TAGS, it.tags.joinToString(CUSTOM_METADATA_TAGS_DELIMITER))
 					.build()
 				mediaSession.setMetadata(metadata)
 			}
@@ -267,6 +273,10 @@ class MusicPlayerService : Service() {
 		fun newIntent(connext: Context): Intent {
 			return Intent(connext, MusicPlayerService::class.java)
 		}
+
+		val CUSTOM_METADATA_KEY_ID = "__id__"
+		val CUSTOM_METADATA_KEY_TAGS = "__tags__"
+		val CUSTOM_METADATA_TAGS_DELIMITER = "%"
 	}
 
 	class MusicPlayerServiceBinder(

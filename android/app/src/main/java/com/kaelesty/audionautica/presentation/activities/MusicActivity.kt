@@ -50,7 +50,7 @@ class MusicActivity : ComponentActivity() {
 		component.inject(this)
 
 		var playerMediaController: MediaController? = null
-		var binder: IBinder? = null
+		var binder: IBinder?
 
 		serviceConn = object : ServiceConnection {
 
@@ -75,14 +75,20 @@ class MusicActivity : ComponentActivity() {
 
 							override fun onMetadataChanged(metadata: MediaMetadata?) {
 								super.onMetadataChanged(metadata)
-								val track = Track(
-									-1,
-									metadata?.getString(MediaMetadata.METADATA_KEY_TITLE) ?: return,
-									metadata.getString(MediaMetadata.METADATA_KEY_ARTIST) ?: return,
-									listOf()
-								)
-								scope.launch {
-									trackFlow.emit(track)
+								try {
+									val track = Track(
+										metadata?.getLong(MusicPlayerService.CUSTOM_METADATA_KEY_ID)?.toInt() ?: throw RuntimeException("Metadata id not found"),
+										metadata.getString(MediaMetadata.METADATA_KEY_TITLE),
+										metadata.getString(MediaMetadata.METADATA_KEY_ARTIST),
+										metadata.getString(MusicPlayerService.CUSTOM_METADATA_KEY_TAGS)
+											.split(MusicPlayerService.CUSTOM_METADATA_TAGS_DELIMITER)
+									)
+									scope.launch {
+										trackFlow.emit(track)
+									}
+								}
+								catch (e: RuntimeException) {
+									Log.d("AudionauticaTag", e.message ?: "no message")
 								}
 							}
 						}
@@ -141,7 +147,21 @@ class MusicActivity : ComponentActivity() {
 					},
 					onDeletePlaylist = {
 						viewModel.deletePlaylist(it)
-					}
+					},
+					onDeleteTrack = {
+						viewModel.deleteTrack(it)
+					},
+					onSaveTrack = {
+						viewModel.saveTrack(it)
+					},
+					libraryTracks = viewModel.getAllTracks(),
+					onPrev = {
+						viewModel.playPrev()
+					},
+					onNext = {
+						viewModel.playNext()
+					},
+					offlineMode = isOffline
 				)
 			}
 		}

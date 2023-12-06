@@ -19,6 +19,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.FavoriteBorder
@@ -50,50 +52,29 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.datastore.preferences.protobuf.Internal.BooleanList
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.kaelesty.audionautica.R
 import com.kaelesty.audionautica.domain.entities.Playlist
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.presentation.composables.dialogues.AddTrackToPlalistDialog
 import com.kaelesty.audionautica.presentation.composables.access.GradientCard
+import com.kaelesty.audionautica.presentation.composables.dialogues.ConfirmTrackDeleteDialog
 import com.kaelesty.audionautica.presentation.composables.dialogues.EditPlaylistDialog
 import com.kaelesty.audionautica.presentation.composables.dialogues.MinimalDialog
 import com.kaelesty.audionautica.presentation.ui.fonts.SpaceGrotesk
-import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-
-//@Preview
-//@Composable
-//fun MusicScreenPreview() {
-//	AudionauticaTheme {
-//		MusicScreen(
-//			onPlay = {},
-//			onPause = { },
-//			onResume = { },
-//			onSearch = {},
-//			onAddTrackToPlaylist = { track, id -> },
-//			onRemoveTrackFromPlaylist = { track, id -> },
-//			tracksSearchResults = MutableLiveData(),
-//			playingFlow = MutableSharedFlow(),
-//			trackFlow = MutableSharedFlow(),
-//			onRequestTrackCreation = {},
-//			playlistsLiveData = MutableLiveData(),
-//			getPlaylistTracks = { MutableLiveData() },
-//		)
-//	}
-//}
 
 @Composable
 fun MusicScreen(
 	onPlay: (Track) -> Unit,
 	onPause: () -> Unit,
 	onResume: () -> Unit,
+	onNext: () -> Unit,
+	onPrev: () -> Unit,
 	onSearch: (String) -> Unit,
 	onAddTrackToPlaylist: (Track, Int) -> Unit,
 	onRemoveTrackFromPlaylist: (Track, Int) -> Unit,
@@ -106,11 +87,26 @@ fun MusicScreen(
 	onDeleteTrackFromPlaylist: (Track, Int) -> Unit,
 	onCreatePlaylist: (Playlist) -> Unit,
 	onDeletePlaylist: (Int) -> Unit,
-	onPlayPlaylist: (Int) -> Unit
+	onPlayPlaylist: (Int) -> Unit,
+	libraryTracks: LiveData<List<Track>>,
+	onSaveTrack: (Track) -> Unit,
+	onDeleteTrack: (Track) -> Unit,
+	offlineMode: Boolean
 ) {
 
+	var pausedTrackId = rememberSaveable {
+		mutableStateOf(-1)
+	}
+
 	val mode = rememberSaveable {
-		mutableStateOf(MusicScreenMode.SEARCH)
+		mutableStateOf(
+			if (!offlineMode) {
+				MusicScreenMode.SEARCH
+			}
+			else {
+				MusicScreenMode.PLAYLISTS
+			}
+		)
 	}
 
 	val systemUiController = rememberSystemUiController()
@@ -161,7 +157,7 @@ fun MusicScreen(
 				createPlaylistDialog.value = null
 				onCreatePlaylist(
 					Playlist(
-						id = -1,
+						id = - 1,
 						title = it,
 						trackIds = listOf()
 					)
@@ -183,9 +179,12 @@ fun MusicScreen(
 					onResume = { onResume() },
 					onPause = { onPause() },
 					playingFlow = playingFlow,
-					trackFlow = trackFlow
+					trackFlow = trackFlow,
+					pausedTrackId = pausedTrackId,
+					onNext = onNext,
+					onPrev = onPrev,
 				)
-				MusicNavigationBar(mode)
+				MusicNavigationBar(mode, offlineMode)
 			}
 		},
 	) {
@@ -207,7 +206,12 @@ fun MusicScreen(
 				onPause = onPause,
 				onAddTrackToPlaylist = onAddTrackToPlaylist,
 				playingFlow = playingFlow,
-				selectPlaylistDialog = selectPlaylistDialog
+				selectPlaylistDialog = selectPlaylistDialog,
+				onSaveTrack = onSaveTrack,
+				libraryTracksLD = libraryTracks,
+				trackFlow = trackFlow,
+				pausedTrackId = pausedTrackId,
+				onResume = onResume
 			)
 
 			MusicScreenMode.PLAYLISTS -> Playlists(
@@ -219,7 +223,17 @@ fun MusicScreen(
 			)
 
 			MusicScreenMode.MY_TRACKS -> MyTracks(
-				onCreateTrack = { onRequestTrackCreation() }
+				onCreateTrack = { onRequestTrackCreation() },
+				libraryTracks = libraryTracks,
+				onDeleteTrack = onDeleteTrack,
+				onPause = onPause,
+				onPlay = onPlay,
+				playingFlow = playingFlow,
+				selectPlaylistDialog = selectPlaylistDialog,
+				trackFlow = trackFlow,
+				pausedTrackId = pausedTrackId,
+				onResume = onResume,
+				offlineMode = offlineMode
 			)
 		}
 	}
@@ -296,8 +310,8 @@ fun Playlists(
 	Row(
 		modifier = Modifier
 			.fillMaxSize()
-			.padding(bottom = 172.dp, end = 12.dp)
-		// 172.dp to make position equals with button of MyTracks
+			.padding(bottom = 192.dp, end = 12.dp)
+		// 192.dp to make position equals with button of MyTracks
 		,
 		verticalAlignment = Alignment.Bottom
 	) {
@@ -323,30 +337,99 @@ fun Playlists(
 
 @Composable
 fun MyTracks(
-	onCreateTrack: () -> Unit
+	onCreateTrack: () -> Unit,
+	libraryTracks: LiveData<List<Track>>,
+	playingFlow: SharedFlow<Boolean>,
+	onPause: () -> Unit,
+	onPlay: (Track) -> Unit,
+	selectPlaylistDialog: MutableState<Track?>,
+	onDeleteTrack: (Track) -> Unit,
+	trackFlow: SharedFlow<Track>,
+	pausedTrackId: MutableState<Int>,
+	onResume: () -> Unit,
+	offlineMode: Boolean
 ) {
-	Column(
-		modifier = Modifier
-			.fillMaxSize()
-			.padding(12.dp),
-		horizontalAlignment = Alignment.End
-	) {
-		Spacer(Modifier.weight(1f))
-		IconButton(
-			onClick = { onCreateTrack() },
-			modifier = Modifier
-				.background(
-					color = MaterialTheme.colorScheme.surface,
-					shape = RoundedCornerShape(4.dp)
-				)
 
-		) {
-			Icon(
-				imageVector = Icons.Filled.Add,
-				contentDescription = null
-			)
+	val tracks by libraryTracks.observeAsState(initial = listOf())
+	val playing by playingFlow.collectAsState(initial = false)
+
+	val track by trackFlow.collectAsState(initial = Track(- 1, "", "", listOf()))
+
+	var deleteTrackDialog by rememberSaveable {
+		mutableStateOf<Track?>(null)
+	}
+
+	deleteTrackDialog?.let { trackToDelete ->
+		ConfirmTrackDeleteDialog(
+			onAcceptRequest = {
+				deleteTrackDialog = null
+				onDeleteTrack(it)
+			},
+			onDismissRequest = { deleteTrackDialog = null },
+			track = trackToDelete
+		)
+	}
+
+	LazyColumn(
+		modifier = Modifier.fillMaxSize(),
+		content = {
+			items(tracks) { track ->
+				TrackCard(
+					track = track,
+					onClick = { clickedTrack ->
+						if (playing) {
+							if (track.id == clickedTrack.id) {
+								onPause()
+								pausedTrackId.value = track.id
+							}
+							else {
+								onPlay(clickedTrack)
+							}
+						} else {
+							if (pausedTrackId.value == clickedTrack.id) {
+								onResume()
+							}
+							else {
+								onPlay(clickedTrack)
+							}
+						}
+					},
+					onAdd = {
+						selectPlaylistDialog.value = it
+					},
+					onSecondary = {
+						deleteTrackDialog = it
+					},
+					secondaryIcon = android.R.drawable.ic_menu_delete
+				)
+			}
 		}
-		Spacer(Modifier.height(160.dp))
+	)
+
+	if (!offlineMode) {
+		Column(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(12.dp),
+			horizontalAlignment = Alignment.End
+		) {
+			Spacer(Modifier.weight(1f))
+			IconButton(
+				onClick = { onCreateTrack() },
+				modifier = Modifier
+					.background(
+						color = MaterialTheme.colorScheme.surface,
+						shape = RoundedCornerShape(4.dp)
+					)
+
+			) {
+				Icon(
+					imageVector = Icons.Filled.Add,
+					contentDescription = null
+				)
+			}
+			Spacer(Modifier.height(180.dp))
+		}
 	}
 }
 
@@ -359,10 +442,19 @@ fun Search(
 	onPause: () -> Unit,
 	onAddTrackToPlaylist: (Track, Int) -> Unit,
 	playingFlow: SharedFlow<Boolean>,
-	selectPlaylistDialog: MutableState<Track?>
+	selectPlaylistDialog: MutableState<Track?>,
+	onSaveTrack: (Track) -> Unit,
+	libraryTracksLD: LiveData<List<Track>>,
+	trackFlow: SharedFlow<Track>,
+	pausedTrackId: MutableState<Int>,
+	onResume: () -> Unit,
 ) {
 	val tracks by tracksSearchResults.observeAsState(listOf())
 	val playing by playingFlow.collectAsState(initial = false)
+
+	val libraryTracks by libraryTracksLD.observeAsState(initial = listOf())
+
+	val track by trackFlow.collectAsState(initial = Track(- 1, "", "", listOf()))
 
 	LazyColumn(
 		modifier = Modifier
@@ -370,18 +462,35 @@ fun Search(
 		content = {
 			stickyHeader { MusicSearchBar(onSearch) }
 			items(tracks, key = { it.id }) {
-				TrackSearchResult(
+				TrackCard(
 					track = it,
-					onClick = { track ->
+					onClick = { clickedTrack ->
 						if (playing) {
-							onPause()
+							if (track.id == clickedTrack.id) {
+								onPause()
+								pausedTrackId.value = track.id
+							}
+							else {
+								onPlay(clickedTrack)
+							}
 						} else {
-							onPlay(it)
+							if (pausedTrackId.value == clickedTrack.id) {
+								onResume()
+							}
+							else {
+								onPlay(clickedTrack)
+							}
 						}
 					},
 					onAdd = {
 						selectPlaylistDialog.value = it
-					}
+					},
+					onSecondary = if (it !in libraryTracks) {
+						{ onSaveTrack(it) }
+					} else {
+						null
+					},
+					secondaryIcon = android.R.drawable.ic_menu_save
 				)
 			}
 			item {
@@ -396,8 +505,11 @@ fun Search(
 fun PlayerBar(
 	onResume: () -> Unit,
 	onPause: () -> Unit,
+	onNext: () -> Unit,
+	onPrev: () -> Unit,
 	playingFlow: SharedFlow<Boolean>,
-	trackFlow: SharedFlow<Track>
+	trackFlow: SharedFlow<Track>,
+	pausedTrackId: MutableState<Int>
 ) {
 
 	val playing by playingFlow.collectAsState(initial = false)
@@ -406,7 +518,8 @@ fun PlayerBar(
 		Row(
 			modifier = Modifier
 				.fillMaxWidth()
-				.padding(horizontal = 6.dp, vertical = 4.dp)
+				.padding(horizontal = 6.dp, vertical = 4.dp),
+			verticalAlignment = Alignment.CenterVertically
 		) {
 			Text(
 				text = track.title + " - " + track.artist,
@@ -417,16 +530,39 @@ fun PlayerBar(
 					.weight(1f)
 			)
 			Icon(
+				imageVector = Icons.Filled.ArrowBack,
+				contentDescription = null,
+				modifier = Modifier
+					.clickable {
+						onPrev()
+					}
+					.size(45.dp)
+					.padding(horizontal = 8.dp)
+			)
+			Icon(
+				imageVector = Icons.Filled.ArrowForward,
+				contentDescription = null,
+				modifier = Modifier
+					.clickable {
+						onNext()
+					}
+					.size(45.dp)
+					.padding(horizontal = 8.dp)
+			)
+			Icon(
 				imageVector = if (! playing) Icons.Outlined.PlayArrow else Icons.Outlined.Clear,
 				contentDescription = null,
 				modifier = Modifier
 					.clickable {
 						if (playing) {
 							onPause()
+							pausedTrackId.value = track.id
 						} else {
 							onResume()
 						}
 					}
+					.size(45.dp)
+					.padding(horizontal = 8.dp)
 			)
 		}
 	}
@@ -464,11 +600,18 @@ fun MusicSearchBar(
 }
 
 @Composable
-fun MusicNavigationBar(mode: MutableState<MusicScreenMode>) {
+fun MusicNavigationBar(
+	mode: MutableState<MusicScreenMode>,
+	offlineMode: Boolean
+) {
 	var selectedItem by rememberSaveable {
 		mutableStateOf(0)
 	}
-	val items = listOf("Search", "Playlists", "My Tracks")
+	val items = if (!offlineMode) {
+		listOf("Search", "Playlists", "My Tracks")
+	} else {
+		listOf("Playlists", "My Tracks")
+	}
 
 	NavigationBar(
 		containerColor = Color.Transparent,
@@ -481,17 +624,30 @@ fun MusicNavigationBar(mode: MutableState<MusicScreenMode>) {
 						selected = selectedItem == index,
 						onClick = {
 							selectedItem = index
-							when (index) {
-								0 -> {
-									mode.value = MusicScreenMode.SEARCH
-								}
+							if (!offlineMode) {
+								when (index) {
+									0 -> {
+										mode.value = MusicScreenMode.SEARCH
+									}
 
-								1 -> {
-									mode.value = MusicScreenMode.PLAYLISTS
-								}
+									1 -> {
+										mode.value = MusicScreenMode.PLAYLISTS
+									}
 
-								2 -> {
-									mode.value = MusicScreenMode.MY_TRACKS
+									2 -> {
+										mode.value = MusicScreenMode.MY_TRACKS
+									}
+								}
+							}
+							else {
+								when (index) {
+									0 -> {
+										mode.value = MusicScreenMode.PLAYLISTS
+									}
+
+									1 -> {
+										mode.value = MusicScreenMode.MY_TRACKS
+									}
 								}
 							}
 						},

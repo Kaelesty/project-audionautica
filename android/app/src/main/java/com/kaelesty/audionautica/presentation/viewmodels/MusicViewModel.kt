@@ -14,9 +14,13 @@ import com.kaelesty.audionautica.domain.usecases.AddTrackToPlaylistUseCase
 import com.kaelesty.audionautica.domain.usecases.CreatePlaylistUseCase
 import com.kaelesty.audionautica.domain.usecases.DeletePlaylistUseCase
 import com.kaelesty.audionautica.domain.usecases.DeleteTrackFromPlaylistUseCase
+import com.kaelesty.audionautica.domain.usecases.DeleteTrackUseCase
 import com.kaelesty.audionautica.domain.usecases.GetAllPlaylistsUseCase
 import com.kaelesty.audionautica.domain.usecases.GetAllTracksUseCase
 import com.kaelesty.audionautica.domain.usecases.GetPlaylistTracksUseCase
+import com.kaelesty.audionautica.domain.usecases.PlayNextUseCase
+import com.kaelesty.audionautica.domain.usecases.PlayPrevUseCase
+import com.kaelesty.audionautica.domain.usecases.SaveTrackUseCase
 import com.kaelesty.audionautica.domain.usecases.SearchTracksUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -34,6 +38,10 @@ class MusicViewModel @Inject constructor(
 	private val createPlaylistUseCase: CreatePlaylistUseCase,
 	private val getAllTracksUseCase: GetAllTracksUseCase,
 	private val deletePlaylistUseCase: DeletePlaylistUseCase,
+	private val saveTrackUseCase: SaveTrackUseCase,
+	private val deleteTrackUseCase: DeleteTrackUseCase,
+	private val playNextUseCase: PlayNextUseCase,
+	private val playPrevUseCase: PlayPrevUseCase,
 ): ViewModel() {
 
 	private val _tracksSearchResults = MutableLiveData<List<Track>>()
@@ -105,5 +113,29 @@ class MusicViewModel @Inject constructor(
 
 	fun getAllTracks(): LiveData<List<Track>> {
 		return getAllTracksUseCase()
+	}
+
+	fun saveTrack(track: Track) {
+		viewModelScope.launch(Dispatchers.IO) {
+			saveTrackUseCase(track)
+		}
+	}
+
+	fun deleteTrack(track: Track) {
+		viewModelScope.launch(Dispatchers.IO) {
+			deleteTrackUseCase(track)
+		}
+	}
+
+	fun playNext() {
+		viewModelScope.launch(Dispatchers.IO) {
+			playNextUseCase()
+		}
+	}
+
+	fun playPrev() {
+		viewModelScope.launch(Dispatchers.IO) {
+			playPrevUseCase()
+		}
 	}
 }

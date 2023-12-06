@@ -22,4 +22,7 @@ interface TrackDao {
 
 	@Query("SELECT * FROM `tracks-` WHERE id IN (:ids)")
 	fun getById(ids: List<Int>): List<TrackDbModel>
+
+	@Query("DELETE FROM `tracks-`WHERE id = :id")
+	fun deleteTrack(id: Int)
 }

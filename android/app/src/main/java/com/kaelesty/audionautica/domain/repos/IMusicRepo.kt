@@ -43,4 +43,12 @@ interface IMusicRepo {
 	fun getPlayingTrackFlow(): SharedFlow<Track>
 
 	fun getPlayingEndedFlow(): MutableSharedFlow<Unit>
+
+	suspend fun saveTrack(track: Track)
+
+	suspend fun deleteTrack(track: Track)
+
+	suspend fun playNext()
+
+	suspend fun playPrev()
 }
