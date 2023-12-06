@@ -111,7 +111,6 @@ class MusicActivity : ComponentActivity() {
 					onSearch = { query -> viewModel.search(query) },
 					onPlay = { track ->
 						viewModel.playTrack(track)
-						playerMediaController?.transportControls?.play()
 					},
 					onPause = {
 						viewModel.pause()
@@ -137,6 +136,9 @@ class MusicActivity : ComponentActivity() {
 					onDeleteTrackFromPlaylist = { track, playlistId ->
 						viewModel.removeTrackFromPlaylist(track, playlistId)
 					},
+					onPlayPlaylist = {
+						viewModel.playPlaylist(it)
+					}
 				)
 			}
 		}

@@ -103,6 +103,7 @@ fun MusicScreen(
 	getPlaylistTracks: (Int) -> List<Track>,
 	onDeleteTrackFromPlaylist: (Track, Int) -> Unit,
 	createPlaylist: (Playlist) -> Unit,
+	onPlayPlaylist: (Int) -> Unit
 ) {
 
 	val mode = rememberSaveable {
@@ -185,7 +186,7 @@ fun MusicScreen(
 			MusicScreenMode.PLAYLISTS -> Playlists(
 				playlistsLiveData =  playlistsLiveData,
 				editPlaylistDialog =  editPlaylistDialog,
-				onPlayPlaylist = {},
+				onPlayPlaylist = onPlayPlaylist,
 				onDeleteTrackFromPlaylist = onRemoveTrackFromPlaylist
 			)
 			MusicScreenMode.MY_TRACKS -> MyTracks(
@@ -328,7 +329,7 @@ fun Search(
 				)
 			}
 			item {
-				Spacer(modifier = Modifier.height(100.dp))
+				Spacer(modifier = Modifier.height(300.dp))
 			}
 		},
 
