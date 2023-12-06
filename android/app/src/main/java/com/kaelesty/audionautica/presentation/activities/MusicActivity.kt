@@ -130,7 +130,7 @@ class MusicActivity : ComponentActivity() {
 					onRemoveTrackFromPlaylist = { track, id ->
 						viewModel.removeTrackFromPlaylist(track, id)
 					},
-					createPlaylist = {
+					onCreatePlaylist = {
 						viewModel.createPlaylist(it)
 					},
 					onDeleteTrackFromPlaylist = { track, playlistId ->
@@ -138,6 +138,9 @@ class MusicActivity : ComponentActivity() {
 					},
 					onPlayPlaylist = {
 						viewModel.playPlaylist(it)
+					},
+					onDeletePlaylist = {
+						viewModel.deletePlaylist(it)
 					}
 				)
 			}

@@ -15,9 +15,6 @@ class ModifiedApplication: Application() {
 				Room.databaseBuilder(this, MusicDatabase::class.java, "playlistdb")
 					.allowMainThreadQueries()
 					.build()
-					.apply {
-					checkFavoritesCreated()
-				}
 			)
 	}
 }

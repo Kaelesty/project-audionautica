@@ -91,7 +91,7 @@ fun AddTrackScreen(
 					tags.add(it)
 					dialogState.value = false
 				},
-				onDimissRequest = { dialogState.value = false }
+				onDismissRequest = { dialogState.value = false }
 			)
 		}
 

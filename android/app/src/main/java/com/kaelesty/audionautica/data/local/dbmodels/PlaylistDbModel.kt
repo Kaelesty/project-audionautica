@@ -9,7 +9,7 @@ import com.kaelesty.audionautica.data.local.typeconverters.ListIntConverter
 	tableName = "playlists-"
 )
 class PlaylistDbModel(
-	@PrimaryKey val id: Int,
+	@PrimaryKey val id: Int?,
 	val title: String,
 	@field:TypeConverters(ListIntConverter::class) val trackIds: List<Int>
 )

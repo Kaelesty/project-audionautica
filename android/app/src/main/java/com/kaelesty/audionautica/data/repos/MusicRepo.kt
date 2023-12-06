@@ -287,4 +287,9 @@ class MusicRepo @Inject constructor(
 			playlistMapper.DomainToDbModel(playlist)
 		)
 	}
+
+	override suspend fun deletePlaylist(playlistId: Int) {
+		playlistDao.deletePlaylist(playlistId)
+		Log.d("AudionauticaTag", "deleting playlist $playlistId")
+	}
 }

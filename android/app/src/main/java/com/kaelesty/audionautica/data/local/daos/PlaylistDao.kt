@@ -23,4 +23,6 @@ interface PlaylistDao {
 	@Query("SELECT * from `playlists-` WHERE id= :playlistId")
 	fun getPlaylist(playlistId: Int): PlaylistDbModel
 
+	@Query("DELETE from `playlists-` WHERE id= :playlistId")
+	fun deletePlaylist(playlistId: Int)
 }

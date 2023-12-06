@@ -34,9 +34,10 @@ fun previewMinimalDialog() {
 @Composable
 fun MinimalDialog(
 	onAcceptRequest: (String) -> Unit,
-	onDimissRequest: () -> Unit,
+	onDismissRequest: () -> Unit,
+	title: String = "Enter your tag"
 	) {
-	Dialog({ onDimissRequest() }) {
+	Dialog({ onDismissRequest() }) {
 
 		val text = rememberSaveable {
 			mutableStateOf("")
@@ -50,7 +51,7 @@ fun MinimalDialog(
 			shape = RoundedCornerShape(16.dp),
 		) {
 			Text(
-				text = "Enter your tag",
+				text = title,
 				fontSize = 24.sp,
 				fontStyle = FontStyle.Normal,
 				fontFamily = SpaceGrotesk,

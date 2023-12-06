@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -61,6 +62,7 @@ import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.presentation.composables.dialogues.AddTrackToPlalistDialog
 import com.kaelesty.audionautica.presentation.composables.access.GradientCard
 import com.kaelesty.audionautica.presentation.composables.dialogues.EditPlaylistDialog
+import com.kaelesty.audionautica.presentation.composables.dialogues.MinimalDialog
 import com.kaelesty.audionautica.presentation.ui.fonts.SpaceGrotesk
 import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -102,7 +104,8 @@ fun MusicScreen(
 	playlistsLiveData: LiveData<List<Playlist>>,
 	getPlaylistTracks: (Int) -> List<Track>,
 	onDeleteTrackFromPlaylist: (Track, Int) -> Unit,
-	createPlaylist: (Playlist) -> Unit,
+	onCreatePlaylist: (Playlist) -> Unit,
+	onDeletePlaylist: (Int) -> Unit,
 	onPlayPlaylist: (Int) -> Unit
 ) {
 
@@ -121,6 +124,10 @@ fun MusicScreen(
 
 	val editPlaylistDialog = rememberSaveable {
 		mutableStateOf<Playlist?>(null)
+	}
+
+	val createPlaylistDialog = rememberSaveable {
+		mutableStateOf<Unit?>(null)
 	}
 
 	val playlists by playlistsLiveData.observeAsState(listOf())
@@ -144,6 +151,26 @@ fun MusicScreen(
 			playlist = playlist,
 			playlistTracks = getPlaylistTracks(playlist.id),
 			onDeleteTrackFromPlaylist = onDeleteTrackFromPlaylist,
+			onDeletePlaylist = onDeletePlaylist
+		)
+	}
+
+	createPlaylistDialog.value?.let {
+		MinimalDialog(
+			onAcceptRequest = {
+				createPlaylistDialog.value = null
+				onCreatePlaylist(
+					Playlist(
+						id = -1,
+						title = it,
+						trackIds = listOf()
+					)
+				)
+			},
+			onDismissRequest = {
+				createPlaylistDialog.value = null
+			},
+			title = "Enter playlist name"
 		)
 	}
 
@@ -184,11 +211,13 @@ fun MusicScreen(
 			)
 
 			MusicScreenMode.PLAYLISTS -> Playlists(
-				playlistsLiveData =  playlistsLiveData,
-				editPlaylistDialog =  editPlaylistDialog,
+				playlistsLiveData = playlistsLiveData,
+				editPlaylistDialog = editPlaylistDialog,
 				onPlayPlaylist = onPlayPlaylist,
-				onDeleteTrackFromPlaylist = onRemoveTrackFromPlaylist
+				onDeleteTrackFromPlaylist = onRemoveTrackFromPlaylist,
+				createPlaylistDialog = createPlaylistDialog
 			)
+
 			MusicScreenMode.MY_TRACKS -> MyTracks(
 				onCreateTrack = { onRequestTrackCreation() }
 			)
@@ -210,18 +239,21 @@ fun MusicScreen(
 //	}
 //}
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Playlists(
 	playlistsLiveData: LiveData<List<Playlist>>,
 	onPlayPlaylist: (Int) -> Unit = {},
-	onDeleteTrackFromPlaylist: (Track, Int) -> Unit = {track, id ->},
-	editPlaylistDialog: MutableState<Playlist?>
+	onDeleteTrackFromPlaylist: (Track, Int) -> Unit = { track, id -> },
+	editPlaylistDialog: MutableState<Playlist?>,
+	createPlaylistDialog: MutableState<Unit?>,
 ) {
 	val playlists by playlistsLiveData.observeAsState(listOf())
 
 	LazyColumn(
 		modifier = Modifier
-			.padding(12.dp),
+			.padding(12.dp)
+			.fillMaxHeight(),
 		content = {
 			itemsIndexed(playlists) { index, item ->
 				Card(
@@ -237,8 +269,7 @@ fun Playlists(
 				) {
 					Row(
 						modifier = Modifier
-							.padding(8.dp)
-							,
+							.padding(8.dp),
 						verticalAlignment = Alignment.CenterVertically
 					) {
 						Text(
@@ -262,6 +293,32 @@ fun Playlists(
 			}
 		}
 	)
+	Row(
+		modifier = Modifier
+			.fillMaxSize()
+			.padding(bottom = 172.dp, end = 12.dp)
+		// 172.dp to make position equals with button of MyTracks
+		,
+		verticalAlignment = Alignment.Bottom
+	) {
+		Spacer(Modifier.weight(1f))
+		IconButton(
+			onClick = {
+				createPlaylistDialog.value = Unit
+			},
+			modifier = Modifier
+				.background(
+					color = MaterialTheme.colorScheme.surface,
+					shape = RoundedCornerShape(4.dp)
+				)
+
+		) {
+			Icon(
+				imageVector = Icons.Filled.Add,
+				contentDescription = null
+			)
+		}
+	}
 }
 
 @Composable
@@ -271,8 +328,7 @@ fun MyTracks(
 	Column(
 		modifier = Modifier
 			.fillMaxSize()
-			.padding(12.dp)
-		,
+			.padding(12.dp),
 		horizontalAlignment = Alignment.End
 	) {
 		Spacer(Modifier.weight(1f))
@@ -345,7 +401,7 @@ fun PlayerBar(
 ) {
 
 	val playing by playingFlow.collectAsState(initial = false)
-	val track by trackFlow.collectAsState(initial = Track(-1, "", "", listOf()))
+	val track by trackFlow.collectAsState(initial = Track(- 1, "", "", listOf()))
 	GradientCard {
 		Row(
 			modifier = Modifier
@@ -361,7 +417,7 @@ fun PlayerBar(
 					.weight(1f)
 			)
 			Icon(
-				imageVector = if (!playing) Icons.Outlined.PlayArrow else Icons.Outlined.Clear,
+				imageVector = if (! playing) Icons.Outlined.PlayArrow else Icons.Outlined.Clear,
 				contentDescription = null,
 				modifier = Modifier
 					.clickable {

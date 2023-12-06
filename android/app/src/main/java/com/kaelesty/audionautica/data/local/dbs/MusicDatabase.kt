@@ -40,7 +40,7 @@ abstract class MusicDatabase() : RoomDatabase() {
 				dbSetupScope.launch {
 					createPlaylistWithoutReplacing(
 						PlaylistDbModel(
-							id = 0,
+							id = null,
 							title = "Favorites",
 							trackIds = listOf(),
 						)

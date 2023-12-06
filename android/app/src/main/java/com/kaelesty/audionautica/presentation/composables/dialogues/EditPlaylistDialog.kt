@@ -19,6 +19,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -50,16 +51,22 @@ import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
 import kotlinx.coroutines.flow.SharedFlow
 
 
-
 @Composable
 fun EditPlaylistDialog(
 	onDismissRequest: () -> Unit,
 	onDeleteTrackFromPlaylist: (Track, Int) -> Unit,
 	playlist: Playlist,
 	playlistTracks: List<Track>,
+
+	onDeletePlaylist: (Int) -> Unit
 ) {
 
 	val states = mutableListOf<MutableState<Track?>>()
+
+	// are buttons yes/no visible?
+	var deletePlaylistRequest by rememberSaveable {
+		mutableStateOf(false)
+	}
 
 	playlistTracks.forEach {
 		states.add(
@@ -100,7 +107,9 @@ fun EditPlaylistDialog(
 						itemNullable.value?.let { item ->
 							Card(
 								colors = CardDefaults.cardColors(
-									containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+									containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
+										alpha = 0.7f
+									)
 								),
 								modifier = Modifier
 									.fillMaxWidth()
@@ -108,8 +117,7 @@ fun EditPlaylistDialog(
 							) {
 								Row(
 									modifier = Modifier
-										.padding(8.dp)
-									,
+										.padding(8.dp),
 									verticalAlignment = Alignment.CenterVertically
 								) {
 									Text(
@@ -158,6 +166,66 @@ fun EditPlaylistDialog(
 //						}
 //				)
 //			}
+			if (!deletePlaylistRequest) {
+				OutlinedButton(
+					onClick = { deletePlaylistRequest = true },
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(12.dp)
+				) {
+					Text(
+						text = "Delete playlist",
+						fontSize = 18.sp,
+						fontStyle = FontStyle.Normal,
+						fontFamily = SpaceGrotesk,
+						fontWeight = FontWeight.Light,
+						color = MaterialTheme.colorScheme.onSurface,
+						modifier = Modifier
+							.padding(horizontal = 10.dp)
+							.padding(top = 8.dp, bottom = 8.dp)
+					)
+				}
+			} else {
+				Row(
+					modifier = Modifier.fillMaxWidth().padding(12.dp)
+				) {
+					OutlinedButton(
+						onClick = {
+							onDeletePlaylist(playlist.id)
+							onDismissRequest()
+						},
+						modifier = Modifier
+							.weight(0.5f)
+							.padding(12.dp)
+					) {
+						Text(
+							text = "DELETE",
+							fontSize = 18.sp,
+							fontStyle = FontStyle.Normal,
+							fontFamily = SpaceGrotesk,
+							fontWeight = FontWeight.Light,
+							color = MaterialTheme.colorScheme.onSurface,
+						)
+					}
+					OutlinedButton(
+						onClick = {
+							deletePlaylistRequest = false
+						},
+						modifier = Modifier
+							.weight(0.5f)
+							.padding(12.dp)
+					) {
+						Text(
+							text = "CANCEL",
+							fontSize = 18.sp,
+							fontStyle = FontStyle.Normal,
+							fontFamily = SpaceGrotesk,
+							fontWeight = FontWeight.Light,
+							color = MaterialTheme.colorScheme.onSurface,
+						)
+					}
+				}
+			}
 			Text(
 				text = "* changes are saved automatically",
 				fontSize = 14.sp,

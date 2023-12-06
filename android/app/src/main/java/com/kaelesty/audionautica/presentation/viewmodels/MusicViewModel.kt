@@ -12,6 +12,7 @@ import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.usecases.AddToTracksQueueUseCase
 import com.kaelesty.audionautica.domain.usecases.AddTrackToPlaylistUseCase
 import com.kaelesty.audionautica.domain.usecases.CreatePlaylistUseCase
+import com.kaelesty.audionautica.domain.usecases.DeletePlaylistUseCase
 import com.kaelesty.audionautica.domain.usecases.DeleteTrackFromPlaylistUseCase
 import com.kaelesty.audionautica.domain.usecases.GetAllPlaylistsUseCase
 import com.kaelesty.audionautica.domain.usecases.GetAllTracksUseCase
@@ -32,6 +33,7 @@ class MusicViewModel @Inject constructor(
 	private val getPlaylistTracksUseCase: GetPlaylistTracksUseCase,
 	private val createPlaylistUseCase: CreatePlaylistUseCase,
 	private val getAllTracksUseCase: GetAllTracksUseCase,
+	private val deletePlaylistUseCase: DeletePlaylistUseCase,
 ): ViewModel() {
 
 	private val _tracksSearchResults = MutableLiveData<List<Track>>()
@@ -92,6 +94,12 @@ class MusicViewModel @Inject constructor(
 	fun createPlaylist(playlist: Playlist) {
 		viewModelScope.launch(Dispatchers.IO) {
 			createPlaylistUseCase(playlist)
+		}
+	}
+
+	fun deletePlaylist(playlistId: Int) {
+		viewModelScope.launch(Dispatchers.IO) {
+			deletePlaylistUseCase(playlistId)
 		}
 	}
 

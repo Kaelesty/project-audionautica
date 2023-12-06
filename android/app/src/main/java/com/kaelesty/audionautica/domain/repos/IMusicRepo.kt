@@ -38,6 +38,8 @@ interface IMusicRepo {
 
 	suspend fun createPlaylist(playlist: Playlist)
 
+	suspend fun deletePlaylist(playlistId: Int)
+
 	fun getPlayingTrackFlow(): SharedFlow<Track>
 
 	fun getPlayingEndedFlow(): MutableSharedFlow<Unit>
