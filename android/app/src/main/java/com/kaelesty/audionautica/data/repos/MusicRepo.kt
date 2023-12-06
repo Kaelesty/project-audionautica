@@ -23,8 +23,12 @@ import com.kaelesty.audionautica.domain.entities.TrackExp
 import com.kaelesty.audionautica.domain.entities.TracksToPlay
 import com.kaelesty.audionautica.domain.repos.IMusicRepo
 import com.kaelesty.audionautica.domain.returncodes.UploadTrackRC
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -49,6 +53,36 @@ class MusicRepo @Inject constructor(
 	private val _tracksQueue = MutableSharedFlow<TracksToPlay>()
 	val tracksQueue: SharedFlow<TracksToPlay> get() = _tracksQueue
 
+	private val playingTrackFlow = MutableSharedFlow<Track>()
+
+	private val playingEndedFlow = MutableSharedFlow<Unit>()
+
+	private var trackQueue = listOf<Track>()
+	private var queueCursor = 0
+
+	private val scope = CoroutineScope(Dispatchers.IO)
+
+	init {
+		scope.launch {
+			playingEndedFlow.collect {
+				Log.d("AudionauticaTag1", "PlayingEnded!")
+				queueCursor += 1
+				if (queueCursor < trackQueue.size) {
+					playingTrackFlow.emit(
+						trackQueue[queueCursor]
+					)
+				}
+			}
+		}
+	}
+
+	override fun getPlayingTrackFlow(): SharedFlow<Track> {
+		return playingTrackFlow.asSharedFlow()
+	}
+
+	override fun getPlayingEndedFlow(): MutableSharedFlow<Unit> {
+		return playingEndedFlow
+	}
 
 	override fun getTracks(): LiveData<List<Track>> {
 		return trackDao.getAll().map { it.map { dbModel -> trackMapper.dbModelToDomain(dbModel) } }
@@ -164,9 +198,11 @@ class MusicRepo @Inject constructor(
 		}
 	}
 
-	override suspend fun addToTracksQueue(track: List<Track>, dropQueue: Boolean) {
-		_tracksQueue.emit(
-			TracksToPlay(track, dropQueue)
+	override suspend fun addToTracksQueue(track: List<Track>) {
+		trackQueue = track
+		queueCursor = 0
+		playingTrackFlow.emit(
+			trackQueue[queueCursor]
 		)
 	}
 

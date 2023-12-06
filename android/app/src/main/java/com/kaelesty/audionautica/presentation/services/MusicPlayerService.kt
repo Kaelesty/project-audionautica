@@ -19,10 +19,14 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
 import com.kaelesty.audionautica.R
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.entities.TrackExp
 import com.kaelesty.audionautica.domain.entities.TracksToPlay
+import com.kaelesty.audionautica.domain.usecases.GetPlayingEndedFlowUseCase
+import com.kaelesty.audionautica.domain.usecases.GetPlayingTrackFlowUseCase
 import com.kaelesty.audionautica.domain.usecases.GetTrackQueueUseCase
 import com.kaelesty.audionautica.domain.usecases.GetTrackUriUseCase
 import com.kaelesty.audionautica.presentation.activities.MusicActivity
@@ -30,6 +34,7 @@ import com.kaelesty.audionautica.system.ModifiedApplication
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import java.io.File
@@ -43,7 +48,7 @@ class MusicPlayerService : Service() {
 
 
 	private val player by lazy {
-		androidx.media3.exoplayer.ExoPlayer
+		ExoPlayer
 			.Builder(this@MusicPlayerService)
 			.build()
 	}
@@ -76,6 +81,9 @@ class MusicPlayerService : Service() {
 	@Inject lateinit var getTrackQueueUseCase: GetTrackQueueUseCase
 	@Inject lateinit var getTrackUriUseCase: GetTrackUriUseCase
 
+	@Inject lateinit var getPlayingEndedFlowUseCase: GetPlayingEndedFlowUseCase
+	@Inject lateinit var getPlayingTrackFlowUseCase: GetPlayingTrackFlowUseCase
+
 	private val dropQueueFlow = MutableSharedFlow<Unit>()
 	private val addMediaItemFlow = MutableSharedFlow<Track>()
 
@@ -105,15 +113,6 @@ class MusicPlayerService : Service() {
 			if (audioFocusResult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
 				return
 			}
-//			val metadata = metadataBuilder
-//				.putBitmap(
-//					MediaMetadata.METADATA_KEY_ART,
-//					BitmapFactory.decodeResource(resources, R.drawable.example_track_poster_2)
-//				)
-//				.putString(MediaMetadata.METADATA_KEY_TITLE, track.title)
-//				.putString(MediaMetadata.METADATA_KEY_ARTIST, track.artist)
-//				.build()
-//			mediaSession.setMetadata(metadata)
 
 			mediaSession.isActive = true
 			mediaSession.setPlaybackState(
@@ -122,18 +121,13 @@ class MusicPlayerService : Service() {
 					PlaybackState.PLAYBACK_POSITION_UNKNOWN, 1F
 				).build()
 			)
-//			player.addMediaItem(
-//				MediaItem.fromUri(
-//					track.musicFile
-//				)
-//			)
 			player.prepare()
 			player.playWhenReady = true
 			Log.d("AudionauticaTag", "Player Ready")
 		}
 
 		override fun onPause() {
-			Log.d("MusicService", "onPause")
+			Log.d("AudionauticaTag", "onPause")
 			super.onPause()
 			player.playWhenReady = false
 			mediaSession.setPlaybackState(
@@ -145,6 +139,7 @@ class MusicPlayerService : Service() {
 
 
 		override fun onStop() {
+			Log.d("AudionauticaTag", "onStop")
 			super.onStop()
 			player.playWhenReady = false
 			mediaSession.isActive = false
@@ -165,6 +160,54 @@ class MusicPlayerService : Service() {
 
 		super.onCreate()
 
+		player.addListener(
+			object :Player.Listener {
+				override fun onPlaybackStateChanged(playbackState: Int) {
+					super.onPlaybackStateChanged(playbackState)
+					when(playbackState) {
+						ExoPlayer.STATE_ENDED -> {
+							Log.d("AudionauticaTag1", "STATE_ENDED")
+						}
+						ExoPlayer.STATE_READY -> {
+							Log.d("AudionauticaTag1", "STATE_READY")
+						}
+						ExoPlayer.STATE_IDLE -> {
+							Log.d("AudionauticaTag1", "STATE_IDLE")
+						}
+					}
+//					mediaSession.setPlaybackState(
+//						stateBuilder.setState(
+//							playbackState,
+//							PlaybackState.PLAYBACK_POSITION_UNKNOWN, 1F
+//						).build()
+//					)
+
+					if (playbackState == ExoPlayer.STATE_ENDED) {
+						scope.launch {
+							delay(500)
+							getPlayingEndedFlowUseCase().emit(Unit)
+						}
+					}
+				}
+			}
+		)
+
+		scope.launch(Dispatchers.Main) {
+			getPlayingTrackFlowUseCase().collect {
+				Log.d("AudionauticaTag1", "Player received new track: ${it.title}")
+				player.clearMediaItems()
+				player.addMediaItem(MediaItem.fromUri(
+					getTrackUriUseCase(it.id)
+				))
+				mediaSessionCallback.onPlay()
+				val metadata = metadataBuilder
+					.putString(MediaMetadata.METADATA_KEY_TITLE, it.title)
+					.putString(MediaMetadata.METADATA_KEY_ARTIST, it.artist)
+					.build()
+				mediaSession.setMetadata(metadata)
+			}
+		}
+
 		mediaSession = MediaSession(this@MusicPlayerService, "MusicPlayerService")
 		mediaSession.setCallback(mediaSessionCallback)
 
@@ -177,50 +220,6 @@ class MusicPlayerService : Service() {
 				PendingIntent.FLAG_IMMUTABLE
 			)
 		)
-
-		with(scope) {
-			launch(Dispatchers.IO) {
-				getTrackQueueUseCase().collect {
-					playTracks(it)
-				}
-			}
-
-			launch(Dispatchers.Main) {
-				dropQueueFlow.collect {
-					player.clearMediaItems()
-				}
-			}
-
-			launch(Dispatchers.Main) {
-				addMediaItemFlow.collect {
-					player.addMediaItem(MediaItem.fromUri(
-						getTrackUriUseCase(it.id)
-					))
-					if (!playerdFlag) {
-						player.play()
-						playerdFlag = true
-					}
-					val metadata = metadataBuilder
-						.putBitmap(
-							MediaMetadata.METADATA_KEY_ART,
-							BitmapFactory.decodeResource(resources, R.drawable.example_track_poster_2)
-						)
-						.putString(MediaMetadata.METADATA_KEY_TITLE, it.title)
-						.putString(MediaMetadata.METADATA_KEY_ARTIST, it.artist)
-						.build()
-						mediaSession.setMetadata(metadata)
-				}
-			}
-		}
-	}
-
-	private suspend fun playTracks(tracksToPlay: TracksToPlay) {
-		if (tracksToPlay.dropQueue) {
-			dropQueueFlow.emit(Unit)
-		}
-		tracksToPlay.tracks.forEach {
-			addMediaItemFlow.emit(it)
-		}
 	}
 
 	private fun getNotification(title: String, text: String): Notification {

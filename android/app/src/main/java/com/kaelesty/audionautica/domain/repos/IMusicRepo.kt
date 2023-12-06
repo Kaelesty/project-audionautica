@@ -7,6 +7,7 @@ import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.entities.TrackExp
 import com.kaelesty.audionautica.domain.entities.TracksToPlay
 import com.kaelesty.audionautica.domain.returncodes.UploadTrackRC
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 
 interface IMusicRepo {
@@ -23,7 +24,6 @@ interface IMusicRepo {
 
 	suspend fun addToTracksQueue(
 		track: List<Track>,
-		dropQueue: Boolean,
 	)
 
 	suspend fun getTrackUri(id: Int): Uri
@@ -37,4 +37,8 @@ interface IMusicRepo {
 	fun getPlaylistTracks(id: Int): List<Track>
 
 	suspend fun createPlaylist(playlist: Playlist)
+
+	fun getPlayingTrackFlow(): SharedFlow<Track>
+
+	fun getPlayingEndedFlow(): MutableSharedFlow<Unit>
 }

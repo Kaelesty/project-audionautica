@@ -14,6 +14,7 @@ import com.kaelesty.audionautica.domain.usecases.AddTrackToPlaylistUseCase
 import com.kaelesty.audionautica.domain.usecases.CreatePlaylistUseCase
 import com.kaelesty.audionautica.domain.usecases.DeleteTrackFromPlaylistUseCase
 import com.kaelesty.audionautica.domain.usecases.GetAllPlaylistsUseCase
+import com.kaelesty.audionautica.domain.usecases.GetAllTracksUseCase
 import com.kaelesty.audionautica.domain.usecases.GetPlaylistTracksUseCase
 import com.kaelesty.audionautica.domain.usecases.SearchTracksUseCase
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +30,8 @@ class MusicViewModel @Inject constructor(
 	private val addTrackToPlaylistUseCase: AddTrackToPlaylistUseCase,
 	private val deleteTrackFromPlaylistUseCase: DeleteTrackFromPlaylistUseCase,
 	private val getPlaylistTracksUseCase: GetPlaylistTracksUseCase,
-	private val createPlaylistUseCase: CreatePlaylistUseCase
+	private val createPlaylistUseCase: CreatePlaylistUseCase,
+	private val getAllTracksUseCase: GetAllTracksUseCase,
 ): ViewModel() {
 
 	private val _tracksSearchResults = MutableLiveData<List<Track>>()
@@ -52,8 +54,14 @@ class MusicViewModel @Inject constructor(
 		viewModelScope.launch {
 			addToTracksQueueUseCase(
 				tracks = listOf(track),
-				dropQueue = true,
 			)
+		}
+	}
+
+	fun playPlaylist(id: Int) {
+		viewModelScope.launch {
+			val tracks = getPlaylistTracks(id)
+			addToTracksQueueUseCase(tracks)
 		}
 	}
 
@@ -85,5 +93,9 @@ class MusicViewModel @Inject constructor(
 		viewModelScope.launch(Dispatchers.IO) {
 			createPlaylistUseCase(playlist)
 		}
+	}
+
+	fun getAllTracks(): LiveData<List<Track>> {
+		return getAllTracksUseCase()
 	}
 }

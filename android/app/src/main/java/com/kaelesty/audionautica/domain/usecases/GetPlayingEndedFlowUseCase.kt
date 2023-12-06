@@ -5,13 +5,10 @@ import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.repos.IMusicRepo
 import javax.inject.Inject
 
-class AddToTracksQueueUseCase @Inject constructor(
+class GetPlayingEndedFlowUseCase @Inject constructor(
 	private val repo: IMusicRepo
 ) {
 
-	suspend operator fun invoke(
-		tracks: List<Track>,
-	) = repo.addToTracksQueue(
-		tracks
-	)
+	operator fun invoke(
+	) = repo.getPlayingEndedFlow()
 }
