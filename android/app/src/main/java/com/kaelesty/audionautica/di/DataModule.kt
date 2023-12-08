@@ -2,6 +2,7 @@ package com.kaelesty.audionautica.di
 
 import android.app.Application
 import com.kaelesty.audionautica.data.local.daos.PlaylistDao
+import com.kaelesty.audionautica.data.local.daos.TokenDao
 import com.kaelesty.audionautica.data.local.daos.TrackDao
 import com.kaelesty.audionautica.data.local.dbs.MusicDatabase
 import com.kaelesty.audionautica.data.remote.api.AccessApiService
@@ -40,5 +41,11 @@ class DataModule {
 
 	@Provides
 	@ApplicationScope
-	fun provideJwtTool(application: Application) = JwtTool(application)
+	fun provideTokenDao(db: MusicDatabase): TokenDao {
+		return db.tokenDao()
+	}
+
+	@Provides
+	@ApplicationScope
+	fun provideJwtTool(application: Application, tokenDao: TokenDao) = JwtTool(application, tokenDao)
 }

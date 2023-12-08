@@ -81,8 +81,8 @@ class AccessViewModel @Inject constructor(
 					_runMusicActivity.postValue(RunMusicActivityMode.OFFLINE)
 				}
 				CheckConnectionRC.OK -> {
-
-					when(checkAuthUseCase()) {
+					val res = checkAuthUseCase()
+					when(res) {
 						CheckAuthRC.NOT_OK -> {
 							// nothing, just show login screen
 						}

@@ -1,6 +1,7 @@
 package com.kaelesty.audionautica.data.remote.api
 
 import com.kaelesty.audionautica.data.remote.entities.CheckAuthResponse
+import com.kaelesty.audionautica.data.remote.entities.JwtDto
 import com.kaelesty.audionautica.data.remote.entities.LoginDto
 import com.kaelesty.audionautica.data.remote.entities.LoginResponse
 import com.kaelesty.audionautica.data.remote.entities.RegisterDto
@@ -23,6 +24,6 @@ interface AccessApiService {
 	@GET("CheckConnection/")
 	suspend fun checkConnection(): Response<Unit>
 
-	@GET("CheckAuth/")
-	suspend fun checkAuth(@Header("jwt") jwt: String): Response<CheckAuthResponse>
+	@POST("User/")
+	suspend fun checkAuth(@Body token: String): Response<CheckAuthResponse>
 }

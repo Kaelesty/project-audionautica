@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.kaelesty.audionautica.data.remote.api.AccessApiService
+import com.kaelesty.audionautica.data.remote.entities.JwtDto
 import com.kaelesty.audionautica.data.remote.entities.LoginDto
 import com.kaelesty.audionautica.data.remote.entities.RegisterDto
 import com.kaelesty.audionautica.data.repos.tools.JwtTool
@@ -53,6 +54,7 @@ class AccessRepo @Inject constructor(
 			}
 		}
 		catch (exception: Exception) {
+			Log.d("AudionauticaTag", exception.message.toString())
 			return LoginRC.UNKNOWN
 		}
 	}
@@ -62,19 +64,18 @@ class AccessRepo @Inject constructor(
 	}
 
 	override suspend fun checkAuth(): CheckAuthRC {
-		return try {
+		try {
+			val token = jwtTool.getToken()
 			val response = accessApiService.checkAuth(
-				jwtTool.getToken()
+				token
 			)
-			if (response.code() != 200) {
-				CheckAuthRC.NOT_OK
+			if (response.code() == 200) {
+				return CheckAuthRC.OK
 			}
-			if (response.body()?.auth?: throw IllegalStateException("Empty body")) {
-				CheckAuthRC.OK
-			}
-			CheckAuthRC.NOT_OK
+			return CheckAuthRC.NOT_OK
 		} catch (exception: Exception) {
-			CheckAuthRC.NOT_OK
+			Log.d("Audionautica tag", exception.message.toString())
+			return CheckAuthRC.NOT_OK
 		}
 	}
 
