@@ -23,6 +23,7 @@ class AccessActivity : ComponentActivity() {
 
 		component.inject(this)
 
+
 		viewModel.runMusicActivity.observe(this@AccessActivity) {
 			startActivity(
 				MusicActivity.newIntent(
@@ -33,7 +34,10 @@ class AccessActivity : ComponentActivity() {
 					}
 				)
 			)
+			finish()
 		}
+
+		viewModel.checkConnectionAndAuth()
 
 		super.onCreate(savedInstanceState)
 		setContent {

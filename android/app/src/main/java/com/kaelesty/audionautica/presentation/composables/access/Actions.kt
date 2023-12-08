@@ -1,5 +1,7 @@
 package com.kaelesty.audionautica.presentation.composables.access
 
+import android.net.Uri
+
 
 data class SimpleNamedAction(
 	val name: String,
@@ -8,5 +10,5 @@ data class SimpleNamedAction(
 
 data class CollectNamedAction(
 	val name: String,
-	val onCollect: (Map<String, String>) -> Unit
+	val onCollect: (Map<String, String>, Map<String, Uri>?) -> Unit
 )

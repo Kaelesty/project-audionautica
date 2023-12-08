@@ -57,8 +57,8 @@ fun Register(
 		title = "Register",
 		mainAction = CollectNamedAction(
 			name = "Register",
-			onCollect = {
-				viewModel.register(it)
+			onCollect = { params, files ->
+				viewModel.register(params)
 			}
 		),
 		leftAction = SimpleNamedAction(
@@ -89,8 +89,8 @@ fun Login(
 		title = "Sing in",
 		mainAction = CollectNamedAction(
 			name = "Sign in",
-			onCollect = {
-				viewModel.signin(it)
+			onCollect = { params, files ->
+				viewModel.signin(params)
 			}
 		),
 		leftAction = SimpleNamedAction(

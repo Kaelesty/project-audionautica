@@ -19,14 +19,26 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
 import com.kaelesty.audionautica.R
 import com.kaelesty.audionautica.domain.entities.Track
+import com.kaelesty.audionautica.domain.entities.TrackExp
+import com.kaelesty.audionautica.domain.entities.TracksToPlay
+import com.kaelesty.audionautica.domain.usecases.GetPlayingEndedFlowUseCase
+import com.kaelesty.audionautica.domain.usecases.GetPlayingTrackFlowUseCase
+import com.kaelesty.audionautica.domain.usecases.GetTrackQueueUseCase
+import com.kaelesty.audionautica.domain.usecases.GetTrackUriUseCase
 import com.kaelesty.audionautica.presentation.activities.MusicActivity
 import com.kaelesty.audionautica.system.ModifiedApplication
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 import java.io.File
+import javax.inject.Inject
 
 class MusicPlayerService : Service() {
 
@@ -34,8 +46,9 @@ class MusicPlayerService : Service() {
 		(application as ModifiedApplication).component
 	}
 
+
 	private val player by lazy {
-		androidx.media3.exoplayer.ExoPlayer
+		ExoPlayer
 			.Builder(this@MusicPlayerService)
 			.build()
 	}
@@ -46,6 +59,7 @@ class MusicPlayerService : Service() {
 
 	val CHANNEL_ID = "MusicPlayerService"
 	val CHANNEL_NAME = "MusicPlayerService"
+
 
 	val scope = CoroutineScope(Dispatchers.IO)
 
@@ -62,6 +76,14 @@ class MusicPlayerService : Service() {
 		)
 
 	lateinit var mediaSession: MediaSession
+
+	private var nullTrack = true
+
+	@Inject lateinit var getTrackQueueUseCase: GetTrackQueueUseCase
+	@Inject lateinit var getTrackUriUseCase: GetTrackUriUseCase
+
+	@Inject lateinit var getPlayingEndedFlowUseCase: GetPlayingEndedFlowUseCase
+	@Inject lateinit var getPlayingTrackFlowUseCase: GetPlayingTrackFlowUseCase
 
 	private val audioFocusChangeListener: OnAudioFocusChangeListener = object: OnAudioFocusChangeListener {
 		override fun onAudioFocusChange(focusChange: Int) {
@@ -81,7 +103,6 @@ class MusicPlayerService : Service() {
 
 	private val mediaSessionCallback = object : MediaSession.Callback() {
 		override fun onPlay() {
-			Log.d("MusicService", "onPlay")
 			val audioFocusResult = audioManager.requestAudioFocus(
 				audioFocusChangeListener,
 				AudioManager.STREAM_MUSIC,
@@ -90,33 +111,6 @@ class MusicPlayerService : Service() {
 			if (audioFocusResult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
 				return
 			}
-			// SAMPLE TODO REMOVE
-			val track = Track(
-				artist = "re:Tye",
-				id = 0,
-				duration = 42422,
-				title = "Akeboshi",
-				musicFile = Uri.fromFile(
-					File(
-						applicationContext.filesDir.absolutePath + "/1234.mp3"
-					)
-				),
-				posterFile = Uri.fromFile(
-					File(
-						applicationContext.filesDir.absolutePath + "/1234.mp3"
-					)
-				)
-			)
-			//
-			val metadata = metadataBuilder
-				.putBitmap(
-					MediaMetadata.METADATA_KEY_ART,
-					BitmapFactory.decodeResource(resources, R.drawable.example_track_poster_2)
-				)
-				.putString(MediaMetadata.METADATA_KEY_TITLE, track.title)
-				.putString(MediaMetadata.METADATA_KEY_ARTIST, track.artist)
-				.build()
-			mediaSession.setMetadata(metadata)
 
 			mediaSession.isActive = true
 			mediaSession.setPlaybackState(
@@ -125,17 +119,13 @@ class MusicPlayerService : Service() {
 					PlaybackState.PLAYBACK_POSITION_UNKNOWN, 1F
 				).build()
 			)
-			player.addMediaItem(
-				MediaItem.fromUri(
-					track.musicFile
-				)
-			)
 			player.prepare()
 			player.playWhenReady = true
+			Log.d("AudionauticaTag", "Player Ready")
 		}
 
 		override fun onPause() {
-			Log.d("MusicService", "onPause")
+			Log.d("AudionauticaTag", "onPause")
 			super.onPause()
 			player.playWhenReady = false
 			mediaSession.setPlaybackState(
@@ -147,8 +137,8 @@ class MusicPlayerService : Service() {
 
 
 		override fun onStop() {
+			Log.d("AudionauticaTag", "onStop")
 			super.onStop()
-
 			player.playWhenReady = false
 			mediaSession.isActive = false
 
@@ -167,8 +157,62 @@ class MusicPlayerService : Service() {
 		component.inject(this@MusicPlayerService)
 
 		super.onCreate()
-		Log.e("MusicService", "onCreate")
-		//startForeground(22, getNotification("Foreground service", "in progress..."))
+
+		player.addListener(
+			object :Player.Listener {
+				override fun onPlaybackStateChanged(playbackState: Int) {
+					super.onPlaybackStateChanged(playbackState)
+					when(playbackState) {
+						ExoPlayer.STATE_ENDED -> {
+							Log.d("AudionauticaTag1", "STATE_ENDED")
+						}
+						ExoPlayer.STATE_READY -> {
+							Log.d("AudionauticaTag1", "STATE_READY")
+						}
+						ExoPlayer.STATE_IDLE -> {
+							Log.d("AudionauticaTag1", "STATE_IDLE")
+						}
+					}
+
+					if (playbackState == ExoPlayer.STATE_ENDED) {
+						scope.launch {
+							getPlayingEndedFlowUseCase().emit(Unit)
+						}
+					}
+				}
+			}
+		)
+
+		scope.launch(Dispatchers.Main) {
+			getPlayingTrackFlowUseCase().collect {
+				Log.d("AudionauticaTag1", "Player received new track: ${it.title}")
+				if (it.id == -1) {
+					if (nullTrack) {
+						return@collect
+					}
+					else {
+						nullTrack = true
+					}
+				}
+				else {
+					nullTrack = false
+				}
+				player.clearMediaItems()
+				if (it.id != -1) {
+					player.addMediaItem(MediaItem.fromUri(
+						getTrackUriUseCase(it.id)
+					))
+				}
+				mediaSessionCallback.onPlay()
+				val metadata = metadataBuilder
+					.putString(MediaMetadata.METADATA_KEY_TITLE, it.title)
+					.putString(MediaMetadata.METADATA_KEY_ARTIST, it.artist)
+					.putLong(CUSTOM_METADATA_KEY_ID, it.id.toLong())
+					.putString(CUSTOM_METADATA_KEY_TAGS, it.tags.joinToString(CUSTOM_METADATA_TAGS_DELIMITER))
+					.build()
+				mediaSession.setMetadata(metadata)
+			}
+		}
 
 		mediaSession = MediaSession(this@MusicPlayerService, "MusicPlayerService")
 		mediaSession.setCallback(mediaSessionCallback)
@@ -226,11 +270,13 @@ class MusicPlayerService : Service() {
 
 	companion object {
 
-		const val TAG = "MyService - Foreground"
-
 		fun newIntent(connext: Context): Intent {
 			return Intent(connext, MusicPlayerService::class.java)
 		}
+
+		val CUSTOM_METADATA_KEY_ID = "__id__"
+		val CUSTOM_METADATA_KEY_TAGS = "__tags__"
+		val CUSTOM_METADATA_TAGS_DELIMITER = "%"
 	}
 
 	class MusicPlayerServiceBinder(
@@ -238,4 +284,6 @@ class MusicPlayerService : Service() {
 	): Binder() {
 		fun getMediasessionToken() = mediaSession.sessionToken
 	}
+
+
 }
