@@ -77,6 +77,8 @@ class MusicPlayerService : Service() {
 
 	lateinit var mediaSession: MediaSession
 
+	private val loadedTrackFlow = MutableSharedFlow<Pair<Track, Uri>>()
+
 	private var nullTrack = true
 
 	@Inject lateinit var getTrackQueueUseCase: GetTrackQueueUseCase
@@ -184,8 +186,25 @@ class MusicPlayerService : Service() {
 		)
 
 		scope.launch(Dispatchers.Main) {
+			loadedTrackFlow.collect {
+				player.clearMediaItems()
+				player.addMediaItem(MediaItem.fromUri(
+					it.second
+				))
+				mediaSessionCallback.onPlay()
+				val metadata = metadataBuilder
+					.putString(MediaMetadata.METADATA_KEY_TITLE, it.first.title)
+					.putString(MediaMetadata.METADATA_KEY_ARTIST, it.first.artist)
+					.putLong(CUSTOM_METADATA_KEY_ID, it.first.id.toLong())
+					.putString(CUSTOM_METADATA_KEY_TAGS, it.first.tags.joinToString(CUSTOM_METADATA_TAGS_DELIMITER))
+					.build()
+				mediaSession.setMetadata(metadata)
+			}
+		}
+
+		scope.launch(Dispatchers.IO) {
 			getPlayingTrackFlowUseCase().collect {
-				Log.d("AudionauticaTag1", "Player received new track: ${it.title}")
+				Log.d("AudionauticaTag", "Player received new track: ${it.title}")
 				if (it.id == -1) {
 					if (nullTrack) {
 						return@collect
@@ -197,20 +216,11 @@ class MusicPlayerService : Service() {
 				else {
 					nullTrack = false
 				}
-				player.clearMediaItems()
 				if (it.id != -1) {
-					player.addMediaItem(MediaItem.fromUri(
-						getTrackUriUseCase(it.id)
-					))
+					loadedTrackFlow.emit(
+						Pair(it, getTrackUriUseCase(it.id))
+					)
 				}
-				mediaSessionCallback.onPlay()
-				val metadata = metadataBuilder
-					.putString(MediaMetadata.METADATA_KEY_TITLE, it.title)
-					.putString(MediaMetadata.METADATA_KEY_ARTIST, it.artist)
-					.putLong(CUSTOM_METADATA_KEY_ID, it.id.toLong())
-					.putString(CUSTOM_METADATA_KEY_TAGS, it.tags.joinToString(CUSTOM_METADATA_TAGS_DELIMITER))
-					.build()
-				mediaSession.setMetadata(metadata)
 			}
 		}
 
