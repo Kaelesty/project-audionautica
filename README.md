@@ -17,7 +17,7 @@
 1. Установить Python 3.11
 2. Установить Django 4.2.5 с помощью pip/poetry
 3. В директории проекта выполнить "cd backend\audionautica\audionautica"
-4. В файле "audionautica\settings.py" добавить адрес, по которому будет выполняться подключение к веб-приложению
+4. В файле "audionautica\settings.py" добавить адрес, по которому будет выполняться подключение к веб-приложению \
 ![изображение](https://github.com/Kaelesty/project-fullstack-audionautica/assets/74826130/60f1ffc2-4364-4b93-bc99-1b045bdeaa77)
 6. Выполнить "python manage.py runserver"
 
