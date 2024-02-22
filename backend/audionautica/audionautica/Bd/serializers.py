@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
-from .models import Users
+from .models import Users, Traks
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -36,3 +36,14 @@ class TokenSerializer(TokenObtainPairView):
     class Meta:
         model = Users
         fields = ('Login', 'Password')
+
+
+class FilepathSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Traks
+        fields = ('title', 'filepath')
+
+class TrackUploadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Traks
+        fields = ('title','artist','filepath')
