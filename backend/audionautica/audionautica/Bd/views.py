@@ -40,7 +40,7 @@ class LoginUser(APIView):
         password = request.data['password']
 
         user = Users.objects.filter(login=login).first()
-        user_pass = Users.objects.filter(password=password).first()
+        user_pass = Users.objects.filter(password=hash(password)).first()
         if user is None:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
