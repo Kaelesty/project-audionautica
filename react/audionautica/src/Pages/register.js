@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import './register.css'; // Импорт файла стилей
 
 const RegisterPage = () => {
@@ -8,6 +8,7 @@ const RegisterPage = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordMismatch, setPasswordMismatch] = useState(false);
+    const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
     const handleEmailChange = (event) => {
         setEmail(event.target.value);
@@ -35,14 +36,19 @@ const RegisterPage = () => {
         } else {
             setPasswordMismatch(false);
         }
-
+        postDataRegister(username,password,email)
         console.log('Отправлены данные для регистрации:', { email, username, password });
         
         setEmail('');
         setUsername('');
         setPassword('');
         setConfirmPassword('');
+        setRegistrationSuccess(true);
     };
+
+    if (registrationSuccess) {
+        return <Navigate to="/login" />;
+    }
 
     return (
         <div className="register-page">
@@ -94,13 +100,37 @@ const RegisterPage = () => {
                         />
                     </div>
                     {passwordMismatch && <p style={{ color: 'red' }}>Пароли не совпадают</p>}
-                    <Link to="/login">
-                        <button type="submit">Зарегистрироваться</button>
-                    </Link>
+                    <button type="submit">Зарегистрироваться</button>
                 </form>
             </div>
         </div>
     );
 };
+
+async function postDataRegister(name, pass, login) {
+    const requestData = {
+        "name": name,
+        "password": pass,
+        "login": login
+    };
+    try {
+      const response = await fetch('http://127.0.0.1:8000/Auth/Register/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+  
+      const data = await response.json();
+      console.log('Success:', data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
 export default RegisterPage;

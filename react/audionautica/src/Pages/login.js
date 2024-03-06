@@ -1,27 +1,42 @@
 import React, { useState } from 'react';
+import { Navigate } from 'react-router-dom';
+import token from '../token';
 import './login.css'
 
 const LoginPage = () => {
-    const [username, setUsername] = useState('');
+    const [login, setlogin] = useState('');
     const [password, setPassword] = useState('');
+    const [loginSuccess, setLoginSuccess] = useState(false);
 
-    const handleUsernameChange = (event) => {
-        setUsername(event.target.value);
+    const handleLoginChange = (event) => {
+        setlogin(event.target.value);
     };
 
     const handlePasswordChange = (event) => {
         setPassword(event.target.value);
     };
 
-    // Отправка формы пока что в консоль
-    const handleSubmit = (event) => {
+    // Отправка формы
+    const handleSubmit = async (event) => {
         event.preventDefault();
-
-        console.log('Отправлены данные для входа:', { username, password });
+       
+        console.log('Отправлены данные для входа:', { login, password });
+    
+        const tokenResponse = await getTokenFromServer(login, password);
+        if (tokenResponse !== null) {
+            token.setToken(tokenResponse);
+            console.log(token.getToken());
+            setLoginSuccess(true);
+        }
         
-        setUsername('');
+    
+        setlogin('');
         setPassword('');
     };
+
+    if (loginSuccess){
+        return <Navigate to="/" />
+    }
 
     return (
         <div className="login-page">
@@ -29,13 +44,13 @@ const LoginPage = () => {
                 <h2>Авторизация</h2>
                 <form onSubmit={handleSubmit}>
                     <div>
-                        <label htmlFor="username">Имя пользователя:</label>
+                        <label htmlFor="login">Имя пользователя:</label>
                         <input
                             type="text"
-                            id="username"
-                            name="username"
-                            value={username}
-                            onChange={handleUsernameChange}
+                            id="login"
+                            name="login"
+                            value={login}
+                            onChange={handleLoginChange}
                             required
                         />
                     </div>
@@ -58,5 +73,32 @@ const LoginPage = () => {
         </div>
     );
 };
+
+async function getTokenFromServer(login, password) {
+    const requestData = {
+        "login": login,
+        "password": password
+    };
+    try {
+        const response = await fetch('http://127.0.0.1:8000/Auth/Login/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        
+        const responseData = await response.json();
+        return responseData;
+       
+    } catch (error) {
+        console.error( error);
+        return null; 
+    }
+}
 
 export default LoginPage;
