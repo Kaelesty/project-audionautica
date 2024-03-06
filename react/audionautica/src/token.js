@@ -6,10 +6,14 @@ class Token {
     setToken(newToken) {
         this.Token = newToken;
     }
-
+    removeToken(){
+        this.Token = null;
+    }
     getToken() {
         return this.Token;
     }
+
+  
 }
 
 const token = new Token();

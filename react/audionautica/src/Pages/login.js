@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import token from '../token';
+import {Context} from "../index"
 import './login.css'
 
 const LoginPage = () => {
     const [login, setlogin] = useState('');
     const [password, setPassword] = useState('');
-    const [loginSuccess, setLoginSuccess] = useState(false);
+    const [isLoggedIn, setisLoggedIn] = useContext(Context);
 
     const handleLoginChange = (event) => {
         setlogin(event.target.value);
@@ -26,7 +27,7 @@ const LoginPage = () => {
         if (tokenResponse !== null) {
             token.setToken(tokenResponse);
             console.log(token.getToken());
-            setLoginSuccess(true);
+            setisLoggedIn(true);
         }
         
     
@@ -34,7 +35,7 @@ const LoginPage = () => {
         setPassword('');
     };
 
-    if (loginSuccess){
+    if (isLoggedIn){
         return <Navigate to="/" />
     }
 
