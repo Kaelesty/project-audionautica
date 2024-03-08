@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import RegisterPage from './Pages/register';
 import LoginPage from './Pages/login';
 import Menu from './Pages/menu';
+import HomePage from './Pages/home';
 
 export const Context = React.createContext();
 
@@ -17,6 +18,7 @@ const App = () => {
         <Routes> 
           <Route path="/register" Component={RegisterPage} />
           <Route path="/login" Component={LoginPage} />
+          <Route path="/" Component={HomePage} />
         </Routes>
       </Context.Provider>
     </Router>

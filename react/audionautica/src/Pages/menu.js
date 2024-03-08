@@ -19,7 +19,7 @@ const Menu = () => {
     <div className="menu">
       <Link to="/">Домой</Link>
       {isLoggedIn ? (
-        <Link to="/login" className='right'>
+        <Link to="/login" className='ButtonLink'>
           <button onClick={handleLogout}>Выход</button>
         </Link>
       ) : (
