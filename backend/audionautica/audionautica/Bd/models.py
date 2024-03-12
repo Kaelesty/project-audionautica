@@ -22,3 +22,17 @@ class Traks(models.Model):
 
     class Meta:
         verbose_name = "Trak"
+
+class PlayList(models.Model):
+    title = models.CharField("title", max_length=250)
+    creatorid = models.IntegerField("CreatorId")
+    image = models.CharField("image_url", max_length=250)
+    description = models.CharField("description", max_length=250)
+    tracksid = models.CharField("tracksid", max_length=250)
+    isprivat = models.CharField("isprivat", max_length=200)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "PlayList"

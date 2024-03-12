@@ -11,7 +11,7 @@ import jwt, datetime
 from django.http import HttpResponse, HttpResponseNotFound, FileResponse
 
 
-file_path = "C:/Users/greg/Desktop/"
+file_path = "C:/Users/greg/Desktop/music/"
 class UsersAPIViwe(generics.ListAPIView):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
@@ -40,7 +40,7 @@ class LoginUser(APIView):
         password = request.data['password']
 
         user = Users.objects.filter(login=login).first()
-        user_pass = Users.objects.filter(password=password).first()
+        user_pass = Users.objects.filter(password=hash(password)).first()
         if user is None:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -127,12 +127,14 @@ class TrackUpload(APIView):
                 track.artist = meta_data[1]
                 track.tags = meta_data[2]
                 #replace w to wb
-                with open(file_path+meta_data[0]+'.mp3', 'wb') as f:
+                track.filepath =""
+                track.save()
+                track.filepath = file_path+ str(track.id) +'.mp3'
+                track.save()
+                with open(track.filepath, 'wb') as f:
                     f.write(file)
                 f.close()
-                track.filepath = file_path+meta_data[0]+'.mp3'
-                track.save()
-        return Response(track.pk, status=status.HTTP_200_OK)
+        return Response(track.id, status=status.HTTP_200_OK)
 
 #rewrite Delete
 class TrackDelete(APIView):

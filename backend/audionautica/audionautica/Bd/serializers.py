@@ -21,7 +21,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         #     'password' : {'write_only':True}
         # }
     def create(self, validated_data):
-        password = validated_data#.pop('password', None)
+        password = validated_data["password"]#.pop('password', None)
+        hash_password = hash(password)
+        validated_data["password"] = hash_password
         instance = self.Meta.model(**validated_data)
         if password is not None:
             Users.password = make_password('password')
