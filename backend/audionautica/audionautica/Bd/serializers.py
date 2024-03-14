@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
-from .models import Users, Traks
+from .models import Users, Traks, PlayList
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -49,3 +49,9 @@ class TrackUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Traks
         fields = ('title','artist','filepath')
+
+class PlaylistUploadSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PlayList
+        fields = ('title','creatorid','description','tracksid','isprivat','image')

@@ -5,13 +5,29 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.exceptions import AuthenticationFailed
-from .models import Users, Traks
-from .serializers import UsersSerializer, RegisterSerializer, LoginSerialiaer, TokenSerializer, TrackUploadSerializer, FilepathSerializer
+from .models import Users, Traks, PlayList
+from .serializers import (
+    UsersSerializer,
+    RegisterSerializer,
+    LoginSerialiaer,
+    TokenSerializer,
+    TrackUploadSerializer,
+    FilepathSerializer,
+    PlaylistUploadSerializer,
+)
 import jwt, datetime
 from django.http import HttpResponse, HttpResponseNotFound, FileResponse
 
 
 file_path = "C:/Users/greg/Desktop/music/"
+file_path_posters = "C:/Users/greg/Desktop/posters/"
+def create_playlist(x):
+    playlist = PlayList()
+    playlist.title = 'Favorite Playlist'
+    playlist.creatorid = str(x)
+    playlist.isprivat = 'True'
+    playlist.image = file_path_posters + "kitty.jpg"
+    playlist.save()
 class UsersAPIViwe(generics.ListAPIView):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
@@ -31,6 +47,9 @@ class RegisterUser(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         if serializer.is_valid():
             serializer.save()
+            login = serializer['login']
+            user = Users.objects.filter(login=login.value).first()
+            create_playlist(user.id)
             return Response(serializer.data)
         return Response(serializer.errors)
 
@@ -118,7 +137,6 @@ class TrackUpload(APIView):
             meta_data.append(request.headers["title"])
             meta_data.append(request.headers["artist"])
             meta_data.append(request.headers["tags"])
-            print(meta_data)
             if Traks.objects.filter(title=meta_data[0], artist=meta_data[1]):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             else:
@@ -126,7 +144,6 @@ class TrackUpload(APIView):
                 track.title = meta_data[0]
                 track.artist = meta_data[1]
                 track.tags = meta_data[2]
-                #replace w to wb
                 track.filepath =""
                 track.save()
                 track.filepath = file_path+ str(track.id) +'.mp3'
@@ -194,5 +211,67 @@ class TrackSearch(APIView):
             print(array)
             json_response['tracks'] = array
         return Response(json_response)
-class Test(APIView):
-    pass
+class PlayListUpload(APIView):
+    def post(self, request):
+        if request.method == "POST":
+            image = request.body
+            ext = request.headers["ext"]
+            playlist = PlayList()
+            playlist.title = request.headers["title"]
+            playlist.creatorid = request.headers["creatorid"]
+            playlist.description = request.headers["description"]
+            playlist.tracksid = request.headers["tracksid"]
+            playlist.isprivat = request.headers["isprivat"]
+            playlist.save()
+            playlist.image = file_path_posters+ str(playlist.id) +ext
+            playlist.save()
+            with open(playlist.image, 'wb') as f:
+                f.write(image)
+            f.close()
+            return Response(playlist.id, status=status.HTTP_200_OK)
+
+class PlayListDeleteId(APIView):
+    def post(self, request):
+        try:
+            id = request.data["id"]
+            playlist = PlayList.objects.get(id = id)
+            if not playlist.image == file_path_posters + "kitty.jpg":
+                os.remove(playlist.image)
+            playlist.delete()
+            return Response(status = status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+class GetPlayListPoster(APIView):
+    def post(self, request):
+        if request.method == "POST":
+            playlist_id = request.data["playlist_id"]
+            playlist = PlayList.objects.get(id=playlist_id)
+            path = playlist.image
+            print(path)
+            return FileResponse(open(path,'rb'))
+
+class AddTrackToPlayList(APIView):
+    def post(self, request):
+        if request.method == "POST":
+            playlist_id = request.data["playlist_id"]
+            track_id = request.data["track_id"]
+            playlist = PlayList.objects.filter(id = playlist_id).first()
+            tracks = playlist.tracksid
+            tracks += track_id
+            tracks += "/"
+            playlist.tracksid = tracks
+            playlist.save()
+            return Response(status = status.HTTP_200_OK)
+
+class DeleteTrackFromPlayList(APIView):
+    def post(self, request):
+        if request.method == "POST":
+            playlist_id = request.data["playlist_id"]
+            track_id = request.data["track_id"]
+            playlist = PlayList.objects.filter(id = playlist_id).first()
+            tracks = playlist.tracksid
+            tracks = "/".join(filter(lambda x: x != track_id, tracks.split("/")))
+            playlist.tracksid = tracks
+            playlist.save()
+            return Response(status = status.HTTP_200_OK)

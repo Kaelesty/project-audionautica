@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-(u@svuz86an9hbplikwo*e@v$6n1#kkyfo-x0+br#n7x2dha0i
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'a4fd-188-244-132-75.ngrok-free.app',
+    'a771-188-170-79-152.ngrok-free.app',
     '127.0.0.1',
 ]
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
