@@ -7,6 +7,7 @@
     display: flex;
     align-items: center;
     padding: 10px;
+    z-index: 2;
   }
   
   .album-cover img {
@@ -77,3 +78,5 @@
     transform: translateX(-100%); 
     justify-content: center; 
   }
+ 
+  

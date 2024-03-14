@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import VolumeSlider from './volumeslider';
 import './player.css';
-
+import AlbumCover from './icons/nopic.png';
 
 const MusicPlayer = ({ songTitle, artistName, albumCover }) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -17,9 +17,9 @@ const MusicPlayer = ({ songTitle, artistName, albumCover }) => {
 
   return (
     <div className="music-player">
-      <div className="album-cover img">
-        <img src={require('./icons/nopic.png')} alt="Album Cover" />
-      </div>
+        <div class="album-cover">
+          <img src={AlbumCover} alt="Album Cover"/>
+        </div>
       <div className="song-details">
         <h3>{songTitle}</h3>
         <p>{artistName}</p>
