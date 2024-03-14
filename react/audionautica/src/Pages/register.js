@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import BackURL from "../urls"
 import './register.css'; // Импорт файла стилей
 
 const RegisterPage = () => {
@@ -114,7 +115,7 @@ async function postDataRegister(name, pass, login) {
         "login": login
     };
     try {
-      const response = await fetch('http://127.0.0.1:8000/Auth/Register/', {
+      const response = await fetch(BackURL + "/Auth/Register/", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

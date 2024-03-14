@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import token from '../token';
 import {Context} from "../index"
+import BackURL from '../urls';
 import './login.css'
 
 const LoginPage = () => {
@@ -81,7 +82,7 @@ async function getTokenFromServer(login, password) {
         "password": password
     };
     try {
-        const response = await fetch('http://127.0.0.1:8000/Auth/Login/', {
+        const response = await fetch(BackURL + "/Auth/Login/", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

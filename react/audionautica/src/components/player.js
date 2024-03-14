@@ -3,21 +3,33 @@ import VolumeSlider from './volumeslider';
 import './player.css';
 import AlbumCover from './icons/nopic.png';
 
-const MusicPlayer = ({ songTitle, artistName, albumCover }) => {
+const MusicPlayer = ({ songTitle, artistName, albumCover, audio}) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [repeatMode, setRepeatMode] = useState(0);
 
   const togglePlay = () => {
+    if (isPlaying){
+      audio.pause()
+      
+    }
+    else{
+      audio.play()
+    }
     setIsPlaying(!isPlaying);
-  };
+    };
 
   const toggleReplay = () => {
     setRepeatMode((repeatMode+1)%3)
   }
 
+  const handleVolumeChange = (newVolume) =>{
+    audio.volume = newVolume/100
+
+  }
+
   return (
     <div className="music-player">
-        <div class="album-cover">
+        <div className="album-cover">
           <img src={AlbumCover} alt="Album Cover"/>
         </div>
       <div className="song-details">
@@ -43,9 +55,7 @@ const MusicPlayer = ({ songTitle, artistName, albumCover }) => {
         
       </div>
       <div className='volume-controls'>
-          <VolumeSlider 
-            audio={''}
-          />
+          <VolumeSlider volumeChange={handleVolumeChange} />
         
         </div>
     </div>

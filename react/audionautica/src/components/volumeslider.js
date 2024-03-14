@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './volumeslider.css'; 
 
-const VolumeSlider = () => {
+const VolumeSlider = ({ volumeChange }) => {
   const [volume, setVolume] = useState(50);
   const [lastVolume, setLastVolume] = useState(0);
 
@@ -9,15 +9,19 @@ const VolumeSlider = () => {
   const handleVolumeChange = (e) => {
     const newVolume = e.target.value;
     setVolume(newVolume);
+
+    volumeChange(volume);
   };
 
   const VolumeButPressed = () => {
     if (volume!==0){
       setLastVolume(volume)
       setVolume(0)
+      volumeChange(0);
     }
     else {
       setVolume(lastVolume)
+      volumeChange(lastVolume);
     }
 
   }
