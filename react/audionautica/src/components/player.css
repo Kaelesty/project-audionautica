@@ -1,0 +1,79 @@
+.music-player {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #f2f2f2;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+  }
+  
+  .album-cover img {
+    width: 100px;
+    height: 100px;
+    margin-right: 20px;
+    -webkit-user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+  }
+ 
+  .player-controls {
+    position: absolute; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    background-color: #f2f2f2;
+  }
+  
+  .control-button {
+    width: 40px;
+    height: 40px;
+    margin: 0px 0px;
+    padding: 10px 10px;
+    background-color: #f2f2f2;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    -webkit-user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+  }
+  
+  .control-button:hover {
+    background-color: #cfcfcf;
+    
+  }
+  .replay-button{
+    width: 25px;
+    height: 25px;
+    transition: .1s all;
+  }
+
+  .song-details {
+    display: flex;
+    flex-direction: column;
+    white-space: nowrap;
+    overflow: hidden;
+    flex: 0 0 33%; 
+  }
+  
+  .song-details h3 {
+    margin-bottom: -10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .volume-controls{
+    position: absolute; 
+    left: 97%; 
+    transform: translateX(-100%); 
+    justify-content: center; 
+  }

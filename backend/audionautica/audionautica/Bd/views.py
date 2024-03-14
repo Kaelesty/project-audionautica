@@ -148,7 +148,10 @@ class TrackUpload(APIView):
                 track.save()
                 track.filepath = file_path+ str(track.id) +'.mp3'
                 track.save()
-
+                with open(track.filepath, 'wb') as f:
+                    f.write(file)
+                f.close()
+        return Response(track.id, status=status.HTTP_200_OK)
 
 #rewrite Delete
 class TrackDelete(APIView):

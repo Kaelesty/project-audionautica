@@ -26,6 +26,7 @@ class Traks(models.Model):
 class PlayList(models.Model):
     title = models.CharField("title", max_length=250)
     creatorid = models.CharField("CreatorId", max_length=250)
+
     image = models.CharField("image_url", max_length=250)
     description = models.CharField("description", max_length=250)
     tracksid = models.CharField("tracksid", max_length=250)
