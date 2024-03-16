@@ -8,8 +8,8 @@ const RegisterPage = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [passwordMismatch, setPasswordMismatch] = useState(false);
     const [registrationSuccess, setRegistrationSuccess] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     const handleEmailChange = (event) => {
         setEmail(event.target.value);
@@ -27,17 +27,22 @@ const RegisterPage = () => {
         setConfirmPassword(event.target.value);
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
 
-        // Проверка пароля
         if (password !== confirmPassword) {
-            setPasswordMismatch(true);
+            setErrorMessage("Пароли не совпадают")
             return;
-        } else {
-            setPasswordMismatch(false);
         }
-        postDataRegister(username,password,email)
+       
+        const status = await postDataRegister(username,password,email)
+        console.log(status)
+        if (status === 400){
+            setErrorMessage("Пользователь с таким email уже существует")
+            return
+        }
+       
+      
         console.log('Отправлены данные для регистрации:', { email, username, password });
         
         setEmail('');
@@ -100,7 +105,7 @@ const RegisterPage = () => {
                             required
                         />
                     </div>
-                    {passwordMismatch && <p style={{ color: 'red' }}>Пароли не совпадают</p>}
+                    <p className="error-message">{errorMessage}</p>
                     <button type="submit">Зарегистрироваться</button>
                 </form>
             </div>
@@ -122,11 +127,9 @@ async function postDataRegister(name, pass, login) {
         },
         body: JSON.stringify(requestData),
       });
-  
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+      if (response.status === 400) {
+        return 400
       }
-  
       const data = await response.json();
       console.log('Success:', data);
     } catch (error) {

@@ -8,6 +8,7 @@
     align-items: center;
     padding: 10px;
     z-index: 2;
+    animation: slideIn 0.7s forwards;
   }
   
   .album-cover img {
@@ -78,5 +79,13 @@
     transform: translateX(-100%); 
     justify-content: center; 
   }
- 
+  
+  @keyframes slideIn {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
   

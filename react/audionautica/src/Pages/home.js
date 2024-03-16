@@ -1,6 +1,5 @@
 import React, {useState} from 'react';
 import MusicPlayer from '../components/player'; 
-import AlbumCoverBig from '../components/albumcoverbig';
 import CoverImg from '../components/icons/nopic.png'
 import BackURL from '../urls';
 import "./home.css"
@@ -14,9 +13,16 @@ const HomePage = () => {
   const [audio, setAudio] = useState(null);
 
   const getTrack = async () => {
-    const trackBlob = await postGetTrackById(8);
-    const trackUrl = URL.createObjectURL(trackBlob);
-    setAudio(new Audio(trackUrl)); 
+    //setAudio(1)//отображение плеера без музыки
+    //return
+    try{
+      const trackBlob = await postGetTrackById(8);
+      const trackUrl = URL.createObjectURL(trackBlob);
+      setAudio(new Audio(trackUrl)); 
+    }
+    catch(error){
+      console.error("Ошибка при получении трека",error)
+    }
   };
 
   return (
@@ -27,11 +33,7 @@ const HomePage = () => {
           artistName={artistName}
           albumCover={albumCover}
           audio={audio}
-        />
-        <AlbumCoverBig
-          coverSrc={CoverImg}
-        />
-        
+        />        
       </div>
       <button onClick={getTrack}> Загрузить аудио</button>
     </div>
@@ -49,10 +51,15 @@ async function postGetTrackById(id) {
       body: JSON.stringify({id}),
       responseType: 'blob'
     });
+
+    if (response.status === 404) {
+      console.error('Трек не найден');
+      return null;
+    }
+    
     console.log("Отправлен запрос на получение трека")
     const trackBlob = await response.blob(); // Получаем бинарный трек
     return trackBlob;
-
   } catch (error) {
       console.error('Ошибка:', error);
       return null;
