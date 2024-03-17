@@ -1,7 +1,9 @@
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
+import {Navigate, Outlet} from 'react-router-dom';
 import MusicPlayer from '../components/player'; 
 import CoverImg from '../components/icons/nopic.png'
 import BackURL from '../urls';
+import {Context} from "../index.js"
 import "./home.css"
 
 
@@ -11,10 +13,15 @@ const HomePage = () => {
   const artistName = "Artist Name";
   const albumCover = CoverImg;
   const [audio, setAudio] = useState(null);
+  const [isLoggedIn] = useContext(Context);
+
+  if (!isLoggedIn){
+    return <Navigate to="/login" />
+  }
 
   const getTrack = async () => {
-    //setAudio(1)//отображение плеера без музыки
-    //return
+    setAudio(1)//отображение плеера без музsыки
+    return
     try{
       const trackBlob = await postGetTrackById(8);
       const trackUrl = URL.createObjectURL(trackBlob);
@@ -26,19 +33,21 @@ const HomePage = () => {
   };
 
   return (
-    <div className="home-page">
-      <div className="Player">
-        <MusicPlayer
-          songTitle={songTitle}
-          artistName={artistName}
-          albumCover={albumCover}
-          audio={audio}
-        />        
-      </div>
+      <div className="home-page">
+        <Outlet/>
+        <div className="Player">
+          <MusicPlayer
+            songTitle={songTitle}
+            artistName={artistName}
+            albumCover={albumCover}
+            audio={audio}
+          />
+        </div>
+
+        
       <button onClick={getTrack}> Загрузить аудио</button>
-    </div>
+      </div>
   );
-  
 };
 
 async function postGetTrackById(id) {

@@ -5,6 +5,9 @@ import RegisterPage from './Pages/register';
 import LoginPage from './Pages/login';
 import Menu from './Pages/menu';
 import HomePage from './Pages/home';
+import Recomendations from './components/recomendations';
+import SearchBar from './components/searchbar';
+
 
 export const Context = React.createContext();
 
@@ -16,9 +19,13 @@ const App = () => {
       <Context.Provider value={[isLoggedIn, setisLoggedIn]}>
         <Menu />
         <Routes> 
-          <Route path="/register" Component={RegisterPage} />
-          <Route path="/login" Component={LoginPage} />
-          <Route path="/" Component={HomePage} />
+          <Route path="/register" element={<RegisterPage/>} />
+          <Route path="/login" element={<LoginPage/>} />
+          <Route path="/home/" element={<HomePage/>} >
+            <Route path="rec/" element={<Recomendations/>} />
+            <Route path="search/" element={<SearchBar/>} />
+          </Route>
+          
         </Routes>
       </Context.Provider>
     </Router>

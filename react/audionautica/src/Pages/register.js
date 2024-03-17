@@ -41,7 +41,7 @@ const RegisterPage = () => {
             setErrorMessage("Пользователь с таким email уже существует")
             return
         }
-       
+    
       
         console.log('Отправлены данные для регистрации:', { email, username, password });
         

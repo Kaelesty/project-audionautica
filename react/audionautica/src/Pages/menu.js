@@ -17,11 +17,15 @@ const Menu = () => {
 
   return (
     <div className="menu">
-      <Link to="/">Домой</Link>
       {isLoggedIn ? (
-        <Link to="/login" className='ButtonLink'>
-          <button onClick={handleLogout}>Выход</button>
-        </Link>
+        <>
+          <Link to="/login" className='ButtonLink'>
+            <button onClick={handleLogout}>Выход</button>
+          </Link>
+          <Link to="/home/">Домой</Link>
+          <Link to="/home/rec">Рекомендации</Link>
+          <Link to="/home/search">Поиск</Link>
+        </>
       ) : (
         <>
           <Link to="/login" className='right'>Войти</Link>

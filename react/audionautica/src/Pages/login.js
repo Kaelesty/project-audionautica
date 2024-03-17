@@ -46,7 +46,7 @@ const LoginPage = () => {
     };
 
     if (isLoggedIn){
-        return <Navigate to="/" />
+        return <Navigate to="/home/" />
     }
 
     return (
@@ -77,9 +77,7 @@ const LoginPage = () => {
                         />
                     </div>
                     <p className='error-message'>{errorMessage}</p>
-                   
-                        <button type="submit">Войти</button>
-                    
+                    <button type="submit">Войти</button>
                 </form>
             </div>
         </div>

@@ -13,15 +13,7 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     
   }
-  @keyframes slideIn {
-    from {
-      transform: translateY(100%);
-    }
-    to {
-      transform: translateY(0);
-    }
-  }
-  
+ 
   .open-button {
     width: 30px;
     height: 30px;
@@ -32,6 +24,8 @@
     padding: 5px 20px;
     border-radius: 5px;
     cursor: pointer; 
+    opacity: 0; 
+    animation: fadeInAnimation 0.5s ease-in 0.6s forwards;
   }
 
   .close-button {
@@ -53,4 +47,20 @@
     -moz-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
+  }
+  @keyframes slideIn {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+  @keyframes fadeInAnimation {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
