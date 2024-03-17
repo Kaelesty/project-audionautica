@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-(u@svuz86an9hbplikwo*e@v$6n1#kkyfo-x0+br#n7x2dha0i
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'a771-188-170-79-152.ngrok-free.app',
+    'e812-188-244-132-71.ngrok-free.app',
     '127.0.0.1',
 ]
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
@@ -138,6 +138,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_DRIDIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS=True
 REST_FRAMEWORCK = {
     'DEFAULT_RENDER_CLASSES':[
         'rest_frameworck.renderers.JSONRender',
