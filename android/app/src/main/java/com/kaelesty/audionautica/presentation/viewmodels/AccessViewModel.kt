@@ -40,9 +40,9 @@ class AccessViewModel @Inject constructor(
 	fun register(parameters: Map<String, String>) {
 		viewModelScope.launch(Dispatchers.IO) {
 			val result = registerUseCase(
-				parameters["Email"] ?: throw IllegalStateException(),
-				parameters["Name"] ?: throw IllegalStateException(),
-				parameters["Password"] ?: throw IllegalStateException()
+				parameters["Email"]?.trim() ?: throw IllegalStateException(),
+				parameters["Name"]?.trim() ?: throw IllegalStateException(),
+				parameters["Password"]?.trim() ?: throw IllegalStateException()
 			)
 			when (result) {
 				RegisterRC.OK -> _runMusicActivity.postValue(RunMusicActivityMode.ONLINE)
@@ -57,8 +57,8 @@ class AccessViewModel @Inject constructor(
 	fun signin(parameters: Map<String, String>) {
 		viewModelScope.launch(Dispatchers.IO) {
 			val result = loginUseCase(
-				parameters["Email"] ?: throw IllegalStateException(),
-				parameters["Password"] ?: throw IllegalStateException()
+				parameters["Email"]?.trim() ?: throw IllegalStateException(),
+				parameters["Password"]?.trim() ?: throw IllegalStateException()
 			)
 
 			when (result) {

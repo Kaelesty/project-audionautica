@@ -21,10 +21,16 @@ interface MusicApiService {
 
 	@Streaming
 	@POST("GetTrack/")
-	suspend fun downloadTrackSample(@Body body: DownloadTrackDto): Response<ResponseBody>
+	suspend fun downloadTrackSample(
+		@Header("token") token: String,
+		@Body body: DownloadTrackDto
+	): Response<ResponseBody>
 
 	@POST("Search/")
-	suspend fun searchTracks(@Body body: SearchDto): Response<TracksSearchResponse>
+	suspend fun searchTracks(
+		@Header("token") token: String,
+		@Body body: SearchDto
+	): Response<TracksSearchResponse>
 
 	@Multipart
 	@POST("Upload/")
@@ -32,6 +38,7 @@ interface MusicApiService {
 		@Header("title") title: String,
 		@Header("artist") artist: String,
 		@Header("tags") tags: String,
+		@Header("token") token: String,
 		@Part("description") description: RequestBody,
 		@Part musicFile: MultipartBody.Part,
 	): Response<ResponseBody>
