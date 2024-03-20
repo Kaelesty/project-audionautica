@@ -31,7 +31,9 @@ class PlayList(models.Model):
     image = models.CharField("image_url", max_length=250)
     description = models.CharField("description", max_length=250)
     tracksid = models.CharField("tracksid", max_length=250)
+    liked = models.CharField("liked", max_length=250)
     isprivat = models.CharField("isprivat", max_length=200)
+    #lastupdate_date = models.DateTimeField("lastupdate_date")
 
     def __str__(self):
         return self.title +' id {}'.format(self.id)

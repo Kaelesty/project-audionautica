@@ -1,4 +1,4 @@
-import os, json, bcrypt, hashlib
+import os, json, hashlib
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
@@ -26,6 +26,7 @@ def create_playlist(x):
     playlist.creatorid = str(x)
     playlist.isprivat = 'True'
     playlist.image = file_path_posters + "kitty.jpg"
+    playlist.liked = "0"
     playlist.save()
     return playlist.id
 
@@ -35,7 +36,7 @@ def make_hash(password):
     return hash_object.hexdigest()
 
 def check_token(request):
-    token = request.data['token']
+    token = request.headers['token']
     try:
         jwt.decode(token, secret_key, algorithms=['HS256'])
         return True
@@ -80,7 +81,7 @@ class LoginUser(APIView):
 
         payload = {
             'id':user.id,
-            'exp':datetime.datetime.utcnow()+datetime.timedelta(minutes=1440),
+            'exp':datetime.datetime.utcnow()+datetime.timedelta(minutes=720),
             'iat':datetime.datetime.utcnow()
         }
         token = jwt.encode(payload,secret_key,algorithm='HS256')
@@ -97,7 +98,7 @@ class LoginUser(APIView):
 
 class UserView(APIView):
     def post(self, request):
-        token = request.data
+        token = request.headers['token']
         #token = request.COOKIES.get('jwt')
         # if not token:
         #     raise AuthenticationFailed('Unauthrnticated')
@@ -306,14 +307,70 @@ class LikePlayList(APIView):
         if not check_token(request):
             return Response(status=status.HTTP_418_IM_A_TEAPOT)
         if request.method == "POST":
-            token = request.data["token"]
+            token = request.headers["token"]
             playlist_id = request.data["playlist_id"]
             payload = jwt.decode(token, secret_key, algorithms=['HS256'])
             user = Users.objects.filter(id = payload['id']).first()
-            user_playlists = user.likedplaylist
-            user_playlists += playlist_id
-            user_playlists += "/"
-            user.likedplaylist = user_playlists
-            user.save()
-
+            if playlist_id not in user.likedplaylist:
+                user_playlists = user.likedplaylist
+                user_playlists += playlist_id
+                user_playlists += "/"
+                user.likedplaylist = user_playlists
+                user.save()
+                playlist = PlayList.objects.filter(id = playlist_id).first()
+                playlist.liked = str(int(playlist.liked)+1)
+                playlist.save()
             return Response(status=status.HTTP_200_OK)
+
+
+class DisLikePlayList(APIView):
+    def post(self, request):
+        if not check_token(request):
+            return Response(status=status.HTTP_418_IM_A_TEAPOT)
+        if request.method == "POST":
+            token = request.headers["token"]
+            playlist_id = request.data["playlist_id"]
+            payload = jwt.decode(token, secret_key, algorithms=['HS256'])
+            user = Users.objects.filter(id = payload['id']).first()
+            if playlist_id in user.likedplaylist:
+                user_playlists = user.likedplaylist
+                print(user_playlists)
+                user_playlists = "/".join(list(filter(lambda x:x != playlist_id,user_playlists.split('/'))))
+                print(user_playlists)
+                user.likedplaylist = user_playlists
+                user.save()
+                playlist = PlayList.objects.filter(id = playlist_id).first()
+                playlist.liked = str(int(playlist.liked)-1)
+                playlist.save()
+            return Response(status=status.HTTP_200_OK)
+
+
+class PlayListSearch(APIView):
+    def post(self, request):
+        if not check_token(request):
+            return Response(status=status.HTTP_418_IM_A_TEAPOT)
+        query = request.data["query"].lower()
+        result = PlayList.objects.filter(title=query)
+        all_playlists = PlayList.objects.all()
+        list = []
+        response = []
+        json_response = {}
+        for i in range(PlayList.objects.count()):
+            res = []
+            res.append(all_playlists[i].title)
+            list.append(res)
+        for i in range(len(list)):
+            string = ''.join(list[i])
+            if query in string:
+                response.append(list[i])
+        if len(response) == 0:
+            return HttpResponse('<h1>PlayList not exist</h1>')
+        else:
+            array = []
+            for i in range(len(response)):
+                playlist = {}
+                playlist['title'] = response[i][0]
+                array.append(playlist)
+            print(array)
+            json_response['playlists'] = array
+        return Response(json_response)
