@@ -193,8 +193,6 @@ class MusicRepo @Inject constructor(
 				MultipartBody.FORM, "description"
 			)
 
-			// TODO check possibility to send more than one file via multipart body
-			// TODO there i send music file twice, it should be replaced by poster file
 			val request = musicApiService.uploadTrack(
 				track.title,
 				track.artist,
@@ -242,7 +240,6 @@ class MusicRepo @Inject constructor(
 
 
 	override suspend fun getTrackUri(id: Int): Uri {
-
 		if (! checkFileDownloaded(id)) {
 			Log.d("AudionauticaTag", "Not downloaded $id")
 			downloadTrack(id)

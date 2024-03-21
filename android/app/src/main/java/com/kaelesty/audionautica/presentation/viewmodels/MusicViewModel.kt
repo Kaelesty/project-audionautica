@@ -1,14 +1,12 @@
 package com.kaelesty.audionautica.presentation.viewmodels
 
-import android.app.Application
-import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kaelesty.audionautica.domain.entities.Playlist
 import com.kaelesty.audionautica.domain.entities.Track
+import com.kaelesty.audionautica.domain.player.IPlayerQueueController
 import com.kaelesty.audionautica.domain.usecases.AddToTracksQueueUseCase
 import com.kaelesty.audionautica.domain.usecases.AddTrackToPlaylistUseCase
 import com.kaelesty.audionautica.domain.usecases.CreatePlaylistUseCase
@@ -23,14 +21,11 @@ import com.kaelesty.audionautica.domain.usecases.PlayPrevUseCase
 import com.kaelesty.audionautica.domain.usecases.SaveTrackUseCase
 import com.kaelesty.audionautica.domain.usecases.SearchTracksUseCase
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class MusicViewModel @Inject constructor(
 	private val searchTracksUseCase: SearchTracksUseCase,
-	private val addToTracksQueueUseCase: AddToTracksQueueUseCase,
 	private val getAllPlaylistsUseCase: GetAllPlaylistsUseCase,
 	private val addTrackToPlaylistUseCase: AddTrackToPlaylistUseCase,
 	private val deleteTrackFromPlaylistUseCase: DeleteTrackFromPlaylistUseCase,
@@ -40,18 +35,11 @@ class MusicViewModel @Inject constructor(
 	private val deletePlaylistUseCase: DeletePlaylistUseCase,
 	private val saveTrackUseCase: SaveTrackUseCase,
 	private val deleteTrackUseCase: DeleteTrackUseCase,
-	private val playNextUseCase: PlayNextUseCase,
-	private val playPrevUseCase: PlayPrevUseCase,
+	private val pqc: IPlayerQueueController
 ): ViewModel() {
 
 	private val _tracksSearchResults = MutableLiveData<List<Track>>()
 	val tracksSearchResults: LiveData<List<Track>> get() = _tracksSearchResults
-
-	private val _playedTrackUri = MutableLiveData<Uri>()
-	val playedTrackUri: LiveData<Uri> get() = _playedTrackUri
-
-	private val _playlistTracksFlow = MutableSharedFlow<List<Track>>()
-	val playlistTracksFlow: SharedFlow<List<Track>> get() = _playlistTracksFlow
 
 	fun search(query: String) {
 		viewModelScope.launch {
@@ -62,8 +50,8 @@ class MusicViewModel @Inject constructor(
 
 	fun playTrack(track: Track) {
 		viewModelScope.launch {
-			addToTracksQueueUseCase(
-				tracks = listOf(track),
+			pqc.setQueue(
+				listOf(track)
 			)
 		}
 	}
@@ -71,7 +59,7 @@ class MusicViewModel @Inject constructor(
 	fun playPlaylist(id: Int) {
 		viewModelScope.launch {
 			val tracks = getPlaylistTracks(id)
-			addToTracksQueueUseCase(tracks)
+			pqc.setQueue(tracks)
 		}
 	}
 
@@ -83,10 +71,6 @@ class MusicViewModel @Inject constructor(
 
 	fun getPlaylists(): LiveData<List<Playlist>> {
 		return getAllPlaylistsUseCase()
-	}
-
-	fun pause() {
-
 	}
 
 	fun removeTrackFromPlaylist(track: Track, id: Int) {
@@ -124,18 +108,6 @@ class MusicViewModel @Inject constructor(
 	fun deleteTrack(track: Track) {
 		viewModelScope.launch(Dispatchers.IO) {
 			deleteTrackUseCase(track)
-		}
-	}
-
-	fun playNext() {
-		viewModelScope.launch(Dispatchers.IO) {
-			playNextUseCase()
-		}
-	}
-
-	fun playPrev() {
-		viewModelScope.launch(Dispatchers.IO) {
-			playPrevUseCase()
 		}
 	}
 }

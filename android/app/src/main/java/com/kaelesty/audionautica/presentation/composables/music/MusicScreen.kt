@@ -1,10 +1,12 @@
 package com.kaelesty.audionautica.presentation.composables.music
 
+import android.media.session.MediaController
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -14,7 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.LiveData
-import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.kaelesty.audionautica.R
 import com.kaelesty.audionautica.domain.entities.Playlist
@@ -22,40 +24,25 @@ import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.presentation.composables.dialogues.AddTrackToPlalistDialog
 import com.kaelesty.audionautica.presentation.composables.dialogues.EditPlaylistDialog
 import com.kaelesty.audionautica.presentation.composables.dialogues.MinimalDialog
+import com.kaelesty.audionautica.presentation.player.PlayerBar
 import com.kaelesty.audionautica.presentation.navigation.MusicNavGraph
 import com.kaelesty.audionautica.presentation.navigation.Screen
 import com.kaelesty.audionautica.presentation.navigation.rememberMusicNavigationState
+import com.kaelesty.audionautica.presentation.viewmodels.MusicViewModel
+import com.kaelesty.audionautica.presentation.viewmodels.ViewModelFactory
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun MusicScreen(
-	onPlay: (Track) -> Unit,
-	onPause: () -> Unit,
-	onResume: () -> Unit,
-	onNext: () -> Unit,
-	onPrev: () -> Unit,
-	onSearch: (String) -> Unit,
-	onAddTrackToPlaylist: (Track, Int) -> Unit,
-	onRemoveTrackFromPlaylist: (Track, Int) -> Unit,
-	tracksSearchResults: LiveData<List<Track>>,
-	playingFlow: SharedFlow<Boolean>,
-	trackFlow: SharedFlow<Track>,
-	onRequestTrackCreation: () -> Unit,
-	playlistsLiveData: LiveData<List<Playlist>>,
-	getPlaylistTracks: (Int) -> List<Track>,
-	onDeleteTrackFromPlaylist: (Track, Int) -> Unit,
-	onCreatePlaylist: (Playlist) -> Unit,
-	onDeletePlaylist: (Int) -> Unit,
-	onPlayPlaylist: (Int) -> Unit,
-	libraryTracks: LiveData<List<Track>>,
-	onSaveTrack: (Track) -> Unit,
-	onDeleteTrack: (Track) -> Unit,
-	offlineMode: Boolean
+	viewModelFactory: ViewModelFactory,
+	offlineMode: Boolean,
+	playerMediaControllerFlow: StateFlow<MediaController?>,
+	launchCreateTrackActivity: () -> Unit,
 ) {
 
-	var pausedTrackId = rememberSaveable {
-		mutableStateOf(- 1)
-	}
+	val vm: MusicViewModel = viewModel(factory = viewModelFactory)
+	val playerMediaController by playerMediaControllerFlow.collectAsState()
 
 	val navigationState = rememberMusicNavigationState()
 
@@ -76,15 +63,13 @@ fun MusicScreen(
 		mutableStateOf<Unit?>(null)
 	}
 
-	val playlists by playlistsLiveData.observeAsState(listOf())
+	val playlists by vm.getPlaylists().observeAsState(listOf())
 
 	selectPlaylistDialog.value?.let { track ->
 		AddTrackToPlalistDialog(
 			onDimissRequest = { selectPlaylistDialog.value = null },
 			onAcceptRequest = { playlistId ->
-				onAddTrackToPlaylist(
-					track, playlistId
-				)
+				vm.addTrackToPlaylist(track, playlistId)
 				selectPlaylistDialog.value = null
 			},
 			playlists = playlists
@@ -95,9 +80,9 @@ fun MusicScreen(
 		EditPlaylistDialog(
 			onDismissRequest = { editPlaylistDialog.value = null },
 			playlist = playlist,
-			playlistTracks = getPlaylistTracks(playlist.id),
-			onDeleteTrackFromPlaylist = onDeleteTrackFromPlaylist,
-			onDeletePlaylist = onDeletePlaylist
+			playlistTracks = vm.getPlaylistTracks(playlist.id),
+			onDeleteTrackFromPlaylist = { track, id -> vm.removeTrackFromPlaylist(track, id) },
+			onDeletePlaylist = { vm.deletePlaylist(it) }
 		)
 	}
 
@@ -105,7 +90,7 @@ fun MusicScreen(
 		MinimalDialog(
 			onAcceptRequest = {
 				createPlaylistDialog.value = null
-				onCreatePlaylist(
+				vm.createPlaylist(
 					Playlist(
 						id = - 1,
 						title = it,
@@ -125,15 +110,12 @@ fun MusicScreen(
 			.fillMaxSize(),
 		bottomBar = {
 			Column {
-				PlayerBar(
-					onResume = { onResume() },
-					onPause = { onPause() },
-					playingFlow = playingFlow,
-					trackFlow = trackFlow,
-					pausedTrackId = pausedTrackId,
-					onNext = onNext,
-					onPrev = onPrev,
-				)
+				playerMediaController?.let {
+					PlayerBar(
+						playerMediaController = it,
+						viewModelFactory = viewModelFactory
+					)
+				}
 				MusicNavigationBar(navigationState, offlineMode)
 			}
 		},
@@ -156,40 +138,32 @@ fun MusicScreen(
 			else Screen.MusicLibrary.route,
 			musicSearchScreenContent = {
 				Search(
-					onSearch = onSearch,
-					tracksSearchResults = tracksSearchResults,
-					onPlay = onPlay,
-					onPause = onPause,
-					playingFlow = playingFlow,
+					onSearch = { vm.search(it) },
+					tracksSearchResults = vm.tracksSearchResults,
+					onPlay = { vm.playTrack(it) },
 					selectPlaylistDialog = selectPlaylistDialog,
-					onSaveTrack = onSaveTrack,
-					libraryTracksLD = libraryTracks,
-					trackFlow = trackFlow,
-					pausedTrackId = pausedTrackId,
-					onResume = onResume
+					onSaveTrack = { vm.saveTrack(it) },
+					libraryTracksLD = vm.getAllTracks(),
+					playerMediaController = playerMediaController
 				)
 			},
 			musicPlaylistsScreenContent = {
 				Playlists(
-					playlistsLiveData = playlistsLiveData,
+					playlistsLiveData = vm.getPlaylists(),
 					editPlaylistDialog = editPlaylistDialog,
-					onPlayPlaylist = onPlayPlaylist,
+					onPlayPlaylist = { vm.playPlaylist(it) },
 					createPlaylistDialog = createPlaylistDialog
 				)
 			},
 			musicLibraryScreenContent = {
 				MyTracks(
-					onCreateTrack = { onRequestTrackCreation() },
-					libraryTracks = libraryTracks,
-					onDeleteTrack = onDeleteTrack,
-					onPause = onPause,
-					onPlay = onPlay,
-					playingFlow = playingFlow,
+					onCreateTrack = { launchCreateTrackActivity() },
+					libraryTracks = vm.getAllTracks(),
+					onDeleteTrack = { vm.deleteTrack(it) },
+					onPlay = { vm.playTrack(it) },
 					selectPlaylistDialog = selectPlaylistDialog,
-					trackFlow = trackFlow,
-					pausedTrackId = pausedTrackId,
-					onResume = onResume,
-					offlineMode = offlineMode
+					offlineMode = offlineMode,
+					playerMediaController = playerMediaController
 				)
 			},
 		)
