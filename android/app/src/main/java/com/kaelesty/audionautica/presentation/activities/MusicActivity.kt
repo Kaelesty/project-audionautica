@@ -13,24 +13,29 @@ import android.os.RemoteException
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.MutableState
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.presentation.composables.music.MusicScreen
-import com.kaelesty.audionautica.presentation.services.MusicPlayerService
+import com.kaelesty.audionautica.presentation.player.PlayerService
 import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
 import com.kaelesty.audionautica.presentation.viewmodels.MusicViewModel
+import com.kaelesty.audionautica.presentation.viewmodels.ViewModelFactory
 import com.kaelesty.audionautica.system.ModifiedApplication
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class MusicActivity : ComponentActivity() {
 
 
-	@Inject
-	lateinit var viewModel: MusicViewModel
+	@Inject lateinit var viewModelFactory: ViewModelFactory
 
 	private val component by lazy {
 		(application as ModifiedApplication).component
@@ -44,24 +49,26 @@ class MusicActivity : ComponentActivity() {
 	private val playingFlow = MutableSharedFlow<Boolean>()
 	private val trackFlow = MutableSharedFlow<Track>()
 
+	private val _playerMediaControllerFlow: MutableStateFlow<MediaController?> = MutableStateFlow(null)
+	val playerMediaControllerFlow: StateFlow<MediaController?> get() = _playerMediaControllerFlow.asStateFlow()
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 
 		super.onCreate(savedInstanceState)
 		component.inject(this)
 
-		var playerMediaController: MediaController? = null
 		var binder: IBinder?
 
 		serviceConn = object : ServiceConnection {
 
 			override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
-				binder = p1 as MusicPlayerService.MusicPlayerServiceBinder
+				binder = p1 as PlayerService.MusicPlayerServiceBinder
 				try {
-					playerMediaController = MediaController(
+					val playerMediaController = MediaController(
 						this@MusicActivity,
-						(binder as MusicPlayerService.MusicPlayerServiceBinder).getMediasessionToken()
+						(binder as PlayerService.MusicPlayerServiceBinder).getMediasessionToken()
 					)
-					playerMediaController?.registerCallback(
+					playerMediaController.registerCallback(
 						object : MediaController.Callback() {
 							override fun onPlaybackStateChanged(state: PlaybackState?) {
 								super.onPlaybackStateChanged(state)
@@ -77,11 +84,11 @@ class MusicActivity : ComponentActivity() {
 								super.onMetadataChanged(metadata)
 								try {
 									val track = Track(
-										metadata?.getLong(MusicPlayerService.CUSTOM_METADATA_KEY_ID)?.toInt() ?: throw RuntimeException("Metadata id not found"),
+										metadata?.getLong(PlayerService.CUSTOM_METADATA_KEY_ID)?.toInt() ?: throw RuntimeException("Metadata id not found"),
 										metadata.getString(MediaMetadata.METADATA_KEY_TITLE),
 										metadata.getString(MediaMetadata.METADATA_KEY_ARTIST),
-										metadata.getString(MusicPlayerService.CUSTOM_METADATA_KEY_TAGS)
-											.split(MusicPlayerService.CUSTOM_METADATA_TAGS_DELIMITER)
+										metadata.getString(PlayerService.CUSTOM_METADATA_KEY_TAGS)
+											.split(PlayerService.CUSTOM_METADATA_TAGS_DELIMITER)
 									)
 									scope.launch {
 										trackFlow.emit(track)
@@ -93,19 +100,20 @@ class MusicActivity : ComponentActivity() {
 							}
 						}
 					)
+					scope.launch { _playerMediaControllerFlow.emit(playerMediaController) }
 				} catch (e: RemoteException) {
-					playerMediaController = null
+					scope.launch { _playerMediaControllerFlow.emit(null) }
 				}
 			}
 
 			override fun onServiceDisconnected(p0: ComponentName?) {
-				playerMediaController = null
+				scope.launch { _playerMediaControllerFlow.emit(null) }
 				binder = null
 			}
 		}
 		isOffline = intent.getBooleanExtra(IS_OFFLINE_EXTRA_KEY, false)
 		bindService(
-			MusicPlayerService.newIntent(this@MusicActivity),
+			PlayerService.newIntent(this@MusicActivity),
 			serviceConn as ServiceConnection,
 			BIND_AUTO_CREATE
 		)
@@ -113,55 +121,10 @@ class MusicActivity : ComponentActivity() {
 		setContent {
 			AudionauticaTheme {
 				MusicScreen(
-					tracksSearchResults = viewModel.tracksSearchResults,
-					onSearch = { query -> viewModel.search(query) },
-					onPlay = { track ->
-						viewModel.playTrack(track)
-					},
-					onPause = {
-						viewModel.pause()
-						playerMediaController?.transportControls?.pause()
-					},
-					onResume = {
-						playerMediaController?.transportControls?.play()
-					},
-					onAddTrackToPlaylist = { track, playlistId ->
-						viewModel.addTrackToPlaylist(track, playlistId)
-					},
-					playingFlow = playingFlow,
-					trackFlow = trackFlow,
-					onRequestTrackCreation = { launchAddTrackActivity() },
-					playlistsLiveData = viewModel.getPlaylists(),
-					getPlaylistTracks = { viewModel.getPlaylistTracks(it) },
-					onRemoveTrackFromPlaylist = { track, id ->
-						viewModel.removeTrackFromPlaylist(track, id)
-					},
-					onCreatePlaylist = {
-						viewModel.createPlaylist(it)
-					},
-					onDeleteTrackFromPlaylist = { track, playlistId ->
-						viewModel.removeTrackFromPlaylist(track, playlistId)
-					},
-					onPlayPlaylist = {
-						viewModel.playPlaylist(it)
-					},
-					onDeletePlaylist = {
-						viewModel.deletePlaylist(it)
-					},
-					onDeleteTrack = {
-						viewModel.deleteTrack(it)
-					},
-					onSaveTrack = {
-						viewModel.saveTrack(it)
-					},
-					libraryTracks = viewModel.getAllTracks(),
-					onPrev = {
-						viewModel.playPrev()
-					},
-					onNext = {
-						viewModel.playNext()
-					},
-					offlineMode = isOffline
+					viewModelFactory = viewModelFactory,
+					offlineMode = isOffline,
+					launchCreateTrackActivity = { launchAddTrackActivity() },
+					playerMediaControllerFlow = playerMediaControllerFlow
 				)
 			}
 		}

@@ -1,6 +1,9 @@
 package com.kaelesty.audionautica.presentation.composables.dialogues
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -50,38 +53,45 @@ fun MinimalDialog(
 				.padding(16.dp),
 			shape = RoundedCornerShape(16.dp),
 		) {
-			Text(
-				text = title,
-				fontSize = 24.sp,
-				fontStyle = FontStyle.Normal,
-				fontFamily = SpaceGrotesk,
-				fontWeight = FontWeight.SemiBold,
-				color = MaterialTheme.colorScheme.onSurface,
-				modifier = Modifier
-					.padding(horizontal = 10.dp)
-					.padding(top = 8.dp)
-			)
-			TextField(
-				modifier = Modifier
-					.padding(horizontal = 8.dp)
-					.fillMaxWidth(),
-				value = text.value,
-				onValueChange = { text.value = it }
-			)
+			Column(
+				modifier = Modifier.padding(8.dp)
+			) {
+				Text(
+					text = title,
+					fontSize = 24.sp,
+					fontStyle = FontStyle.Normal,
+					fontFamily = SpaceGrotesk,
+					fontWeight = FontWeight.SemiBold,
+					color = MaterialTheme.colorScheme.onSurface,
+					modifier = Modifier
+						.padding(horizontal = 10.dp)
+						.padding(top = 8.dp)
+				)
+				TextField(
+					modifier = Modifier
+						.padding(horizontal = 8.dp)
+						.fillMaxWidth(),
+					value = text.value,
+					onValueChange = { text.value = it }
+				)
 
-			Text(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(horizontal = 12.dp)
-					.padding(top = 24.dp)
-					.clickable {
-						onAcceptRequest(text.value)
-					},
-				text = "OK",
-				textAlign = TextAlign.End,
-				fontSize = 20.sp,
-				fontFamily = SpaceGrotesk,
-			)
+				Row(
+					Modifier.padding(vertical = 12.dp)
+				) {
+					Spacer(Modifier.weight(1f))
+					Text(
+						modifier = Modifier
+							.padding(horizontal = 12.dp)
+							.clickable {
+								onAcceptRequest(text.value)
+							},
+						text = "OK",
+						textAlign = TextAlign.End,
+						fontSize = 20.sp,
+						fontFamily = SpaceGrotesk,
+					)
+				}
+			}
 		}
 	}
 }

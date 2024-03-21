@@ -55,8 +55,14 @@ class AddTrackViewModel @Inject constructor(
 		viewModelScope.launch(Dispatchers.IO) {
 			when(uploadTrackUseCase(track, uri)) {
 				UploadTrackRC.OK -> _finish.postValue(Unit)
-				UploadTrackRC.NOT_CONNECTED -> _errorFlow.emit("Not available in offline mode")
-				UploadTrackRC.SERVER_ERROR -> _errorFlow.emit("Unknown server error")
+				UploadTrackRC.NOT_CONNECTED -> {
+					_errorFlow.emit("Not available in offline mode")
+					_loadingFlow.emit(false)
+				}
+				UploadTrackRC.SERVER_ERROR -> {
+					_errorFlow.emit("Unknown server error")
+					_loadingFlow.emit(false)
+				}
 			}
 		}
 	}

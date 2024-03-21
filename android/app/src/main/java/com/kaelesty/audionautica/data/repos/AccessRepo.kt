@@ -35,7 +35,7 @@ class AccessRepo @Inject constructor(
 			)
 			return when (response.code()) {
 				200 -> {
-					val jwt = response.body() ?: throw IllegalStateException("EMPTY JWT")
+					val jwt = response.body()?.jwt ?: throw IllegalStateException("EMPTY JWT")
 					jwtTool.saveToken(jwt)
 					LoginRC.OK
 				}
@@ -78,7 +78,6 @@ class AccessRepo @Inject constructor(
 			return CheckAuthRC.NOT_OK
 		}
 	}
-
 	override suspend fun register(email: String, name: String, password: String): RegisterRC {
 		try {
 			val response = accessApiService.register(
