@@ -43,22 +43,27 @@ class PlayerViewModel @Inject constructor(
 	val playerState: StateFlow<PlayerState> get() = _playerState
 
 	private var player: Player? = null
+	private var updateProgress = true
+	private var seekingProgress: Float = 0f
 
 	init {
 
 		viewModelScope.launch(Dispatchers.Main) {
 			while (true) {
-				player?.let {
-					val dur = it.duration
-					//Log.d("PlayerTag", "new player position: ${it.currentPosition}")
-					_playerState.emit(
-						_playerState.value.copy(
-							progress = it.currentPosition,
-							duration = if (dur > 0) dur else 0
+				if (updateProgress) {
+					player?.let {
+						val dur = it.duration
+						//Log.d("PlayerTag", "new player position: ${it.currentPosition}")
+						_playerState.emit(
+							_playerState.value.copy(
+								progress = it.currentPosition,
+								duration = if (dur > 0) dur else 0
+							)
 						)
-					)
+					}
+					delay(100)
 				}
-				delay(100)
+
 			}
 		}
 
@@ -98,6 +103,17 @@ class PlayerViewModel @Inject constructor(
 		player?.let {
 			it.seekTo(progress.toLong())
 		}
+	}
+
+	fun setSeekingProgress(progress: Float) {
+		updateProgress = false
+		seekingProgress = progress
+	}
+
+	fun confirmSeek() {
+		setPlayingProgress(seekingProgress)
+		seekingProgress = 0f
+		updateProgress = true
 	}
 
 	fun getQueueFlow() = pqc.getQueueFlow()

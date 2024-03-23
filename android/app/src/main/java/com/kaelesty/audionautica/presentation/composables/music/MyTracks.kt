@@ -119,7 +119,7 @@ fun MyTracks(
 					contentDescription = null
 				)
 			}
-			Spacer(Modifier.height(180.dp))
+			Spacer(Modifier.height(230.dp))
 		}
 	}
 }

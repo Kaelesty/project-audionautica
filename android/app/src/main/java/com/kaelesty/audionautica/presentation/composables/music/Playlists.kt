@@ -88,7 +88,7 @@ fun Playlists(
 	Row(
 		modifier = Modifier
 			.fillMaxSize()
-			.padding(bottom = 192.dp, end = 12.dp)
+			.padding(bottom = 242.dp, end = 12.dp)
 		// 192.dp to make position equals with button of MyTracks
 		,
 		verticalAlignment = Alignment.Bottom

@@ -17,6 +17,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -44,14 +48,20 @@ fun PlayerBar(
 
 
 	val playerState by vm.playerState.collectAsState()
-	val track = playerState.meta ?: Track(-1, "None", "", listOf())
+	val track = playerState.meta ?: Track(-1, "", "", listOf())
 
 	var progress = playerState.progress
+	var isSeeking by remember {
+		mutableStateOf(false)
+	}
+	var seekingProgress by remember {
+		mutableFloatStateOf(0f)
+	}
 
 	val playing = playerState.playing
 	val duration = playerState.duration
 
-	val left = duration - progress
+	val left = duration - if (isSeeking) seekingProgress.toLong() else progress
 
 	val leftMinutes = (left / 60000).toInt()
 	val leftSeconds = (left / 1000).toInt() - leftMinutes * 60
@@ -73,7 +83,7 @@ fun PlayerBar(
 						.weight(1f)
 				)
 				Text(
-					text = "-$leftMinutes:${if (leftSeconds != 0) leftSeconds else "00"}",
+					text = "-$leftMinutes:${if (leftSeconds >= 10) leftSeconds else "0$leftSeconds"}",
 					fontFamily = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) SpaceGrotesk else FontFamily.SansSerif,
 					fontWeight = FontWeight.Thin,
 					fontSize = 14.sp,
@@ -124,13 +134,19 @@ fun PlayerBar(
 				)
 			}
 			Slider(
-				value = progress.toFloat(),
+				value = if (isSeeking) seekingProgress else progress.toFloat(),
+
 				onValueChange = {
-					vm.setPlayingProgress(it)
+					isSeeking = true
+					seekingProgress = it
 				},
 				modifier = Modifier
 					.padding(horizontal = 6.dp),
 				valueRange = 0f..duration.toFloat(),
+				onValueChangeFinished = {
+					vm.setPlayingProgress(seekingProgress)
+					isSeeking = false
+				}
 			)
 		}
 	}
