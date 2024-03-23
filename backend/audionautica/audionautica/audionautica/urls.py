@@ -34,6 +34,9 @@ from Bd.views import (
     AddTrackToPlayList,
     DeleteTrackFromPlayList,
     LikePlayList,
+    UsersPlayList,
+    PlayListDetail,
+    PlayListSearch,
 )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -60,6 +63,9 @@ urlpatterns = [
     path('PlayList/AddTrackToPlayList/', AddTrackToPlayList.as_view()),
     path('PlayList/DeleteTrackFromPlayList/', DeleteTrackFromPlayList.as_view()),
     path('PlayList/LikePlayList/', LikePlayList.as_view()),
+    path('PlayList/UsersPlayList/', UsersPlayList.as_view()),
+    path('PlayList/PlayListDetail/', PlayListDetail.as_view()),
+    path ('PlayList/SearchPlayList/', PlayListSearch.as_view()),
     #path('Logout/', LogoutView.as_view()),
     # path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'), #for login give access & refresh token
     # path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), #refreshing

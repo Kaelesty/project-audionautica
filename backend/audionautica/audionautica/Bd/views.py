@@ -22,7 +22,7 @@ file_path_posters = "C:/Users/greg/Desktop/posters/"
 secret_key = "secretkey"
 def create_playlist(x):
     playlist = PlayList()
-    playlist.title = 'Favorite Playlist'
+    playlist.title = 'favorite playlist'
     playlist.creatorid = str(x)
     playlist.isprivat = 'True'
     playlist.image = file_path_posters + "kitty.jpg"
@@ -358,6 +358,7 @@ class PlayListSearch(APIView):
         for i in range(PlayList.objects.count()):
             res = []
             res.append(all_playlists[i].title)
+            res.append(str(all_playlists[i].id))
             list.append(res)
         for i in range(len(list)):
             string = ''.join(list[i])
@@ -369,8 +370,26 @@ class PlayListSearch(APIView):
             array = []
             for i in range(len(response)):
                 playlist = {}
-                playlist['title'] = response[i][0]
+                playlist['id'] = response[i][1]
                 array.append(playlist)
-            print(array)
             json_response['playlists'] = array
         return Response(json_response)
+
+class UsersPlayList(APIView):
+    def post(self, request):
+        if not check_token(request):
+            return Response(status=status.HTTP_418_IM_A_TEAPOT)
+        token = request.headers["token"]
+        payload = jwt.decode(token, secret_key, algorithms=['HS256'])
+        user = Users.objects.filter(id = payload['id']).first()
+        playlist_id = {}
+        playlist_id['id'] = user.likedplaylist
+        return Response(playlist_id, status=status.HTTP_200_OK)
+
+class PlayListDetail(APIView):
+    def post(self, request):
+        if not check_token(request):
+            return Response(status = status.HTTP_418_IM_A_TEAPOT)
+        playlist_id = request.data["playlist_id"]
+        playlist = PlayList.objects.filter(id = playlist_id).first()
+        return Response(PlaylistUploadSerializer(playlist).data)
