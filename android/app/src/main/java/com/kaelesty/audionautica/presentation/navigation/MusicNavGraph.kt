@@ -19,7 +19,7 @@ fun MusicNavGraph(
 	) {
 
 		composable(Screen.MusicSearch.route) {
-			musicPlaylistsScreenContent()
+			musicSearchScreenContent()
 		}
 
 		composable(Screen.MusicPlaylists.route) {
