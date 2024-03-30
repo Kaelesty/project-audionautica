@@ -30,6 +30,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1','7872-188-244-132-71.ngrok-free.app'
 ]
 CSRF_TRUSTED_ORIGINS = ['https://7872-188-244-132-71.ngrok-free.app']
+
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
 
 # Application definition
