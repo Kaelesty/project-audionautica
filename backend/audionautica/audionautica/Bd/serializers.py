@@ -54,4 +54,4 @@ class PlaylistUploadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PlayList
-        fields = ('id','title','creatorid','description','tracksid','isprivat','image')
+        fields = ('title','creatorid','description','tracksid','isprivat','image')
