@@ -27,9 +27,10 @@ SECRET_KEY = 'django-insecure-(u@svuz86an9hbplikwo*e@v$6n1#kkyfo-x0+br#n7x2dha0i
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '127.0.0.1','-188-244-132-71.ngrok-free.app'
+    '127.0.0.1','7872-188-244-132-71.ngrok-free.app'
 ]
-CSRF_TRUSTED_ORIGINS = ['https://-188-244-132-71.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://7872-188-244-132-71.ngrok-free.app']
+
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
 
 # Application definition
@@ -60,7 +61,9 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'audionautica.urls'
-
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+]
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -138,7 +141,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_DRIDIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS=True
+CORS_ALLOW_HEADERS = [
+    'Content-Type',
+    'token',
+]
+
 REST_FRAMEWORCK = {
     'DEFAULT_RENDER_CLASSES':[
         'rest_frameworck.renderers.JSONRender',

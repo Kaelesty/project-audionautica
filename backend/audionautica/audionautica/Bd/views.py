@@ -17,8 +17,8 @@ import jwt, datetime
 from django.http import HttpResponse, HttpResponseNotFound, FileResponse
 
 
-file_path = "C:/Users/greg/Desktop/music/"
-file_path_posters = "C:/Users/greg/Desktop/posters/"
+file_path = "/tmp/music/"
+file_path_posters = "tmp/posters/"
 secret_key = "secretkey"
 def create_playlist(x):
     playlist = PlayList()
@@ -149,7 +149,7 @@ class TrackUpload(APIView):
             if not check_token(request):
                 return Response(status=status.HTTP_418_IM_A_TEAPOT)
             file = request.body
-            if Traks.objects.filter(title=meta_data[0], artist=meta_data[1]):
+            if Traks.objects.filter(title=request.headers["title"], artist=request.headers["artist"]):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             else:
                 track = Traks()
