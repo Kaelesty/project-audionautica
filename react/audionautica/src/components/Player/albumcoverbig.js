@@ -14,7 +14,7 @@ const AlbumCoverBig = ({ coverSrc }) => {
 
   return (
     <div>
-      <img className="open-button" alt="Open Album Cover" src={require("./icons/up-arrow.png")} onClick={openModal}/>
+      <img className="open-button" alt="Open Album Cover" src={require("./../icons/up-arrow.png")} onClick={openModal}/>
       {isOpen && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content">

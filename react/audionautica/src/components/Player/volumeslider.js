@@ -29,7 +29,7 @@ const VolumeSlider = ({ volumeChange }) => {
   return (
     <div className="volume-slider">
       <img className='volume-indicator'
-          src={volume > 80 ? require("./icons/volume3.png") : volume > 45 ? require("./icons/volume2.png") : volume > 0 ? require("./icons/volume1.png"): require("./icons/volume0.png")}
+          src={volume > 80 ? require("./../icons/volume3.png") : volume > 45 ? require("./../icons/volume2.png") : volume > 0 ? require("./../icons/volume1.png"): require("./../icons/volume0.png")}
           alt="Volume Ind"
           onClick={VolumeButPressed}
         />

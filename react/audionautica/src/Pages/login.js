@@ -38,7 +38,7 @@ const LoginPage = () => {
             return
         }
         
-        token.setToken(tokenResponse);
+        token.setToken(tokenResponse.token);
         console.log(token.getToken());
         setisLoggedIn(true);
         setlogin('');

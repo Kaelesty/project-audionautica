@@ -1,8 +1,9 @@
 import React, {useState, useContext} from 'react';
 import {Navigate, Outlet} from 'react-router-dom';
-import MusicPlayer from '../components/player'; 
+import MusicPlayer from '../components/Player/player.js'; 
 import CoverImg from '../components/icons/nopic.png'
 import BackURL from '../urls';
+import token from '../token.js';
 import {Context} from "../index.js"
 import "./home.css"
 
@@ -20,10 +21,10 @@ const HomePage = () => {
   }
 
   const getTrack = async () => {
-    setAudio(1)//отображение плеера без музsыки
-    return
+    //setAudio(1)//отображение плеера без музsыки
+    //return
     try{
-      const trackBlob = await postGetTrackById(8);
+      const trackBlob = await postGetTrackById(4);
       const trackUrl = URL.createObjectURL(trackBlob);
       setAudio(new Audio(trackUrl)); 
     }
@@ -53,9 +54,11 @@ const HomePage = () => {
 async function postGetTrackById(id) {
   try {
     const response = await fetch(BackURL + "/Music/GetTrack/", {
+     
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'token': token.getToken()
       },
       body: JSON.stringify({id}),
       responseType: 'blob'

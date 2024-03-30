@@ -6,7 +6,10 @@ import LoginPage from './Pages/login';
 import Menu from './Pages/menu';
 import HomePage from './Pages/home';
 import Recomendations from './components/recomendations';
-import SearchBar from './components/searchbar';
+import SearchBar from './components/Search/searchbar';
+import Playlist from './components/playlist';
+import AlbumCover from './components/icons/nopic.png';
+
 
 
 export const Context = React.createContext();
@@ -24,6 +27,7 @@ const App = () => {
           <Route path="/home/" element={<HomePage/>} >
             <Route path="rec/" element={<Recomendations/>} />
             <Route path="search/" element={<SearchBar/>} />
+            <Route path="test/" element={<Playlist title={"Title"} creator={"Creator"} cover={AlbumCover}/>} />
           </Route>
           
         </Routes>

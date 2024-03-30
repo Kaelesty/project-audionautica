@@ -25,6 +25,7 @@ const Menu = () => {
           <Link to="/home/">Домой</Link>
           <Link to="/home/rec">Рекомендации</Link>
           <Link to="/home/search">Поиск</Link>
+          <Link to="/home/test">Тест</Link>
         </>
       ) : (
         <>

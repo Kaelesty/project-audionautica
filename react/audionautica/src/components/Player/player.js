@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import VolumeSlider from './volumeslider';
 import './player.css';
-import AlbumCover from './icons/nopic.png';
+import AlbumCover from './../icons/nopic.png';
 import AlbumCoverBig from './albumcoverbig';
 
 const MusicPlayer = ({ songTitle, artistName, albumCover, audio}) => {
@@ -38,18 +38,18 @@ const MusicPlayer = ({ songTitle, artistName, albumCover, audio}) => {
           <p>{artistName}</p>
         </div>
         <div className="player-controls">
-          <img className="control-button img" src={require('./icons/rewind.png')} alt="Backward" />
+          <img className="control-button img" src={require('./../icons/rewind.png')} alt="Backward" />
 
           <img className="control-button img"
-            src={isPlaying ? require('./icons/pause.png') : require('./icons/play-button.png')} 
+            src={isPlaying ? require('./../icons/pause.png') : require('./../icons/play-button.png')} 
             alt={isPlaying ? 'Pause' : 'Play'} 
             onClick={togglePlay} 
           />
 
-          <img className="control-button img" src={require("./icons/fast-forward.png")} alt="Forward" />
+          <img className="control-button img" src={require("./../icons/fast-forward.png")} alt="Forward" />
 
           <img className="control-button replay-button" 
-            src={repeatMode < 2 ? require("./icons/replay.png") : require("./icons/replay-one.png")}
+            src={repeatMode < 2 ? require("./../icons/replay.png") : require("./../icons/replay-one.png")}
             style={repeatMode > 0 ? { backgroundColor: '#bebebe', transform: 'translateY(1px)' }: {}} 
             alt="Replay Mode" onClick={toggleReplay}
           />
