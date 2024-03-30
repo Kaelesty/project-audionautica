@@ -16,6 +16,7 @@ import com.kaelesty.audionautica.data.mappers.TrackMapper
 import com.kaelesty.audionautica.data.remote.api.MusicApiService
 import com.kaelesty.audionautica.data.remote.entities.DownloadTrackDto
 import com.kaelesty.audionautica.data.remote.entities.SearchDto
+import com.kaelesty.audionautica.data.repos.tools.JwtTool
 import com.kaelesty.audionautica.di.ApplicationScope
 import com.kaelesty.audionautica.domain.entities.Playlist
 import com.kaelesty.audionautica.domain.entities.Track
@@ -48,6 +49,7 @@ class MusicRepo @Inject constructor(
 	private val musicApiService: MusicApiService,
 	private val contentResolver: ContentResolver,
 	private val application: Application,
+	private val jwtTool: JwtTool
 ) : IMusicRepo {
 
 	private val _tracksQueue = MutableSharedFlow<TracksToPlay>()
@@ -116,6 +118,7 @@ class MusicRepo @Inject constructor(
 		Log.d("AudionauticaTag", "Downloading $id")
 		try {
 			val response = musicApiService.downloadTrackSample(
+				token = jwtTool.getToken(),
 				DownloadTrackDto(id)
 			)
 			val body = response.body() ?: throw IOException("Empty body!")
@@ -190,14 +193,13 @@ class MusicRepo @Inject constructor(
 				MultipartBody.FORM, "description"
 			)
 
-			// TODO check possibility to send more than one file via multipart body
-			// TODO there i send music file twice, it should be replaced by poster file
 			val request = musicApiService.uploadTrack(
 				track.title,
 				track.artist,
 				track.tags.joinToString(trackMapper.TRACK_TAGS_STRINGIFICATION_DELIMITER),
+				token = jwtTool.getToken(),
 				description,
-				body
+				body,
 			)
 			return when (request.code()) {
 				200 -> UploadTrackRC.OK
@@ -212,6 +214,7 @@ class MusicRepo @Inject constructor(
 	override suspend fun search(query: String): List<Track> {
 		try {
 			val response = musicApiService.searchTracks(
+				token = jwtTool.getToken(),
 				SearchDto(query)
 			)
 			response.body()?.let { body ->
@@ -237,7 +240,6 @@ class MusicRepo @Inject constructor(
 
 
 	override suspend fun getTrackUri(id: Int): Uri {
-
 		if (! checkFileDownloaded(id)) {
 			Log.d("AudionauticaTag", "Not downloaded $id")
 			downloadTrack(id)

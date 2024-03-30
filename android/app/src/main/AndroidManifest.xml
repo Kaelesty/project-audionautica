@@ -39,11 +39,10 @@
         <activity
             android:name=".presentation.activities.MusicActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Audionautica"></activity>
+            android:theme="@style/Theme.Audionautica"/>
 
         <service
-            android:name=".presentation.services.MusicPlayerService"
+            android:name=".presentation.player.PlayerService"
             android:exported="false" />
     </application>
 

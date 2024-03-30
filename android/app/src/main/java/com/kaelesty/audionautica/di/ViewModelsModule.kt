@@ -1,6 +1,7 @@
 package com.kaelesty.audionautica.di
 
 import androidx.lifecycle.ViewModel
+import com.kaelesty.audionautica.presentation.player.PlayerViewModel
 import com.kaelesty.audionautica.presentation.viewmodels.AccessViewModel
 import com.kaelesty.audionautica.presentation.viewmodels.MusicViewModel
 import dagger.Binds
@@ -20,4 +21,9 @@ interface ViewModelsModule {
 	@StringKey("MusicViewModel")
 	@Binds
 	fun bindsMusicViewModel(impl: MusicViewModel): ViewModel
+
+	@IntoMap
+	@StringKey("PlayerViewModel")
+	@Binds
+	fun bindsPlayerViewModel(impl: PlayerViewModel): ViewModel
 }
