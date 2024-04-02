@@ -1,11 +1,11 @@
-import React, {useState, useContext} from 'react';
+import React, { useContext} from 'react';
 import {Navigate, Outlet} from 'react-router-dom';
-import MusicPlayer from '../components/Player/player.js'; 
+import MusicPlayer from '../components/player/player.js';
 import CoverImg from '../components/icons/nopic.png'
-import BackURL from '../urls';
-import token from '../token.js';
 import {Context} from "../index.js"
+import getTrackById from '../gettrack.js';
 import "./home.css"
+
 
 
 const HomePage = () => {
@@ -13,24 +13,23 @@ const HomePage = () => {
   const songTitle = "Song Title";
   const artistName = "Artist Name";
   const albumCover = CoverImg;
-  const [audio, setAudio] = useState(null);
   const [isLoggedIn] = useContext(Context);
+  const [currentTrack, setCurrentTrack] = useContext(Context)
 
   if (!isLoggedIn){
     return <Navigate to="/login" />
   }
 
   const getTrack = async () => {
-    //setAudio(1)//отображение плеера без музsыки
-    //return
     try{
-      const trackBlob = await postGetTrackById(4);
+      const trackBlob = await getTrackById(4)
       const trackUrl = URL.createObjectURL(trackBlob);
-      setAudio(new Audio(trackUrl)); 
+      setCurrentTrack(new Audio(trackUrl)); 
     }
     catch(error){
       console.error("Ошибка при получении трека",error)
     }
+    finally {console.log(currentTrack)}
   };
 
   return (
@@ -41,7 +40,6 @@ const HomePage = () => {
             songTitle={songTitle}
             artistName={artistName}
             albumCover={albumCover}
-            audio={audio}
           />
         </div>
 
@@ -49,33 +47,6 @@ const HomePage = () => {
       <button onClick={getTrack}> Загрузить аудио</button>
       </div>
   );
-};
-
-async function postGetTrackById(id) {
-  try {
-    const response = await fetch(BackURL + "/Music/GetTrack/", {
-     
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'token': token.getToken()
-      },
-      body: JSON.stringify({id}),
-      responseType: 'blob'
-    });
-
-    if (response.status === 404) {
-      console.error('Трек не найден');
-      return null;
-    }
-    
-    console.log("Отправлен запрос на получение трека")
-    const trackBlob = await response.blob(); // Получаем бинарный трек
-    return trackBlob;
-  } catch (error) {
-      console.error('Ошибка:', error);
-      return null;
-  }
 };
 
 export default HomePage;

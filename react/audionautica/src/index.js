@@ -14,12 +14,13 @@ import AlbumCover from './components/icons/nopic.png';
 
 export const Context = React.createContext();
 
-const App = () => {
+const App = () => { 
   const [isLoggedIn, setisLoggedIn] = useState(false);
+  const [currentTrack, setCurrentTrack] = useState(null)
   
   return (
     <Router> 
-      <Context.Provider value={[isLoggedIn, setisLoggedIn]}>
+      <Context.Provider value={[isLoggedIn, setisLoggedIn, currentTrack, setCurrentTrack]}>
         <Menu />
         <Routes> 
           <Route path="/register" element={<RegisterPage/>} />

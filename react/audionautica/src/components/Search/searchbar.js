@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import BackURL from '../../urls';
 import token from '../../token';
 import LoaderIcon from './download';
+import getTrackById from '../../gettrack';
+import {Context} from '../../index.js'
 import "./searchbar.css"
+
 
 
 const SearchBar = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [,setCurrentTrack] = useContext(Context)
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -51,8 +55,16 @@ const SearchBar = () => {
     setQuery(event.target.value);
   };
 
-  const handleTrackClick = (trackId) => {
-    console.log(trackId) 
+ 
+  const handleTrackClick = async (trackId) => {
+    try{
+      const trackBlob = await getTrackById(trackId)
+      const trackUrl = URL.createObjectURL(trackBlob);
+      setCurrentTrack(new Audio(trackUrl)); 
+    }
+    catch(error){
+      console.error("Ошибка при получении трека",error)
+    }
   };
 
   return (

@@ -1,33 +1,37 @@
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
 import VolumeSlider from './volumeslider';
-import './player.css';
 import AlbumCover from './../icons/nopic.png';
 import AlbumCoverBig from './albumcoverbig';
+import './player.css';
+import { Context } from '../../index.js';
 
-const MusicPlayer = ({ songTitle, artistName, albumCover, audio}) => {
+const MusicPlayer = ({ songTitle, artistName, albumCover}) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [repeatMode, setRepeatMode] = useState(0);
+  const [currentTrack] = useContext(Context)
 
   const togglePlay = () => {
     if (isPlaying){
-      audio.pause()
+      currentTrack.pause()
     }
     else{
-      audio.play()
+      currentTrack.play()
     }
     setIsPlaying(!isPlaying);
     };
 
   const toggleReplay = () => {
     setRepeatMode((repeatMode+1)%3)
+    if (repeatMode === 2) {currentTrack.loop = true}
+    else {currentTrack.loop = false}
   }
 
   const handleVolumeChange = (newVolume) =>{
-    audio.volume = newVolume/100
+    currentTrack.volume = newVolume/100
   }
 
   return (
-    audio !== null && (
+    currentTrack !== null && (
     <>
       <div className="music-player">
           <div className="album-cover">

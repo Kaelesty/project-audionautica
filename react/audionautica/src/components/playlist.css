@@ -16,8 +16,9 @@
   }
   
   .playlist-cover {
-    width: 200px;
-    height: 200px;
+    width: 190px;
+    height: 190px;
+    padding: 5px;
     -webkit-user-drag: none;
     user-select: none;
     -moz-user-select: none;
@@ -41,7 +42,7 @@
     height: 60px;
     top: 165px;
     left: 165px;
- 
+
     border-radius: 50%;
     background-color: #8b2ef5;
     border: none;
