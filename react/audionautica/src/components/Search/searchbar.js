@@ -7,7 +7,6 @@ import {Context} from '../../index.js'
 import "./searchbar.css"
 
 
-
 const SearchBar = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
@@ -75,7 +74,7 @@ const SearchBar = () => {
       setCurrentTrack(newTrack);
       setCurrTrackTitle(trackTitle)
       setCurrTrackArtist(trackArtist)
-      
+
     } catch (error) {
       console.error("Ошибка при получении трека", error);
     }

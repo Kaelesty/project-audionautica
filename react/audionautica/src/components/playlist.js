@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './playlist.css'; // Подключаем файл стилей
+import './playlist.css';
 
 const Playlist = ({ cover, title, creator }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -22,7 +22,7 @@ const Playlist = ({ cover, title, creator }) => {
       {/* Кнопка воспроизведения */}
       {isHovered && (
         <button className="play-button">
-           <img className='playpic'
+           <img className='playpic' alt=''
             src={require('./icons/play-button.png')} 
             />
         </button>

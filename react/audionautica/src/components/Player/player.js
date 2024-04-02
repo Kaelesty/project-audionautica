@@ -1,9 +1,11 @@
 import React, {useState, useContext, useEffect} from 'react';
 import VolumeSlider from './volumeslider';
-import AlbumCover from './../icons/nopic.png';
 import AlbumCoverBig from './albumcoverbig';
-import './player.css';
+import ProgressBar from './progressbar.js';
+import AlbumCover from './../icons/nopic.png';
 import { Context } from '../../index.js';
+import './player.css';
+
 
 const MusicPlayer = ({albumCover}) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -51,6 +53,7 @@ const MusicPlayer = ({albumCover}) => {
           <h3>{currTrackTitle}</h3>
           <p>{currTrackArtist}</p>
         </div>
+       
         <div className="player-controls">
           <img className="control-button img" src={require('./../icons/rewind.png')} alt="Backward" />
 
@@ -67,13 +70,14 @@ const MusicPlayer = ({albumCover}) => {
             style={repeatMode > 0 ? { backgroundColor: '#bebebe', transform: 'translateY(1px)' }: {}} 
             alt="Replay Mode" onClick={toggleReplay}
           />
-
         </div>
+        
         <div className='volume-controls'>
             <VolumeSlider volumeChange={handleVolumeChange} />
-
         </div>
-
+        <div className='progress-bar-container'>
+          <ProgressBar />
+        </div>
       </div>
       <AlbumCoverBig
         coverSrc={AlbumCover}

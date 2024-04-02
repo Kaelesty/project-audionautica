@@ -79,7 +79,13 @@
     transform: translateX(-100%); 
     justify-content: center; 
   }
-  
+  .progress-bar-container{
+      position: fixed;
+      bottom: 0;
+      width: 70%;
+      left: 15%;
+  }
+
   @keyframes slideIn {
     from {
       transform: translateY(100%);
