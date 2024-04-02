@@ -9,8 +9,7 @@ const VolumeSlider = ({ volumeChange }) => {
   const handleVolumeChange = (e) => {
     const newVolume = e.target.value;
     setVolume(newVolume);
-
-    volumeChange(volume);
+    volumeChange(newVolume);
   };
 
   const VolumeButPressed = () => {

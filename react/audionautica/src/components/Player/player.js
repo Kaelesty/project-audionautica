@@ -1,14 +1,24 @@
-import React, {useState, useContext} from 'react';
+import React, {useState, useContext, useEffect} from 'react';
 import VolumeSlider from './volumeslider';
 import AlbumCover from './../icons/nopic.png';
 import AlbumCoverBig from './albumcoverbig';
 import './player.css';
 import { Context } from '../../index.js';
 
-const MusicPlayer = ({ songTitle, artistName, albumCover}) => {
+const MusicPlayer = ({albumCover}) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [repeatMode, setRepeatMode] = useState(0);
-  const [currentTrack] = useContext(Context)
+  const [volume, setVolume] = useState(0.5);
+  const {currentTrack} = useContext(Context)
+  const {currTrackTitle} = useContext(Context)
+  const {currTrackArtist} = useContext(Context)
+  
+
+  useEffect(() => {
+    if (currentTrack===null){return}
+    setIsPlaying(true)
+    currentTrack.volume = volume
+  }, [currentTrack, volume]);
 
   const togglePlay = () => {
     if (isPlaying){
@@ -21,13 +31,13 @@ const MusicPlayer = ({ songTitle, artistName, albumCover}) => {
     };
 
   const toggleReplay = () => {
-    setRepeatMode((repeatMode+1)%3)
-    if (repeatMode === 2) {currentTrack.loop = true}
+    if (repeatMode === 1) {currentTrack.loop = true}
     else {currentTrack.loop = false}
+    setRepeatMode((repeatMode + 1) % 3)   
   }
 
   const handleVolumeChange = (newVolume) =>{
-    currentTrack.volume = newVolume/100
+    setVolume(newVolume/100)
   }
 
   return (
@@ -38,8 +48,8 @@ const MusicPlayer = ({ songTitle, artistName, albumCover}) => {
             <img src={AlbumCover} alt="Album Cover"/>
           </div>
         <div className="song-details">
-          <h3>{songTitle}</h3>
-          <p>{artistName}</p>
+          <h3>{currTrackTitle}</h3>
+          <p>{currTrackArtist}</p>
         </div>
         <div className="player-controls">
           <img className="control-button img" src={require('./../icons/rewind.png')} alt="Backward" />

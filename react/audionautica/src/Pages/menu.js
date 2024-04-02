@@ -7,7 +7,7 @@ import "./menu.css"
 
 
 const Menu = () => {
-  const [isLoggedIn, setIsLoggedIn] = useContext(Context);
+  const {isLoggedIn, setIsLoggedIn} = useContext(Context);
   
 
   const handleLogout = () => {

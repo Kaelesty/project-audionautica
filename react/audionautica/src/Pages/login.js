@@ -8,7 +8,7 @@ import './login.css'
 const LoginPage = () => {
     const [login, setlogin] = useState('');
     const [password, setPassword] = useState('');
-    const [isLoggedIn, setisLoggedIn] = useContext(Context);
+    const {isLoggedIn, setIsLoggedIn} = useContext(Context);
     const [errorMessage, setErrorMessage] = useState('');
 
     const handleLoginChange = (event) => {
@@ -40,7 +40,7 @@ const LoginPage = () => {
         
         token.setToken(tokenResponse.token);
         console.log(token.getToken());
-        setisLoggedIn(true);
+        setIsLoggedIn(true);
         setlogin('');
         setPassword('');
     };

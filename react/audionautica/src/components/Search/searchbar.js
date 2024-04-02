@@ -12,7 +12,9 @@ const SearchBar = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [,setCurrentTrack] = useContext(Context)
+  const {currentTrack, setCurrentTrack} = useContext(Context)
+  const {setCurrTrackTitle} = useContext(Context)
+  const {setCurrTrackArtist} = useContext(Context)
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -56,14 +58,26 @@ const SearchBar = () => {
   };
 
  
-  const handleTrackClick = async (trackId) => {
-    try{
-      const trackBlob = await getTrackById(trackId)
+  const handleTrackClick = async (trackId, trackTitle, trackArtist) => {
+    try {
+      if (currentTrack !== null) {
+        currentTrack.pause();
+      }
+  
+      const trackBlob = await getTrackById(trackId);
       const trackUrl = URL.createObjectURL(trackBlob);
-      setCurrentTrack(new Audio(trackUrl)); 
-    }
-    catch(error){
-      console.error("Ошибка при получении трека",error)
+      const newTrack = new Audio(trackUrl);
+  
+      newTrack.addEventListener('loadedmetadata', () => {
+        newTrack.play();
+      });
+  
+      setCurrentTrack(newTrack);
+      setCurrTrackTitle(trackTitle)
+      setCurrTrackArtist(trackArtist)
+      
+    } catch (error) {
+      console.error("Ошибка при получении трека", error);
     }
   };
 
@@ -86,7 +100,7 @@ const SearchBar = () => {
           <button
             className="result"
             key={result.id}
-            onClick={() => handleTrackClick(result.id)}
+            onClick={() => handleTrackClick(result.id, result.title, result.artist)}
           >
             <div>
               <p>{result.title}</p>
