@@ -1,12 +1,15 @@
 package com.kaelesty.audionautica.presentation.composables.access
 
 import android.net.Uri
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import com.kaelesty.audionautica.presentation.ui.fonts.SpaceGrotesk
 import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun MultiparameterInputCard(
 	title: String = "Multiparameter Input Card",
@@ -151,7 +155,7 @@ fun MultiparameterInputCard(
 					fontSize = 16.sp,
 					fontFamily = SpaceGrotesk,
 					modifier = Modifier
-						.padding(horizontal=12.dp)
+						.padding(horizontal = 12.dp)
 				)
 			}
 		}
@@ -159,15 +163,23 @@ fun MultiparameterInputCard(
 }
 
 @Composable
-fun TextInput(value: MutableState<String>, hint: String, isPassword: Boolean = false) {
+fun TextInput(
+	value: MutableState<String>,
+	hint: String,
+	modifier: Modifier = Modifier,
+	isPassword: Boolean = false,
+	isReadOnly: Boolean = false,
+) {
 	TextField(
+		readOnly = isReadOnly,
 		value = value.value,
 		onValueChange = {
 			value.value = it
 		},
-		modifier = Modifier
+		modifier = modifier
+			.padding(horizontal = 10.dp)
 			.fillMaxWidth()
-			.padding(horizontal = 10.dp),
+		,
 		label = {
 			Text(
 				hint,
@@ -212,12 +224,13 @@ fun GradientCard(
 	}
 }
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Preview
 @Composable
 fun PreviewMICLight() {
 	AudionauticaTheme(darkTheme = false) {
 		MultiparameterInputCard(
-			mainAction = CollectNamedAction("Action") { map1, map ->  },
+			mainAction = CollectNamedAction("Action") { map1, map -> },
 			leftAction = SimpleNamedAction("Action", {}),
 			rightAction = SimpleNamedAction("Action", {}),
 			errorMessage = "123",
@@ -230,7 +243,7 @@ fun PreviewMICLight() {
 fun PreviewMICDark() {
 	AudionauticaTheme(darkTheme = true) {
 		MultiparameterInputCard(
-			mainAction = CollectNamedAction("Action") { map1, map ->  },
+			mainAction = CollectNamedAction("Action") { map1, map -> },
 			leftAction = SimpleNamedAction("Action", {}),
 			rightAction = SimpleNamedAction("Action", {})
 		)

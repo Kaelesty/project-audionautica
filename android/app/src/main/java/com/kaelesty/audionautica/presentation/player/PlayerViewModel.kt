@@ -7,18 +7,14 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.Player
-import androidx.media3.common.Timeline
-import androidx.media3.exoplayer.ExoPlayer
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.player.IPlayerQueueController
-import kotlinx.coroutines.CoroutineScope
+import com.kaelesty.audionautica.presentation.getCurrentTrack
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.time.Duration
 import javax.inject.Inject
 
 class PlayerViewModel @Inject constructor(

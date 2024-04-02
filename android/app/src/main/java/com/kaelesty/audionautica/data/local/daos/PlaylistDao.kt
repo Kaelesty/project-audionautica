@@ -6,7 +6,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.kaelesty.audionautica.data.local.dbmodels.PlaylistDbModel
-import com.kaelesty.audionautica.domain.entities.Playlist
 
 @Dao
 interface PlaylistDao {

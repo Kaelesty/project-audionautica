@@ -3,11 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
 
     <application
         android:name=".system.ModifiedApplication"
@@ -20,6 +19,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Audionautica"
         tools:targetApi="31">
+        <activity
+            android:name=".presentation.activities.AddPlaylistActivity"
+            android:exported="false"
+            android:label="@string/title_activity_add_playlist"
+            android:theme="@style/Theme.Audionautica" />
         <activity
             android:name=".presentation.activities.AddTrackActivity"
             android:exported="false"
@@ -39,7 +43,7 @@
         <activity
             android:name=".presentation.activities.MusicActivity"
             android:exported="true"
-            android:theme="@style/Theme.Audionautica"/>
+            android:theme="@style/Theme.Audionautica" />
 
         <service
             android:name=".presentation.player.PlayerService"

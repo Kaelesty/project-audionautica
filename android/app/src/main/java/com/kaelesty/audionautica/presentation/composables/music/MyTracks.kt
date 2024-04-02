@@ -17,7 +17,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -29,9 +28,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.presentation.composables.dialogues.ConfirmTrackDeleteDialog
-import com.kaelesty.audionautica.presentation.player.getCurrentTrack
-import com.kaelesty.audionautica.presentation.player.isPlaying
-import kotlinx.coroutines.flow.SharedFlow
+import com.kaelesty.audionautica.presentation.getCurrentTrack
+import com.kaelesty.audionautica.presentation.isPlaying
 
 @Composable
 fun MyTracks(
