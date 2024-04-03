@@ -232,7 +232,7 @@ class PlayListUpload(APIView):
         if request.method == "POST":
             if not check_token(request):
                 return Response(status=status.HTTP_418_IM_A_TEAPOT)
-            image = request.body
+            image = request.FILES['image']
             ext = request.headers["ext"]
             playlist = PlayList()
             playlist.title = request.headers["title"]
