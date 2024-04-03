@@ -1,7 +1,6 @@
-package com.kaelesty.audionautica.presentation.playlists
+package com.kaelesty.audionautica.presentation.playlists.upload
 
 import android.net.Uri
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,19 +19,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.kaelesty.audionautica.presentation.composables.access.CollectNamedAction
 import com.kaelesty.audionautica.presentation.composables.access.GradientCard
 import com.kaelesty.audionautica.presentation.composables.access.TextInput
+import com.kaelesty.audionautica.presentation.composables.dialogues.LoadingDialog
+import com.kaelesty.audionautica.presentation.playlists.PlaylistsViewModel
 import com.kaelesty.audionautica.presentation.ui.fonts.SpaceGrotesk
 import com.kaelesty.audionautica.presentation.viewmodels.ViewModelFactory
 import kotlinx.coroutines.flow.SharedFlow
@@ -42,9 +42,27 @@ fun AddPlaylistScreen(
 	viewModelFactory: ViewModelFactory,
 	requestImageUri: () -> Unit,
 	requestedImageFlow: SharedFlow<Uri?>,
+	navigateToListScreen: () -> Unit,
 ) {
 
-	val viewModel: PlaylistsViewModel = viewModel(factory = viewModelFactory)
+	val viewModel: PlaylistUploadViewModel = viewModel(factory = viewModelFactory)
+
+	val state by viewModel.stateFlow.collectAsState()
+	var errorMessage: String? = ""
+
+	when (state) {
+		is PlaylistUploadState.Uploading -> {
+			LoadingDialog()
+		}
+		is PlaylistUploadState.Error -> {
+			errorMessage = (state as PlaylistUploadState.Error).error
+		}
+		is PlaylistUploadState.Finished -> {
+			navigateToListScreen()
+		}
+		else -> {}
+	}
+
 
 	var nameValue = rememberSaveable {
 		mutableStateOf("")
@@ -148,18 +166,27 @@ fun AddPlaylistScreen(
 					fontFamily = SpaceGrotesk
 				)
 			}
+			errorMessage?.let {
+				Spacer(Modifier.height(6.dp))
+				Text(
+					text = it,
+					color = Color.Red,
+					fontSize = 16.sp,
+					fontFamily = SpaceGrotesk,
+					modifier = Modifier
+						.padding(horizontal = 12.dp)
+				)
+			}
 			Spacer(modifier = Modifier.height(12.dp))
 			Button(
 				onClick = {
-					imageUri.value?.let {
-						viewModel.uploadPlaylist(
-							uri = it,
-							title = nameValue.value,
-							desc = descValue.value,
-							trackIds = listOf(),
-							isPrivate = isPrivateValue
-						)
-					}
+					viewModel.uploadPlaylist(
+						uri = imageUri.value,
+						title = nameValue.value,
+						desc = descValue.value,
+						trackIds = listOf(),
+						isPrivate = isPrivateValue
+					)
 				},
 				modifier = Modifier
 					.fillMaxWidth()
@@ -176,6 +203,7 @@ fun AddPlaylistScreen(
 					fontFamily = SpaceGrotesk
 				)
 			}
+			Spacer(modifier = Modifier.height(12.dp))
 		}
 	}
 }

@@ -27,7 +27,7 @@ import com.kaelesty.audionautica.presentation.player.PlayerBar
 import com.kaelesty.audionautica.presentation.navigation.MusicNavGraph
 import com.kaelesty.audionautica.presentation.navigation.Screen
 import com.kaelesty.audionautica.presentation.navigation.rememberMusicNavigationState
-import com.kaelesty.audionautica.presentation.playlists.AddPlaylistScreen
+import com.kaelesty.audionautica.presentation.playlists.upload.AddPlaylistScreen
 import com.kaelesty.audionautica.presentation.playlists.Playlists
 import com.kaelesty.audionautica.presentation.viewmodels.MusicViewModel
 import com.kaelesty.audionautica.presentation.viewmodels.ViewModelFactory
@@ -152,6 +152,9 @@ fun MusicScreen(
 					viewModelFactory,
 					onRequestImage,
 					requestedImageFlow,
+					navigateToListScreen = {
+						navigationState.navHostController.popBackStack()
+					}
 				)
 			}
 		)
