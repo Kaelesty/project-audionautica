@@ -9,7 +9,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.media3.common.Player
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.player.IPlayerQueueController
+import com.kaelesty.audionautica.presentation.getCurrentTrack
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -21,31 +23,59 @@ class PlayerViewModel @Inject constructor(
 
 	data class PlayerState(
 		val meta: Track?,
-		val playing: Boolean
+		val playing: Boolean,
+		val progress: Long,
+		val duration: Long,
 	)
 
 	private val _playerState = MutableStateFlow(
 		PlayerState(
 			null,
-			false
+			false,
+			0,
+			0,
 		)
 	)
 	val playerState: StateFlow<PlayerState> get() = _playerState
 
+	private var player: Player? = null
+	private var updateProgress = true
+	private var seekingProgress: Float = 0f
+
 	init {
+
+		viewModelScope.launch(Dispatchers.Main) {
+			while (true) {
+				if (updateProgress) {
+					player?.let {
+						val dur = it.duration
+						//Log.d("PlayerTag", "new player position: ${it.currentPosition}")
+						_playerState.emit(
+							_playerState.value.copy(
+								progress = it.currentPosition,
+								duration = if (dur > 0) dur else 0
+							)
+						)
+					}
+					delay(100)
+				}
+
+			}
+		}
+
 		viewModelScope.launch(Dispatchers.IO) {
 			pqc.getPlayerFlow().collect {
+				player = it
 				Log.d("PlayerTag", if (it == null) "player not connected" else "player connected")
 				it?.addListener(
 					object : Player.Listener {
 
 						override fun onMediaMetadataChanged(mediaMetadata: androidx.media3.common.MediaMetadata) {
 							super.onMediaMetadataChanged(mediaMetadata)
-							viewModelScope.launch(Dispatchers.IO) {
+							viewModelScope.launch(Dispatchers.Main) {
 								_playerState.emit(
-									PlayerState(
+									_playerState.value.copy(
 										meta = mediaMetadata.getCurrentTrack(),
-										playing = _playerState.value.playing
 									)
 								)
 							}
@@ -55,18 +85,31 @@ class PlayerViewModel @Inject constructor(
 							super.onIsPlayingChanged(isPlaying)
 							viewModelScope.launch(Dispatchers.IO) {
 								_playerState.emit(
-									PlayerState(
-										meta = _playerState.value.meta,
-										playing = isPlaying
-									)
+									_playerState.value.copy(playing = isPlaying,)
 								)
 							}
 						}
 					}
 				)
-
 			}
 		}
+	}
+
+	fun setPlayingProgress(progress: Float) {
+		player?.let {
+			it.seekTo(progress.toLong())
+		}
+	}
+
+	fun setSeekingProgress(progress: Float) {
+		updateProgress = false
+		seekingProgress = progress
+	}
+
+	fun confirmSeek() {
+		setPlayingProgress(seekingProgress)
+		seekingProgress = 0f
+		updateProgress = true
 	}
 
 	fun getQueueFlow() = pqc.getQueueFlow()
@@ -80,10 +123,7 @@ class PlayerViewModel @Inject constructor(
 					viewModelScope.launch(Dispatchers.IO) {
 						val track = metadata?.getCurrentTrack()
 						_playerState.emit(
-							PlayerState(
-								track,
-								_playerState.value.playing
-							)
+							_playerState.value.copy(meta = track)
 						)
 					}
 				}
@@ -92,10 +132,7 @@ class PlayerViewModel @Inject constructor(
 					super.onPlaybackStateChanged(state)
 					viewModelScope.launch(Dispatchers.IO) {
 						_playerState.emit(
-							PlayerState(
-								_playerState.value.meta,
-								state?.state == PlaybackState.STATE_PLAYING
-							)
+							_playerState.value.copy(playing = state?.state == PlaybackState.STATE_PLAYING)
 						)
 					}
 				}

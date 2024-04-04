@@ -7,12 +7,14 @@ import android.content.ServiceConnection
 import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.PlaybackState
+import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteException
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.MutableState
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.presentation.composables.music.MusicScreen
@@ -49,8 +51,17 @@ class MusicActivity : ComponentActivity() {
 	private val playingFlow = MutableSharedFlow<Boolean>()
 	private val trackFlow = MutableSharedFlow<Track>()
 
+	private val _requestedImageFlow = MutableSharedFlow<Uri?>()
+	val requestedImageFlow: SharedFlow<Uri?> get() = _requestedImageFlow
+
 	private val _playerMediaControllerFlow: MutableStateFlow<MediaController?> = MutableStateFlow(null)
 	val playerMediaControllerFlow: StateFlow<MediaController?> get() = _playerMediaControllerFlow.asStateFlow()
+
+	val getImage = registerForActivityResult(ActivityResultContracts.GetContent()) {
+		scope.launch {
+			_requestedImageFlow.emit(it)
+		}
+	}
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -124,7 +135,11 @@ class MusicActivity : ComponentActivity() {
 					viewModelFactory = viewModelFactory,
 					offlineMode = isOffline,
 					launchCreateTrackActivity = { launchAddTrackActivity() },
-					playerMediaControllerFlow = playerMediaControllerFlow
+					playerMediaControllerFlow = playerMediaControllerFlow,
+					onRequestImage = {
+						getImage.launch("image/*")
+					},
+					requestedImageFlow = requestedImageFlow
 				)
 			}
 		}

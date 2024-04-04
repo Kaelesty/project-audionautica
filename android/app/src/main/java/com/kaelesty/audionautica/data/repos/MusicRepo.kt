@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.map
 import com.kaelesty.audionautica.data.local.daos.PlaylistDao
 import com.kaelesty.audionautica.data.local.daos.TrackDao
@@ -16,9 +17,10 @@ import com.kaelesty.audionautica.data.mappers.TrackMapper
 import com.kaelesty.audionautica.data.remote.api.MusicApiService
 import com.kaelesty.audionautica.data.remote.entities.DownloadTrackDto
 import com.kaelesty.audionautica.data.remote.entities.SearchDto
+import com.kaelesty.audionautica.data.repos.tools.FileUploaderTool
 import com.kaelesty.audionautica.data.repos.tools.JwtTool
 import com.kaelesty.audionautica.di.ApplicationScope
-import com.kaelesty.audionautica.domain.entities.Playlist
+import com.kaelesty.audionautica.domain.playlists.Playlist
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.entities.TrackExp
 import com.kaelesty.audionautica.domain.entities.TracksToPlay
@@ -49,7 +51,8 @@ class MusicRepo @Inject constructor(
 	private val musicApiService: MusicApiService,
 	private val contentResolver: ContentResolver,
 	private val application: Application,
-	private val jwtTool: JwtTool
+	private val jwtTool: JwtTool,
+	private val uploader: FileUploaderTool,
 ) : IMusicRepo {
 
 	private val _tracksQueue = MutableSharedFlow<TracksToPlay>()
@@ -167,27 +170,7 @@ class MusicRepo @Inject constructor(
 	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	override suspend fun uploadTrack(track: Track, uri: Uri): UploadTrackRC {
 		try {
-
-			val tempFile = File(application.cacheDir, "tempfile")
-			try {
-				val inputstream: InputStream = contentResolver.openInputStream(uri) !!
-				val output = FileOutputStream(tempFile)
-				val buffer = ByteArray(1024)
-				var size: Int
-				while (inputstream.read(buffer).also { size = it } != - 1) {
-					output.write(buffer, 0, size)
-				}
-				inputstream.close()
-				output.close()
-			} catch (e: IOException) {
-				Log.e("MYTAG", "COPYCODE ERROR")
-			}
-			val file = tempFile
-			val requestBody = RequestBody.create(
-				"Audio".toMediaTypeOrNull(),
-				file
-			)
-			val body = MultipartBody.Part.create(requestBody)
+			val body = uploader.getMultipartOfFile(uri, "Audio")
 
 			val description = RequestBody.create(
 				MultipartBody.FORM, "description"
@@ -266,58 +249,60 @@ class MusicRepo @Inject constructor(
 	}
 
 	override suspend fun addTrackToPlaylist(track: Track, playlistId: Int) {
-		trackDao.createTrack(trackMapper.domainToDbModel(track))
-
-		val playlist = playlistMapper.DbModelToDomain(
-			playlistDao.getPlaylist(playlistId)
-		)
-
-		val newTrackIds = playlist.trackIds.toMutableList()
-		newTrackIds.add(track.id)
-
-		val newPlaylist = Playlist(
-			id = playlist.id,
-			title = playlist.title,
-			trackIds = newTrackIds
-		)
-		playlistDao.createPlaylist(
-			playlistMapper.DomainToDbModel(newPlaylist) // Will be replaced by OnConflictStrategy.REPLACE
-		)
+//		trackDao.createTrack(trackMapper.domainToDbModel(track))
+//
+//		val playlist = playlistMapper.DbModelToDomain(
+//			playlistDao.getPlaylist(playlistId)
+//		)
+//
+//		val newTrackIds = playlist.trackIds.toMutableList()
+//		newTrackIds.add(track.id)
+//
+//		val newPlaylist = Playlist(
+//			id = playlist.id,
+//			title = playlist.title,
+//			trackIds = newTrackIds
+//		)
+//		playlistDao.createPlaylist(
+//			playlistMapper.DomainToDbModel(newPlaylist) // Will be replaced by OnConflictStrategy.REPLACE
+//		)
 	}
 
 	override fun getPlaylists(): LiveData<List<Playlist>> {
-		return playlistDao.getAll().map { list ->
-			list.map { dbModel ->
-				playlistMapper.DbModelToDomain(dbModel)
-			}
-		}
+//		return playlistDao.getAll().map { list ->
+//			list.map { dbModel ->
+//				playlistMapper.DbModelToDomain(dbModel)
+//			}
+//		}
+		return MutableLiveData()
 	}
 
 	override suspend fun removeTrackFromPlaylist(track: Track, playlistId: Int) {
-		val playlist = playlistMapper.DbModelToDomain(playlistDao.getPlaylist(playlistId))
-		val newPlaylist = Playlist(
-			id = playlist.id,
-			title = playlist.title,
-			trackIds = playlist.trackIds.toMutableList().apply {
-				remove(track.id)
-			}
-		)
-		playlistDao.createPlaylist(
-			playlistMapper.DomainToDbModel(newPlaylist)
-		)
-		Log.d("AudionauticaTag", "Removing ${track.title} from ${playlist.title}")
+//		val playlist = playlistMapper.DbModelToDomain(playlistDao.getPlaylist(playlistId))
+//		val newPlaylist = Playlist(
+//			id = playlist.id,
+//			title = playlist.title,
+//			trackIds = playlist.trackIds.toMutableList().apply {
+//				remove(track.id)
+//			}
+//		)
+//		playlistDao.createPlaylist(
+//			playlistMapper.DomainToDbModel(newPlaylist)
+//		)
+//		Log.d("AudionauticaTag", "Removing ${track.title} from ${playlist.title}")
 	}
 
 	override fun getPlaylistTracks(id: Int): List<Track> {
-		val playlist = playlistMapper.DbModelToDomain(playlistDao.getPlaylist(id))
-		val result = trackDao.getById(playlist.trackIds)
-		return result.map { trackMapper.dbModelToDomain(it) }
+//		val playlist = playlistMapper.DbModelToDomain(playlistDao.getPlaylist(id))
+//		val result = trackDao.getById(playlist.trackIds)
+//		return result.map { trackMapper.dbModelToDomain(it) }
+		return listOf()
 	}
 
 	override suspend fun createPlaylist(playlist: Playlist) {
-		playlistDao.createPlaylist(
-			playlistMapper.DomainToDbModel(playlist)
-		)
+//		playlistDao.createPlaylist(
+//			playlistMapper.DomainToDbModel(playlist)
+//		)
 	}
 
 	override suspend fun deletePlaylist(playlistId: Int) {
@@ -333,21 +318,21 @@ class MusicRepo @Inject constructor(
 	}
 
 	override suspend fun deleteTrack(track: Track) {
-		trackDao.deleteTrack(track.id)
-		deleteTrackFile(trackId = track.id)
-		val playlists = playlistDao.getAll().value?: return
-
-		playlists.forEach { playlist ->
-			if (track.id in playlist.trackIds) {
-				val newPlaylist = Playlist(
-					id = playlist.id!!, // playlist is taken from db so its id definitely cant be null
-					title = playlist.title,
-					trackIds = playlist.trackIds.toMutableList().apply {
-						remove(track.id)
-					}
-				)
-				playlistDao.createPlaylist(playlist)
-			}
-		}
+//		trackDao.deleteTrack(track.id)
+//		deleteTrackFile(trackId = track.id)
+//		val playlists = playlistDao.getAll().value?: return
+//
+//		playlists.forEach { playlist ->
+//			if (track.id in playlist.trackIds) {
+//				val newPlaylist = Playlist(
+//					id = playlist.id!!, // playlist is taken from db so its id definitely cant be null
+//					title = playlist.title,
+//					trackIds = playlist.trackIds.toMutableList().apply {
+//						remove(track.id)
+//					}
+//				)
+//				playlistDao.createPlaylist(playlist)
+//			}
+//		}
 	}
 }

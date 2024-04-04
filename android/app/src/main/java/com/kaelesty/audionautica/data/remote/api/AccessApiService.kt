@@ -25,5 +25,5 @@ interface AccessApiService {
 	suspend fun checkConnection(): Response<Unit>
 
 	@POST("User/")
-	suspend fun checkAuth(@Body token: String): Response<CheckAuthResponse>
+	suspend fun checkAuth(@Header("token") token: String,): Response<CheckAuthResponse>
 }

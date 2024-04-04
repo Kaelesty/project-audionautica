@@ -1,9 +1,10 @@
-package com.kaelesty.audionautica.presentation.player
+package com.kaelesty.audionautica.presentation
 
 import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.PlaybackState
 import com.kaelesty.audionautica.domain.entities.Track
+import com.kaelesty.audionautica.presentation.player.PlayerService
 
 fun MediaController.getCurrentTrack(): Track? {
 	val meta = metadata ?: return null

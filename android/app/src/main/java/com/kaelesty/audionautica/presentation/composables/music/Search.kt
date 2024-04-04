@@ -15,8 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import com.kaelesty.audionautica.domain.entities.Track
-import com.kaelesty.audionautica.presentation.player.getCurrentTrack
-import com.kaelesty.audionautica.presentation.player.isPlaying
+import com.kaelesty.audionautica.presentation.getCurrentTrack
+import com.kaelesty.audionautica.presentation.isPlaying
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
