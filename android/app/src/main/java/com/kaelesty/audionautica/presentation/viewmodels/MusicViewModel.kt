@@ -4,10 +4,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kaelesty.audionautica.domain.entities.Playlist
+import com.kaelesty.audionautica.domain.playlists.Playlist
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.player.IPlayerQueueController
-import com.kaelesty.audionautica.domain.usecases.AddToTracksQueueUseCase
 import com.kaelesty.audionautica.domain.usecases.AddTrackToPlaylistUseCase
 import com.kaelesty.audionautica.domain.usecases.CreatePlaylistUseCase
 import com.kaelesty.audionautica.domain.usecases.DeletePlaylistUseCase
@@ -16,8 +15,6 @@ import com.kaelesty.audionautica.domain.usecases.DeleteTrackUseCase
 import com.kaelesty.audionautica.domain.usecases.GetAllPlaylistsUseCase
 import com.kaelesty.audionautica.domain.usecases.GetAllTracksUseCase
 import com.kaelesty.audionautica.domain.usecases.GetPlaylistTracksUseCase
-import com.kaelesty.audionautica.domain.usecases.PlayNextUseCase
-import com.kaelesty.audionautica.domain.usecases.PlayPrevUseCase
 import com.kaelesty.audionautica.domain.usecases.SaveTrackUseCase
 import com.kaelesty.audionautica.domain.usecases.SearchTracksUseCase
 import kotlinx.coroutines.Dispatchers

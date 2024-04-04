@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './volumeslider.css'; 
 
-const VolumeSlider = () => {
+const VolumeSlider = ({ volumeChange }) => {
   const [volume, setVolume] = useState(50);
   const [lastVolume, setLastVolume] = useState(0);
 
@@ -9,15 +9,18 @@ const VolumeSlider = () => {
   const handleVolumeChange = (e) => {
     const newVolume = e.target.value;
     setVolume(newVolume);
+    volumeChange(newVolume);
   };
 
   const VolumeButPressed = () => {
     if (volume!==0){
       setLastVolume(volume)
       setVolume(0)
+      volumeChange(0);
     }
     else {
       setVolume(lastVolume)
+      volumeChange(lastVolume);
     }
 
   }
@@ -25,7 +28,7 @@ const VolumeSlider = () => {
   return (
     <div className="volume-slider">
       <img className='volume-indicator'
-          src={volume > 80 ? require("./icons/volume3.png") : volume > 45 ? require("./icons/volume2.png") : volume > 0 ? require("./icons/volume1.png"): require("./icons/volume0.png")}
+          src={volume > 80 ? require("./../icons/volume3.png") : volume > 45 ? require("./../icons/volume2.png") : volume > 0 ? require("./../icons/volume1.png"): require("./../icons/volume0.png")}
           alt="Volume Ind"
           onClick={VolumeButPressed}
         />

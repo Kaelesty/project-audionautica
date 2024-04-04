@@ -30,7 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.kaelesty.audionautica.domain.entities.Playlist
+import com.kaelesty.audionautica.domain.playlists.Playlist
 import com.kaelesty.audionautica.presentation.ui.fonts.SpaceGrotesk
 import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
 
@@ -127,19 +127,19 @@ fun AddTrackToPlalistDialog(
 		}
 	}
 }
-
-@Preview
-@Composable
-fun previewSelectPlaylistDialog() {
-	AudionauticaTheme {
-		AddTrackToPlalistDialog(
-			onDimissRequest = {},
-			onAcceptRequest = {},
-			playlists = listOf(
-				Playlist(0, "Favorites", listOf()),
-				Playlist(1, "Playlist 1", listOf()),
-				Playlist(2, "Playlist 2", listOf()),
-			)
-		)
-	}
-}
+//
+//@Preview
+//@Composable
+//fun previewSelectPlaylistDialog() {
+//	AudionauticaTheme {
+//		AddTrackToPlalistDialog(
+//			onDimissRequest = {},
+//			onAcceptRequest = {},
+//			playlists = listOf(
+//				Playlist(0, "Favorites", listOf()),
+//				Playlist(1, "Playlist 1", listOf()),
+//				Playlist(2, "Playlist 2", listOf()),
+//			)
+//		)
+//	}
+//}

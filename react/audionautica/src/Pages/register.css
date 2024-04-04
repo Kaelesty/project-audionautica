@@ -46,3 +46,8 @@
   .register-form button:hover {
     background-color: #214475;
   }
+
+  .error-message{
+    color: red;
+    margin-top: 0
+  }

@@ -1,6 +1,7 @@
 package com.kaelesty.audionautica.presentation.composables.music
 
 import android.media.session.MediaController
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,19 +16,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.kaelesty.audionautica.R
-import com.kaelesty.audionautica.domain.entities.Playlist
+import com.kaelesty.audionautica.domain.playlists.Playlist
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.presentation.composables.dialogues.AddTrackToPlalistDialog
 import com.kaelesty.audionautica.presentation.composables.dialogues.EditPlaylistDialog
-import com.kaelesty.audionautica.presentation.composables.dialogues.MinimalDialog
 import com.kaelesty.audionautica.presentation.player.PlayerBar
 import com.kaelesty.audionautica.presentation.navigation.MusicNavGraph
 import com.kaelesty.audionautica.presentation.navigation.Screen
 import com.kaelesty.audionautica.presentation.navigation.rememberMusicNavigationState
+import com.kaelesty.audionautica.presentation.playlists.upload.AddPlaylistScreen
+import com.kaelesty.audionautica.presentation.playlists.Playlists
 import com.kaelesty.audionautica.presentation.viewmodels.MusicViewModel
 import com.kaelesty.audionautica.presentation.viewmodels.ViewModelFactory
 import kotlinx.coroutines.flow.SharedFlow
@@ -39,6 +40,9 @@ fun MusicScreen(
 	offlineMode: Boolean,
 	playerMediaControllerFlow: StateFlow<MediaController?>,
 	launchCreateTrackActivity: () -> Unit,
+
+	onRequestImage: () -> Unit,
+	requestedImageFlow: SharedFlow<Uri?>,
 ) {
 
 	val vm: MusicViewModel = viewModel(factory = viewModelFactory)
@@ -57,10 +61,6 @@ fun MusicScreen(
 
 	val editPlaylistDialog = rememberSaveable {
 		mutableStateOf<Playlist?>(null)
-	}
-
-	val createPlaylistDialog = rememberSaveable {
-		mutableStateOf<Unit?>(null)
 	}
 
 	val playlists by vm.getPlaylists().observeAsState(listOf())
@@ -83,25 +83,6 @@ fun MusicScreen(
 			playlistTracks = vm.getPlaylistTracks(playlist.id),
 			onDeleteTrackFromPlaylist = { track, id -> vm.removeTrackFromPlaylist(track, id) },
 			onDeletePlaylist = { vm.deletePlaylist(it) }
-		)
-	}
-
-	createPlaylistDialog.value?.let {
-		MinimalDialog(
-			onAcceptRequest = {
-				createPlaylistDialog.value = null
-				vm.createPlaylist(
-					Playlist(
-						id = - 1,
-						title = it,
-						trackIds = listOf()
-					)
-				)
-			},
-			onDismissRequest = {
-				createPlaylistDialog.value = null
-			},
-			title = "Enter playlist name"
 		)
 	}
 
@@ -149,10 +130,10 @@ fun MusicScreen(
 			},
 			musicPlaylistsScreenContent = {
 				Playlists(
-					playlistsLiveData = vm.getPlaylists(),
-					editPlaylistDialog = editPlaylistDialog,
-					onPlayPlaylist = { vm.playPlaylist(it) },
-					createPlaylistDialog = createPlaylistDialog
+					viewModelFactory,
+					navigateToAddScreen = {
+						navigationState.navHostController.navigate(Screen.PlaylistsCreate.route)
+					}
 				)
 			},
 			musicLibraryScreenContent = {
@@ -166,6 +147,16 @@ fun MusicScreen(
 					playerMediaController = playerMediaController
 				)
 			},
+			addPlaylistContent = {
+				AddPlaylistScreen(
+					viewModelFactory,
+					onRequestImage,
+					requestedImageFlow,
+					navigateToListScreen = {
+						navigationState.navHostController.popBackStack()
+					}
+				)
+			}
 		)
 	}
 }

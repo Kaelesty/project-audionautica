@@ -2,7 +2,7 @@ package com.kaelesty.audionautica.domain.repos
 
 import android.net.Uri
 import androidx.lifecycle.LiveData
-import com.kaelesty.audionautica.domain.entities.Playlist
+import com.kaelesty.audionautica.domain.playlists.Playlist
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.entities.TrackExp
 import com.kaelesty.audionautica.domain.entities.TracksToPlay

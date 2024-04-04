@@ -1,0 +1,76 @@
+.playlist-container {
+    position: relative;
+    width: 200px;
+    height: 250px; 
+    margin: 3px;
+    overflow: hidden;   
+  }
+  
+  .playlist-container:hover .play-button {
+    opacity: 1;
+  }
+  
+  .playlist-container.hovered {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+  }
+  
+  .playlist-cover {
+    width: 190px;
+    height: 190px;
+    padding: 5px;
+    -webkit-user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+  }
+  
+  .playlist-info {
+    position: absolute;
+    bottom: 0;
+    width: 200px;
+    height: 50px; 
+    color: rgb(0, 0, 0);
+    text-align: center;
+    line-height: 0px; 
+  }
+  
+  .play-button {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    top: 165px;
+    left: 165px;
+
+    border-radius: 50%;
+    background-color: #8b2ef5;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    animation: fadeIn 0.4s ease forwards;
+  }
+
+  .playpic{
+    width: 20px;
+    height: 20px;
+    -webkit-user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+  }
+  
+  @keyframes fadeIn {
+    from {
+        transform: translate(-50%, -30%);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, -50%);
+        opacity: 1;
+    }
+}
