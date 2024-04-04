@@ -12,8 +12,6 @@ class Token {
     getToken() {
         return this.Token;
     }
-
-  
 }
 
 const token = new Token();

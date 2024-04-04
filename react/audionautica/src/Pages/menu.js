@@ -7,7 +7,7 @@ import "./menu.css"
 
 
 const Menu = () => {
-  const [isLoggedIn, setIsLoggedIn] = useContext(Context);
+  const {isLoggedIn, setIsLoggedIn} = useContext(Context);
   
 
   const handleLogout = () => {
@@ -17,11 +17,16 @@ const Menu = () => {
 
   return (
     <div className="menu">
-      <Link to="/">Домой</Link>
       {isLoggedIn ? (
-        <Link to="/login" className='ButtonLink'>
-          <button onClick={handleLogout}>Выход</button>
-        </Link>
+        <>
+          <Link to="/login" className='ButtonLink'>
+            <button onClick={handleLogout}>Выход</button>
+          </Link>
+          <Link to="/home/">Домой</Link>
+          <Link to="/home/rec">Рекомендации</Link>
+          <Link to="/home/search">Поиск</Link>
+          <Link to="/home/test">Тест</Link>
+        </>
       ) : (
         <>
           <Link to="/login" className='right'>Войти</Link>
@@ -29,6 +34,7 @@ const Menu = () => {
         </>
       )}
     </div>
+    
   );
 }
 

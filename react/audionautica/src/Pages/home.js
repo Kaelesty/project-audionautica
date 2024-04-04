@@ -1,20 +1,30 @@
-import React from 'react';
-import MusicPlayer from '../components/player'; 
+import React, { useContext} from 'react';
+import {Navigate, Outlet} from 'react-router-dom';
+import MusicPlayer from '../components/player/player.js';
+import CoverImg from '../components/icons/nopic.png'
+import {Context} from "../index.js"
+import "./home.css"
+
+
 
 const HomePage = () => {
-  // Здесь могут быть данные о песне, исполнителе и обложке альбома
-  const songTitle = "Song Title";
-  const artistName = "Artist Name";
-  const albumCover = "path/to/album/cover.jpg";
+  const albumCover = CoverImg;
+  const {isLoggedIn} = useContext(Context);
+
+  if (!isLoggedIn){
+    return <Navigate to="/login" />
+  }
+
 
   return (
-    <div className="home-page">
-      <MusicPlayer
-        songTitle={songTitle}
-        artistName={artistName}
-        albumCover={albumCover}
-      />
-    </div>
+      <div className="home-page">
+        <Outlet/>
+        <div className="Player">
+          <MusicPlayer
+            albumCover={albumCover}
+          />
+        </div>
+      </div>
   );
 };
 

@@ -2,12 +2,14 @@ import React, { useContext, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import token from '../token';
 import {Context} from "../index"
+import BackURL from '../urls';
 import './login.css'
 
 const LoginPage = () => {
     const [login, setlogin] = useState('');
     const [password, setPassword] = useState('');
-    const [isLoggedIn, setisLoggedIn] = useContext(Context);
+    const {isLoggedIn, setIsLoggedIn} = useContext(Context);
+    const [errorMessage, setErrorMessage] = useState('');
 
     const handleLoginChange = (event) => {
         setlogin(event.target.value);
@@ -24,19 +26,27 @@ const LoginPage = () => {
         console.log('Отправлены данные для входа:', { login, password });
     
         const tokenResponse = await getTokenFromServer(login, password);
-        if (tokenResponse !== null) {
-            token.setToken(tokenResponse);
-            console.log(token.getToken());
-            setisLoggedIn(true);
+        if (tokenResponse===400){
+            setErrorMessage("Пользователь не зарегестрирован")
+            return
+        }
+        if (tokenResponse===401){
+            setErrorMessage("Неверный пароль")
+            return
+        }
+        if (tokenResponse === null) {
+            return
         }
         
-    
+        token.setToken(tokenResponse.token);
+        console.log(token.getToken());
+        setIsLoggedIn(true);
         setlogin('');
         setPassword('');
     };
 
     if (isLoggedIn){
-        return <Navigate to="/" />
+        return <Navigate to="/home/" />
     }
 
     return (
@@ -66,9 +76,8 @@ const LoginPage = () => {
                             required
                         />
                     </div>
-                    <div>
-                        <button type="submit">Войти</button>
-                    </div>
+                    <p className='error-message'>{errorMessage}</p>
+                    <button type="submit">Войти</button>
                 </form>
             </div>
         </div>
@@ -81,7 +90,7 @@ async function getTokenFromServer(login, password) {
         "password": password
     };
     try {
-        const response = await fetch('http://127.0.0.1:8000/Auth/Login/', {
+        const response = await fetch(BackURL + "/Auth/Login/", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -89,8 +98,11 @@ async function getTokenFromServer(login, password) {
             body: JSON.stringify(requestData)
         });
 
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+        if (response.status === 400) {
+            return 400
+          }
+        if (response.status === 401) {
+          return 401
         }
         
         const responseData = await response.json();
