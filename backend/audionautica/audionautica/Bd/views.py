@@ -15,10 +15,13 @@ from .serializers import (
 )
 import jwt, datetime
 from django.http import HttpResponse, HttpResponseNotFound, FileResponse
+from django.core.files.storage import default_storage
 
 
-file_path = "/tmp/music/"
-file_path_posters = "tmp/posters/"
+file_path = "C:/Users/greg//Desktop/music/"
+#file_path = "/files/music/"
+#file_path_posters = "/files/posters/"
+file_path_posters = "C:/Users/greg/Desktop/project-audionautica/backend/audionautica/audionautica/posters/"
 secret_key = "secretkey"
 def create_playlist(x):
     playlist = PlayList()
@@ -236,16 +239,22 @@ class PlayListUpload(APIView):
             ext = request.headers["ext"]
             playlist = PlayList()
             playlist.title = request.headers["title"]
-            playlist.creatorid = request.headers["creatorid"]
+            token = request.headers['token']
+            payload = jwt.decode(token, secret_key, algorithms=['HS256'])
+            playlist.creatorid = payload["id"]
             playlist.description = request.headers["description"]
             playlist.tracksid = request.headers["tracksid"]
             playlist.isprivat = request.headers["isprivat"]
             playlist.save()
             playlist.image = file_path_posters+ str(playlist.id) +ext
             playlist.save()
-            with open(playlist.image, 'wb') as f:
-                f.write(image)
-            f.close()
+            # with open(playlist.image, 'wb') as f:
+            #     f.write(image)
+            # f.close()
+            path = file_path_posters+ str(playlist.id) +ext
+            image.name = path
+            file_name = default_storage.save(path,image)
+
             return Response(playlist.id, status=status.HTTP_200_OK)
 
 class PlayListDeleteId(APIView):
@@ -374,3 +383,12 @@ class PlayListSearch(APIView):
             print(array)
             json_response['playlists'] = array
         return Response(json_response)
+
+class UserPlayList(APIView):
+    def post(self, request):
+        if not check_token(request):
+            return Response(status=status.HTTP_418_IM_A_TEAPOT)
+        token = request.headers["token"]
+        payload = jwt.decode(token, secret_key, algorithms=['HS256'])
+        user = Users.objects.filter(id=payload['id']).first()
+        return Response(user.likedplaylist)

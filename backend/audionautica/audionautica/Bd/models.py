@@ -7,7 +7,7 @@ class Users(models.Model):
     likedplaylist = models.CharField("likedplaylist", max_length=240)
 
     def __str__(self):
-        return self.name
+        return self.name +' id {}'.format(self.id)
 
     class Meta:
         verbose_name = 'User'
