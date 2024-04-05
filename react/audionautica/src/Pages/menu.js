@@ -5,14 +5,18 @@ import {Context} from "../index"
 import "./menu.css"
 
 
-
 const Menu = () => {
   const {isLoggedIn, setIsLoggedIn} = useContext(Context);
+  const { currentTrack, setCurrentTrack} = useContext(Context)
   
 
   const handleLogout = () => {
     token.removeToken()
-    setIsLoggedIn(false);
+    if (currentTrack){ 
+      currentTrack.pause()
+      setCurrentTrack(null)
+    }
+    setIsLoggedIn(false)
   }
 
   return (

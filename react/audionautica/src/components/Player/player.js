@@ -33,9 +33,10 @@ const MusicPlayer = ({albumCover}) => {
     };
 
   const toggleReplay = () => {
-    if (repeatMode === 1) {currentTrack.loop = true}
+    const newMode = (repeatMode + 1) % 3
+    if (newMode === 2) {currentTrack.loop = true}
     else {currentTrack.loop = false}
-    setRepeatMode((repeatMode + 1) % 3)   
+    setRepeatMode(newMode)   
   }
 
   const handleVolumeChange = (newVolume) =>{
