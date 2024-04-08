@@ -1,24 +1,36 @@
 package com.kaelesty.audionautica.presentation.playlists
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.kaelesty.audionautica.domain.playlists.Playlist
+import com.kaelesty.audionautica.domain.playlists.UserPlaylists
+import com.kaelesty.audionautica.presentation.composables.dialogues.LoadingCard
+import com.kaelesty.audionautica.presentation.composables.dialogues.LoadingDialog
 import com.kaelesty.audionautica.presentation.viewmodels.ViewModelFactory
 
 @Composable
@@ -27,41 +39,63 @@ fun Playlists(
 	navigateToAddScreen: () -> Unit,
 ) {
 	val vm = viewModelFactory.create(PlaylistsViewModel::class.java)
+	vm.loadPlaylists()
+	val userPlaylists by vm.stateFlow.collectAsState()
 
-	val playlists = listOf(
-		Playlist(
-			id = 0,
-			creatorId = 0,
-			title = "Playlist for cats",
-			desc = "Do not listen if are not a cat!",
-			imageUrl = "https://i.pinimg.com/564x/86/15/50/8615509334c99ba0c11a9feac151a79e.jpg",
-			isPrivate = false,
-			trackIds = listOf()
-		),
-		Playlist(
-			id = 1,
-			creatorId = 0,
-			title = "Evil music",
-			desc = "I'm glad that you're evil too:)",
-			imageUrl = "https://avatars.yandex.net/get-music-user-playlist/30088/791514790.1022.48240/m1000x1000?1678655770433",
-			isPrivate = false,
-			trackIds = listOf()
-		),
-	)
-
-	LazyColumn(
-		modifier = Modifier
-			.padding(12.dp)
-			.fillMaxHeight(),
-		content = {
-			items(
-				items = playlists,
-				key = { it.id }
-			) {
-				PlaylistCard(playlist = it)
-			}
+	when (userPlaylists) {
+		is PlaylistsState.Loading -> {
+			LoadingDialog()
 		}
-	)
+
+		is PlaylistsState.Empty -> {
+			Column(
+				modifier = Modifier
+					.padding(12.dp)
+					.fillMaxHeight(),
+			) {}
+			AddButton(
+				action = { navigateToAddScreen() }
+			)
+		}
+
+		is PlaylistsState.Result -> {
+			val cards = (userPlaylists as PlaylistsState.Result).cards
+			LazyColumn(
+				modifier = Modifier
+					.padding(12.dp)
+					.fillMaxHeight(),
+				content = {
+					items(
+						items = cards,
+						key = {
+							when (it) {
+								is PlaylistCardState.IdOnly -> {
+									it.id
+								}
+								is PlaylistCardState.Full -> {
+									it.playlist.id
+								}
+							}
+						}
+					) {
+						PlaylistCard(state = it)
+					}
+					item {
+						Spacer(Modifier.height(300.dp))
+					}
+				}
+			)
+			AddButton(
+				action = { navigateToAddScreen() }
+			)
+		}
+	}
+}
+
+@Composable
+fun AddButton(
+	action: () -> Unit
+) {
 	Row(
 		modifier = Modifier
 			.fillMaxSize()
@@ -73,7 +107,7 @@ fun Playlists(
 		Spacer(Modifier.weight(1f))
 		IconButton(
 			onClick = {
-				navigateToAddScreen()
+				action
 			},
 			modifier = Modifier
 				.background(

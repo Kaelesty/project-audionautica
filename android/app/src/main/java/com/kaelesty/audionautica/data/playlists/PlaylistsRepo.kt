@@ -11,6 +11,7 @@ import com.kaelesty.audionautica.data.repos.tools.FileUploaderTool
 import com.kaelesty.audionautica.data.repos.tools.JwtTool
 import com.kaelesty.audionautica.domain.playlists.IPlaylistsRepo
 import com.kaelesty.audionautica.domain.playlists.Playlist
+import com.kaelesty.audionautica.domain.playlists.UserPlaylists
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -24,21 +25,45 @@ class PlaylistsRepo @Inject constructor(
 	private val apiService: PlaylistsApiService,
 	private val jwtTool: JwtTool,
 	private val uploader: FileUploaderTool,
-	private val contentResolver: ContentResolver,
-	private val application: Application
 ): IPlaylistsRepo {
 
 	val PLAYLIST_TRACKIDS_DELIMITER = "/"
 
-	override suspend fun getPlaylists(): List<Playlist> {
-		TODO("Not yet implemented")
+	override suspend fun getPlaylists(): UserPlaylists {
+		try {
+			val response = apiService.getPlaylists(
+				token = jwtTool.getToken()
+			)
+			when (response.code()) {
+				200 -> {
+					response.body()?.let {
+						if (it.isEmpty()) {
+							return UserPlaylists.Empty
+						}
+						else {
+							return UserPlaylists.Result(
+								playlists_ids = it
+									.split("/")
+									.filter { it != "" }
+									.map { it.toInt() }
+							)
+						}
+					}
+					return UserPlaylists.Loading
+				}
+				else -> {
+					return UserPlaylists.Loading
+				}
+			}
+		} catch (e: Exception) {
+			return UserPlaylists.Loading
+		}
 	}
 
 	override suspend fun uploadPlaylist(playlist: Playlist, uri: Uri): Boolean {
 		return try {
 			val response = apiService.uploadPlaylist(
 				title = playlist.title,
-				creatorId = playlist.creatorId,
 				desc = playlist.desc,
 				token = jwtTool.getToken(),
 				trackIds = playlist.trackIds.joinToString(PLAYLIST_TRACKIDS_DELIMITER),
@@ -48,7 +73,20 @@ class PlaylistsRepo @Inject constructor(
 			)
 			response.code() == 200
 		} catch (e: Exception) {
-			val d = e
+			false
+		}
+	}
+
+	override suspend fun likePlaylist(playlist_id: Int): Boolean {
+		return try {
+			val response = apiService.likePlaylist(
+				token = jwtTool.getToken(),
+				body = PlaylistIdRequest(
+					playlist_id = playlist_id.toString()
+				)
+			)
+			return response.code() == 200
+		} catch (e: Exception) {
 			false
 		}
 	}

@@ -59,6 +59,7 @@ fun AddPlaylistScreen(
 		}
 		is PlaylistUploadState.Finished -> {
 			navigateToListScreen()
+			viewModel.resetState()
 		}
 		else -> {}
 	}

@@ -3,12 +3,11 @@ package com.kaelesty.audionautica.data.remote.api
 import com.kaelesty.audionautica.data.playlists.PlaylistsApiService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
 
 object ApiServiceFactory {
 
 	private const val PROTOCOL = "https://"
-	private const val SERVER_URL = "c7f0-193-32-202-60.ngrok-free.app"
+	private const val SERVER_URL = "cb74-193-32-202-60.ngrok-free.app"
 
 	private const val ACCESS_URL = "$PROTOCOL$SERVER_URL/Auth/"
 	private const val MUSIC_URL =  "$PROTOCOL$SERVER_URL/Music/"

@@ -2,6 +2,7 @@ package com.kaelesty.audionautica.presentation.composables.music
 
 import android.media.session.MediaController
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -132,6 +133,7 @@ fun MusicScreen(
 				Playlists(
 					viewModelFactory,
 					navigateToAddScreen = {
+						Log.d("NavTag", "to AddScreen")
 						navigationState.navHostController.navigate(Screen.PlaylistsCreate.route)
 					}
 				)
@@ -153,6 +155,7 @@ fun MusicScreen(
 					onRequestImage,
 					requestedImageFlow,
 					navigateToListScreen = {
+						Log.d("NavTag", "pop backstack")
 						navigationState.navHostController.popBackStack()
 					}
 				)

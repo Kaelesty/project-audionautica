@@ -21,6 +21,12 @@ class PlaylistUploadViewModel @Inject constructor(
 	private val _stateFlow: MutableStateFlow<PlaylistUploadState> = MutableStateFlow(PlaylistUploadState.Initial)
 	val stateFlow: StateFlow<PlaylistUploadState> get() = _stateFlow
 
+	fun resetState() {
+		viewModelScope.launch(Dispatchers.IO) {
+			_stateFlow.emit(PlaylistUploadState.Initial)
+		}
+	}
+
 	fun uploadPlaylist(
 		uri: Uri?,
 		title: String,

@@ -15,7 +15,7 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.net.toFile
-import com.kaelesty.audionautica.presentation.composables.addtrack.AddTrackScreen
+import com.kaelesty.audionautica.presentation.addtrack.AddTrackScreen
 import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
 import com.kaelesty.audionautica.presentation.viewmodels.AddTrackViewModel
 import com.kaelesty.audionautica.system.ModifiedApplication
@@ -24,10 +24,6 @@ import javax.inject.Inject
 
 
 class AddTrackActivity : ComponentActivity() {
-
-	enum class FilesToBrowse(val requestCode: Int) {
-		POSTER(2000), MUSIC(3000)
-	}
 
 	@Inject
 	lateinit var viewModel: AddTrackViewModel
