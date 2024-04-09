@@ -19,18 +19,47 @@ const MusicPlayer = ({albumCover}) => {
   useEffect(() => {
     if (currentTrack===null){return}
     setIsPlaying(true)
+  }, [currentTrack]);
+
+  useEffect(() => {
+    if (currentTrack===null){return}
     currentTrack.volume = volume
-  }, [currentTrack, volume]);
+  }, [volume,currentTrack]);
 
   const togglePlay = () => {
     if (isPlaying){
-      currentTrack.pause()
+      fadeOut()
     }
     else{
-      currentTrack.play()
+      fadeIn()
     }
-    setIsPlaying(!isPlaying);
-    };
+  };
+
+  const fadeIn = () => {
+    currentTrack.play()
+    setIsPlaying(true);
+    const fadeInterval = setInterval(() => {
+      if (currentTrack.volume < (0.95 * volume)) {
+        currentTrack.volume += 0.01;
+      } else {
+        currentTrack.volume = volume;
+        clearInterval(fadeInterval);
+      }
+    }, 4);
+  };
+
+  const fadeOut = () => {
+    setIsPlaying(false);
+    const fadeInterval = setInterval(() => {
+      if (currentTrack.volume > (0.05)) {
+        currentTrack.volume -= 0.01;
+      } else {
+        currentTrack.volume = 0;
+        clearInterval(fadeInterval);
+        currentTrack.pause()
+      }
+    }, 4);
+  }; 
 
   const toggleReplay = () => {
     const newMode = (repeatMode + 1) % 3
@@ -41,6 +70,9 @@ const MusicPlayer = ({albumCover}) => {
 
   const handleVolumeChange = (newVolume) =>{
     setVolume(newVolume/100)
+  }
+  const toggleTest = () => {
+    console.log(currentTrack.duration)
   }
 
   return (
@@ -64,7 +96,9 @@ const MusicPlayer = ({albumCover}) => {
             onClick={togglePlay} 
           />
 
-          <img className="control-button img" src={require("./../icons/fast-forward.png")} alt="Forward" />
+          <img className="control-button img" src={require("./../icons/fast-forward.png")} alt="Forward" 
+            onClick={toggleTest}
+          />
 
           <img className="control-button replay-button" 
             src={repeatMode < 2 ? require("./../icons/replay.png") : require("./../icons/replay-one.png")}

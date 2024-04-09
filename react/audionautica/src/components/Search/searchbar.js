@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import BackURL from '../../urls';
 import token from '../../token';
 import LoaderIcon from './download';
-import getTrackById from '../../gettrack';
+//import getTrackById from '../../gettrack';
 import {Context} from '../../index.js'
 import "./searchbar.css"
 
@@ -11,7 +11,7 @@ const SearchBar = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
- 
+  const [abort, setAbort] = useState(null)
   const {currentTrack, setCurrentTrack} = useContext(Context)
   const {setCurrTrackTitle} = useContext(Context)
   const {setCurrTrackArtist} = useContext(Context)
@@ -82,14 +82,18 @@ const SearchBar = () => {
   }; */
   
 
-
   const handleTrackClick = async (id, trackTitle, trackArtist) => {
+    if (abort){
+      abort.abort()      
+    }
     try {
       const newController = new AbortController();
+      setAbort(newController)
       const mediaSource = new MediaSource();
-      const audio = document.createElement('audio');
+      
+      const audio = new Audio();
       audio.src = URL.createObjectURL(mediaSource);
-
+      
       await new Promise((resolve, reject) => {
         mediaSource.addEventListener('sourceopen', () => {
           resolve();
@@ -100,8 +104,9 @@ const SearchBar = () => {
       });
   
       const sourceBuffer = mediaSource.addSourceBuffer('audio/mpeg');
-  
+
       const { signal } = newController;
+      
       const response = await fetch(BackURL + "/Music/GetTrack/", {
         method: 'POST',
         headers: {
@@ -118,17 +123,29 @@ const SearchBar = () => {
   
       const reader = response.body.getReader();
       const totalSize = +response.headers.get('Content-Length');
-      const initialChunkSize = 300 * 300;
+      const initialChunkSize = 1024*10;
       let loaded = 0;
 
       let firstChankLoaded = false
-      
+      let aborted = false
+      signal.addEventListener('abort', () => {
+        reader.cancel();
+        sourceBuffer.abort();
+        aborted = true
+        console.log("Loading aborted");
+
+      });
+
       const appendData = async () => {
         
         const { done, value } = await reader.read();
 
         if (done) {
           console.log('Track loaded, duration', audio.duration );
+          mediaSource.endOfStream();
+          if (!aborted){
+            setAbort(null)
+          }
           return;
         }
   
@@ -143,7 +160,8 @@ const SearchBar = () => {
 
         if (loaded < initialChunkSize) {
           appendData();
-        } else if (!firstChankLoaded) {
+        } 
+        else if (!firstChankLoaded) {
           if (currentTrack){          
             currentTrack.pause()
           }
@@ -157,10 +175,10 @@ const SearchBar = () => {
         }
         else{
           appendData();
-          console.log("data appended, progress ", loaded / totalSize,)
+          console.log("data appended, progress ", loaded / totalSize, abort)
         }
       };
-  
+      
       appendData();
     } catch (error) {
       if (error.name === 'AbortError') {

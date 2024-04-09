@@ -36,6 +36,7 @@
     border: 1px solid #ddd;
     border-radius: 5px;
     cursor: pointer;
+    text-align: left;
   }
   
   .result p {
