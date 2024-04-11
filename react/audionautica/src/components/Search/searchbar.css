@@ -10,7 +10,7 @@
   }
   
   .search-input {
-    width: 100%;
+    width: 590px;
     padding: 10px;
     font-size: 16px;
     border: 1px solid #ccc;
@@ -29,20 +29,42 @@
   }
   
   .result {
+    display: flex;
+    align-items: center;
     width: 100%;
     padding: 5px;
     margin-bottom: 5px;
     background-color: #f0f0f0;
     border: 1px solid #ddd;
     border-radius: 5px;
-    cursor: pointer;
-    text-align: left;
+    overflow: hidden;
   }
-  
+
+  .play-butt {
+    margin-right: 5px;
+    width: 20px;
+    height: 20px;
+    padding: 10px;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    -webkit-user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+  }
+  .play-butt:hover{
+    background-color: #f0f0f0;
+  }
+
   .result p {
     margin: 0;
+    text-align: left;
   }
   
   .result:hover {
     background-color: #e0e0e0;
   }
+
+ 
