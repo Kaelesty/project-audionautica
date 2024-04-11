@@ -1,4 +1,5 @@
 import hashlib
+from datetime import datetime
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from .models import Users, Traks, PlayList
@@ -20,7 +21,7 @@ class UsersSerializer(serializers.ModelSerializer):
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
-        fields = ('login', 'name','password')
+        fields = ('login', 'name','password','lastupdate_date')
     def create(self, validated_data):
         password = validated_data["password"]#.pop('password', None)
         validated_data["password"] = make_hash(password)
