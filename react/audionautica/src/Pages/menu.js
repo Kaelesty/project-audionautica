@@ -26,10 +26,10 @@ const Menu = () => {
           <Link to="/login" className='ButtonLink'>
             <button onClick={handleLogout}>Выход</button>
           </Link>
-          <Link to="/home/">Домой</Link>
-          <Link to="/home/rec">Рекомендации</Link>
-          <Link to="/home/search">Поиск</Link>
-          <Link to="/home/test">Тест</Link>
+          <Link to="/home">Домой</Link>
+          <Link to="/rec">Рекомендации</Link>
+          <Link to="/search">Поиск</Link>
+          <Link to="/test">Тест</Link>
         </>
       ) : (
         <>

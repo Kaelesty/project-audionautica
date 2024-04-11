@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
-
+import addTrackToPlaylist from '../../requests/addtracktoplaylist';
 import "./addmenu.css"
 
-const AddMenu = ({ onAddToQueue, onAddToFavorites, playlists}) => {
+const AddMenu = ({ onAddToQueue, onAddToFavorites, playlists, trackId}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPlaylistMenuOpen, setIsPlaylistMenuOpen] = useState(false);
 
   const handleToggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  const addToPlaylist = async (playlistId) => {
+    await addTrackToPlaylist(trackId, playlistId)
+  }
 
   return (
     <>
@@ -36,7 +40,7 @@ const AddMenu = ({ onAddToQueue, onAddToFavorites, playlists}) => {
               onMouseEnter={() => setIsPlaylistMenuOpen(true)}
             >
               {playlists.map((playlist, index) => (
-                <button key={index} onClick={() => console.log(`Добавить в плейлист ${playlist}`)}>
+                <button key={index} onClick={() => addToPlaylist(playlist)}>
                   {playlist}
                 </button>
               ))}

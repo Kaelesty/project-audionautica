@@ -3,6 +3,8 @@ import getTrackById from "../requests/gettrack"
 import { Context } from "../index.js"
 import queue from "../queue.js"
 import AddMenu from "./search/addmenu.js"
+import addTrackToPlaylist from "../requests/addtracktoplaylist.js"
+import getUserPlaylists from "../requests/getuserplaylists.js"
 
 const Track = ({id, title, artist, abort, setAbort}) =>{
   const {currentTrack, setCurrentTrack} = useContext(Context)
@@ -16,8 +18,11 @@ const Track = ({id, title, artist, abort, setAbort}) =>{
     queue.setTrack(id, trackTitle, trackArtist)
   }
 
-  const addButtonClick = (id, trackTitle, trackArtist) => {
-    console.log("track " , trackTitle, " added")
+  const addToFavButtClick = async (id) => {
+    const result = await getUserPlaylists()
+    let favId = result.created[0]
+    addTrackToPlaylist(id, favId)
+    console.log("track added to favorites.")
   }
 
   const addQueueButtClick = (id, title, artist) => {
@@ -43,9 +48,10 @@ const Track = ({id, title, artist, abort, setAbort}) =>{
           <p>{artist}</p>
         </div>
         <AddMenu
-          onAddToFavorites={() =>addButtonClick(id, title, artist)}
+          onAddToFavorites={() =>addToFavButtClick(id)}
           onAddToQueue={() =>addQueueButtClick(id, title, artist)}
           playlists={[1,2,3]}
+          trackId={id}
         />
       </div>
     </>

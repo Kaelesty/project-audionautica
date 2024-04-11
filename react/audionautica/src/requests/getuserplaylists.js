@@ -13,7 +13,6 @@ async function getUserPlaylists() {
         
         console.log("Отправлен запрос на получение плейлистов пользователя");
         const data = await response.json();
-        console.log(data)
         return data // Object { liked: [], created: [] }
     } catch (error) {
         console.error('Ошибка:', error);

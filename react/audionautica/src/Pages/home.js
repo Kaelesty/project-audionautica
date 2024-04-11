@@ -1,31 +1,67 @@
-import React, { useContext} from 'react';
-import {Navigate, Outlet} from 'react-router-dom';
-import MusicPlayer from '../components/player/player.js';
-import CoverImg from '../components/icons/nopic.png'
-import {Context} from "../index.js"
+import React from 'react';
+import Playlist from '../components/playlist';
+
 import "./home.css"
 
-
-
 const HomePage = () => {
-  const albumCover = CoverImg;
-  const {isLoggedIn} = useContext(Context);
+  const createdPlaylists = [
+    {
+      cover: null,
+      title: "Название плейлиста 1",
+      creator: "Автор плейлиста 1"
+    },
+    {
+      cover: null,
+      title: "Название плейлиста 2",
+      creator: "Автор плейлиста 2"
+    },
+  ];
 
-  if (!isLoggedIn){
-    return <Navigate to="/login" />
-  }
-
+  const savedPlaylists = [
+    {
+      cover: null,
+      title: "Название плейлиста 1",
+      creator: "Автор плейлиста 1"
+    },
+    {
+      cover: null,
+      title: "Название плейлиста 2",
+      creator: "Автор плейлиста 2"
+    },
+    {
+      cover: null,
+      title: "Название плейлиста 3",
+      creator: "Автор плейлиста 3"
+    },
+  ];
 
   return (
-      <div className="home-page">
-        <Outlet/>
-        <div className="Player">
-          <MusicPlayer
-            albumCover={albumCover}
+    <div>
+      <h1>Добро пожаловать на главную страницу</h1>
+      
+      <h2>Созданные плейлисты</h2>
+      <div className="playlists-container">
+        {createdPlaylists.map((playlist, index) => (
+          <Playlist key={index} 
+            cover = {playlist.cover}
+            title = {playlist.title}
+            creator = {playlist.creator}
           />
-        </div>
+        ))}
       </div>
+      
+      <h2>Сохраненные плейлисты</h2>
+      <div className="playlists-container">
+        {savedPlaylists.map((playlist, index) => (
+          <Playlist key={index}  
+            cover = {playlist.cover}
+            title = {playlist.title}
+            creator = {playlist.creator}
+          />
+        ))}
+      </div>
+    </div>
   );
-};
+}
 
 export default HomePage;

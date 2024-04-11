@@ -1,13 +1,6 @@
-.Player {
-    position: fixed;
-    overflow: hidden;
-    bottom: 0;
-    width: 100%;
-    height: auto;
-    overflow: visible;
-}
-@media screen and (max-width: 680px) {
-    .Player {
-      display: none;
-    }
+.playlists-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
+    grid-gap: 20px; 
   }
+  

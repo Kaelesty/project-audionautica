@@ -4,11 +4,12 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import RegisterPage from './pages/register';
 import LoginPage from './pages/login';
 import Menu from './pages/menu';
-import HomePage from './pages/home';
+import ConstPage from './pages/const';
 import Recomendations from './components/recomendations';
 import SearchBar from './components/search/searchbar';
 import Playlist from './components/playlist';
 import AlbumCover from './components/icons/nopic.png';
+import HomePage from './pages/home';
 
 
 
@@ -32,7 +33,8 @@ const App = () => {
         <Routes> 
           <Route path="/register" element={<RegisterPage/>} />
           <Route path="/login" element={<LoginPage/>} />
-          <Route path="/home/" element={<HomePage/>} >
+          <Route path="/" element={<ConstPage/>} >
+            <Route path="home/" element={<HomePage/>} />
             <Route path="rec/" element={<Recomendations/>} />
             <Route path="search/" element={<SearchBar/>} />
             <Route path="test/" element={<Playlist title={"Title"} creator={"Creator"} cover={AlbumCover}/>} />
