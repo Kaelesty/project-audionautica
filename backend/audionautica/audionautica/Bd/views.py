@@ -278,9 +278,13 @@ class PlayListUpload(APIView):
             path = file_path_posters+ str(playlist.id) +ext
             image.name = path
             file_name = default_storage.save(path,image)
+<<<<<<< HEAD
             user = Users.objects.filter(id=payload.id).first()
             user.lastupdate_date = datetime.now()
             user.save()
+=======
+
+>>>>>>> db5f74b34840a9ac03c67521aa7820d1cd55232a
             return Response(playlist.id, status=status.HTTP_200_OK)
 
 class PlayListDeleteId(APIView):
@@ -432,6 +436,7 @@ class UserPlayList(APIView):
     def post(self, request):
         if not check_token(request):
             return Response(status=status.HTTP_418_IM_A_TEAPOT)
+<<<<<<< HEAD
         json_response = {}
         token = request.headers["token"]
         payload = jwt.decode(token, secret_key, algorithms=['HS256'])
@@ -460,3 +465,9 @@ class PlayListInfoId(APIView):
         dickt["isprivat"] = playlist.isprivat
         return Response(dickt)
 #PLayList info by id
+=======
+        token = request.headers["token"]
+        payload = jwt.decode(token, secret_key, algorithms=['HS256'])
+        user = Users.objects.filter(id=payload['id']).first()
+        return Response(user.likedplaylist)
+>>>>>>> db5f74b34840a9ac03c67521aa7820d1cd55232a
