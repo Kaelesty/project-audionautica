@@ -1,10 +1,12 @@
 from django.db import models
+from datetime import datetime
 
 class Users(models.Model):
     name = models.CharField("name", max_length= 240)
     login = models.CharField("login", max_length=240, unique=True, null = True)
     password = models.CharField("password", max_length=240)
     likedplaylist = models.CharField("likedplaylist", max_length=240)
+    lastupdate_date = models.DateTimeField("lastupdate_date", default=datetime.now())
 
     def __str__(self):
         return self.name +' id {}'.format(self.id)
@@ -32,7 +34,6 @@ class PlayList(models.Model):
     tracksid = models.CharField("tracksid", max_length=240)
     liked = models.CharField("liked", max_length=240)
     isprivat = models.CharField("isprivat", max_length=210)
-    #lastupdate_date = models.DateTimeField("lastupdate_date")
 
     def __str__(self):
         return self.title +' id {}'.format(self.id)

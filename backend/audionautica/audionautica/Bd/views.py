@@ -1,4 +1,5 @@
 import os, json, hashlib
+from datetime import datetime
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
@@ -45,6 +46,27 @@ def check_token(request):
         return True
     except Exception:
         return False
+def user_update_and_delete(id):
+    array = []
+    users = Users.objects.all()
+    for i in users:
+        if str(id) in i.likedplaylist:
+            array.append(i)
+    for i in array:
+        i.lastupdate_date = datetime.datetime.now()
+        string = i.likedplaylist.split("/")
+        string.remove(str(id))
+        i.likedplaylist = "/".join(string)
+        i.save()
+def user_update(id):
+    array = []
+    users = Users.objects.all()
+    for i in users:
+        if str(id) in i.likedplaylist:
+            array.append(i)
+    for i in array:
+        i.lastupdate_date = datetime.datetime.now()
+        i.save()
 class UsersAPIViwe(generics.ListAPIView):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
@@ -145,7 +167,7 @@ class GetTrack(APIView):
             response = HttpResponseNotFound('<h1>File not exist</h1>')
 
         return response
-
+#may not work
 class TrackUpload(APIView):
     def post(self, request):
         if request.method == "POST":
@@ -217,7 +239,9 @@ class TrackSearch(APIView):
             if query in string:
                 response.append(list[i])
         if len(response) == 0:
-            return HttpResponse('<h1>Track not exist</h1>')
+            dikt = {}
+            dikt["tracks"] = []
+            return Response(dikt)
         else:
             array = []
             for i in range(len(response)):
@@ -254,7 +278,9 @@ class PlayListUpload(APIView):
             path = file_path_posters+ str(playlist.id) +ext
             image.name = path
             file_name = default_storage.save(path,image)
-
+            user = Users.objects.filter(id=payload.id).first()
+            user.lastupdate_date = datetime.now()
+            user.save()
             return Response(playlist.id, status=status.HTTP_200_OK)
 
 class PlayListDeleteId(APIView):
@@ -264,36 +290,50 @@ class PlayListDeleteId(APIView):
         try:
             id = request.data["id"]
             playlist = PlayList.objects.get(id = id)
-            if not playlist.image == file_path_posters + "kitty.jpg":
-                os.remove(playlist.image)
+            # if not playlist.image == file_path_posters + "kitty.jpg":
+            #     os.remove(playlist.image)
+            user_update_and_delete(id)
             playlist.delete()
             return Response(status = status.HTTP_200_OK)
-        except:
+        except Exception as e:
+            print(e)
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class GetPlayListPoster(APIView):
-    def post(self, request):
-        if request.method == "POST":
+    def get(self,request):
+        if request.method == "GET":
             if not check_token(request):
                 return Response(status=status.HTTP_418_IM_A_TEAPOT)
-            playlist_id = request.data["playlist_id"]
+            playlist_id = request.GET.get('id','')
             playlist = PlayList.objects.get(id=playlist_id)
             path = playlist.image
             print(path)
             return FileResponse(open(path,'rb'))
+
+# class GetPlayListPoster(APIView):
+#     def post(self, request):
+#         if request.method == "POST":
+#             if not check_token(request):
+#                 return Response(status=status.HTTP_418_IM_A_TEAPOT)
+#             playlist_id = request.data["playlist_id"]
+#             playlist = PlayList.objects.get(id=playlist_id)
+#             path = playlist.image
+#             print(path)
+#             return FileResponse(open(path,'rb'))
 
 class AddTrackToPlayList(APIView):
     def post(self, request):
         if request.method == "POST":
             if not check_token(request):
                 return Response(status=status.HTTP_418_IM_A_TEAPOT)
-            playlist_id = request.data["playlist_id"]
-            track_id = request.data["track_id"]
+            playlist_id = str(request.data["playlist_id"])
+            track_id = str(request.data["track_id"])
             playlist = PlayList.objects.filter(id = playlist_id).first()
             tracks = playlist.tracksid
             tracks += track_id
             tracks += "/"
             playlist.tracksid = tracks
+            user_update(playlist_id)
             playlist.save()
             return Response(status = status.HTTP_200_OK)
 
@@ -302,22 +342,22 @@ class DeleteTrackFromPlayList(APIView):
         if not check_token(request):
             return Response(status=status.HTTP_418_IM_A_TEAPOT)
         if request.method == "POST":
-            playlist_id = request.data["playlist_id"]
-            track_id = request.data["track_id"]
+            playlist_id = str(request.data["playlist_id"])
+            track_id = str(request.data["track_id"])
             playlist = PlayList.objects.filter(id = playlist_id).first()
             tracks = playlist.tracksid
             tracks = "/".join(filter(lambda x: x != track_id, tracks.split("/")))
             playlist.tracksid = tracks
+            user_update(playlist_id)
             playlist.save()
             return Response(status = status.HTTP_200_OK)
-
 class LikePlayList(APIView):
     def post(self, request):
         if not check_token(request):
             return Response(status=status.HTTP_418_IM_A_TEAPOT)
         if request.method == "POST":
             token = request.headers["token"]
-            playlist_id = request.data["playlist_id"]
+            playlist_id = str(request.data["playlist_id"])
             payload = jwt.decode(token, secret_key, algorithms=['HS256'])
             user = Users.objects.filter(id = payload['id']).first()
             if playlist_id not in user.likedplaylist:
@@ -329,6 +369,8 @@ class LikePlayList(APIView):
                 playlist = PlayList.objects.filter(id = playlist_id).first()
                 playlist.liked = str(int(playlist.liked)+1)
                 playlist.save()
+                user.lastupdate_date = datetime.datetime.now()
+                user.save()
             return Response(status=status.HTTP_200_OK)
 
 
@@ -338,7 +380,7 @@ class DisLikePlayList(APIView):
             return Response(status=status.HTTP_418_IM_A_TEAPOT)
         if request.method == "POST":
             token = request.headers["token"]
-            playlist_id = request.data["playlist_id"]
+            playlist_id = str(request.data["playlist_id"])
             payload = jwt.decode(token, secret_key, algorithms=['HS256'])
             user = Users.objects.filter(id = payload['id']).first()
             if playlist_id in user.likedplaylist:
@@ -351,6 +393,8 @@ class DisLikePlayList(APIView):
                 playlist = PlayList.objects.filter(id = playlist_id).first()
                 playlist.liked = str(int(playlist.liked)-1)
                 playlist.save()
+                user.lastupdate_date = datetime.datetime.now()
+                user.save()
             return Response(status=status.HTTP_200_OK)
 
 
@@ -388,7 +432,31 @@ class UserPlayList(APIView):
     def post(self, request):
         if not check_token(request):
             return Response(status=status.HTTP_418_IM_A_TEAPOT)
+        json_response = {}
         token = request.headers["token"]
         payload = jwt.decode(token, secret_key, algorithms=['HS256'])
         user = Users.objects.filter(id=payload['id']).first()
-        return Response(user.likedplaylist)
+        json_response["liked"]= list(map(int,list(filter(lambda x: x != "",user.likedplaylist.split("/")))))
+        all_playlists = PlayList.objects.all()
+        array = []
+        for i in all_playlists:
+            if i.creatorid == str(user.id):
+                array.append(i.id)
+        json_response["created"]=array
+        return Response(json_response)
+
+class PlayListInfoId(APIView):
+    def post(self,request):
+        if not check_token(request):
+            return Response(status=status.HTTP_418_IM_A_TEAPOT)
+        playlist_id = request.data["id"]
+        playlist = PlayList.objects.filter(id=playlist_id).first()
+        dickt = {}
+        dickt["title"] = playlist.title
+        dickt["creatorid"] = playlist.creatorid
+        dickt["description"] = playlist.description
+        dickt["tracksid"] = playlist.tracksid
+        dickt["liked"] = playlist.liked
+        dickt["isprivat"] = playlist.isprivat
+        return Response(dickt)
+#PLayList info by id
