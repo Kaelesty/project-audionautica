@@ -1,6 +1,24 @@
+.home-page{
+  position: relative;
+  height: calc(100vh - 50px - 125px); /*высота меню и плеера*/
+  overflow-y: scroll; /* Включаем вертикальную прокрутку при необходимости */
+  overflow-x: hidden; /* Скрываем горизонтальную прокрутку */
+  scrollbar-width: thin; 
+  scrollbar-color: transparent; 
+  -ms-overflow-style: none; 
+}
+
+.home-page::-webkit-scrollbar {
+  width: 6px;
+}
+
+.home-page::-webkit-scrollbar-thumb { 
+  background-color: #999; 
+} 
+
 .playlists-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
-    grid-gap: 20px; 
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+    grid-gap: 10px; 
   }
   

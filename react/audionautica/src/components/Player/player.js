@@ -14,10 +14,11 @@ const MusicPlayer = ({albumCover}) => {
   const {currentTrack} = useContext(Context)
   const {currTrackTitle} = useContext(Context)
   const {currTrackArtist} = useContext(Context)
-  
 
   useEffect(() => {
-    if (currentTrack===null){return}
+    if (currentTrack===null){
+      return
+    }
     setIsPlaying(true)
   }, [currentTrack]);
 

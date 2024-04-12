@@ -1,6 +1,5 @@
 import React from 'react';
 import Playlist from '../components/playlist';
-
 import "./home.css"
 
 const HomePage = () => {
@@ -32,11 +31,11 @@ const HomePage = () => {
       cover: null,
       title: "Название плейлиста 3",
       creator: "Автор плейлиста 3"
-    },
+    }
   ];
 
   return (
-    <div>
+    <div className='home-page'>
       <h1>Добро пожаловать на главную страницу</h1>
       
       <h2>Созданные плейлисты</h2>

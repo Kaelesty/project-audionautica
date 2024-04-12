@@ -39,7 +39,6 @@ const App = () => {
             <Route path="search/" element={<SearchBar/>} />
             <Route path="test/" element={<Playlist title={"Title"} creator={"Creator"} cover={AlbumCover}/>} />
           </Route>
-          
         </Routes>
       </Context.Provider>
     </Router>

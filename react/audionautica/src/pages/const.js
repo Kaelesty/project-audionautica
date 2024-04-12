@@ -20,7 +20,7 @@ const ConstPage = () => {
   }
 
   return (
-      <div className="home-page">
+      <div className="const-page">
         <Outlet/>
         <button onClick={logPlaylists}>Просто кнопка</button>
         <div className="Player">
