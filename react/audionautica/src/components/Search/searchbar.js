@@ -10,7 +10,6 @@ const SearchBar = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [abort, setAbort] = useState(null)
    
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -74,8 +73,6 @@ const SearchBar = () => {
             id = {result.id}
             title = {result.title}
             artist = {result.artist}
-            abort = {abort}
-            setAbort={setAbort}
           />
         ))}
       </div>

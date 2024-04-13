@@ -1,21 +1,17 @@
-import React, { useContext } from "react"
-import getTrackById from "../requests/gettrack"
-import { Context } from "../index.js"
-import queue from "../queue.js"
+import React, { useState } from "react"
+import { useQueue } from "./queue/queue.js"
 import AddMenu from "./search/addmenu.js"
 import addTrackToPlaylist from "../requests/addtracktoplaylist.js"
 import getUserPlaylists from "../requests/getuserplaylists.js"
 
-const Track = ({id, title, artist, abort, setAbort}) =>{
-  const {currentTrack, setCurrentTrack} = useContext(Context)
-  const {setCurrTrackArtist} = useContext(Context)
-  const {setCurrTrackTitle} = useContext(Context)
+const Track = ({id, title, artist}) =>{
+  const [isOnTrack, setIsOnTrack] = useState(false)
+  const {addTrackToQueue, setQueueTrack } = useQueue()
 
-  const handleTrackClick = async (id, trackTitle, trackArtist) => {
-    getTrackById(id, currentTrack, setCurrentTrack, abort, setAbort)
-    setCurrTrackArtist(trackArtist)
-    setCurrTrackTitle(trackTitle)
-    queue.setTrack(id, trackTitle, trackArtist)
+
+  const handleTrackClick = async (id, title, artist) => {
+    
+    setQueueTrack({id, title, artist})
   }
 
   const addToFavButtClick = async (id) => {
@@ -26,8 +22,7 @@ const Track = ({id, title, artist, abort, setAbort}) =>{
   }
 
   const addQueueButtClick = (id, title, artist) => {
-    queue.addTrack({id, title, artist})
-    console.log(queue.queue)    
+    addTrackToQueue({id, title, artist}) 
   }
 
   return (
@@ -35,6 +30,8 @@ const Track = ({id, title, artist, abort, setAbort}) =>{
       <div
         className="result"
         key={id}
+        onMouseLeave={() => setIsOnTrack(false)}
+        onMouseEnter={() => setIsOnTrack(true)}
       >
         <img
           className="play-butt"
@@ -52,6 +49,7 @@ const Track = ({id, title, artist, abort, setAbort}) =>{
           onAddToQueue={() =>addQueueButtClick(id, title, artist)}
           playlists={[1,2,3]}
           trackId={id}
+          isOnTrack = {isOnTrack}
         />
       </div>
     </>

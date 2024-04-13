@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import addTrackToPlaylist from '../../requests/addtracktoplaylist';
 import "./addmenu.css"
 
-const AddMenu = ({ onAddToQueue, onAddToFavorites, playlists, trackId}) => {
+const AddMenu = ({ onAddToQueue, onAddToFavorites, playlists, trackId, isOnTrack}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPlaylistMenuOpen, setIsPlaylistMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (isOnTrack){return}
+    setIsMenuOpen(isOnTrack)
+  }, [isOnTrack]);
 
   const handleToggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);

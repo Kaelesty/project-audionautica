@@ -1,0 +1,23 @@
+.sidebar {
+    width: 400px;
+    height: calc(100vh - 178px);
+    position: fixed;
+    top: 54px;
+    right: -400px;
+    background-color: #333;
+    transition: right 0.3s ease;
+  }
+  
+  .sidebar.open {
+    right: 8px;
+  }
+  
+  .track{
+    margin: 10px;
+  }
+  
+  .trackinfo {
+    margin: 0;
+    padding: 0;
+    color: white;
+  }

@@ -4,28 +4,47 @@ import AlbumCoverBig from './albumcoverbig';
 import ProgressBar from './progressbar.js';
 import AlbumCover from './../icons/nopic.png';
 import { Context } from '../../index.js';
+import useQueue from '../queue/queue.js';
+import getTrackById from '../../requests/gettrack.js';
 import './player.css';
 
 
-const MusicPlayer = ({albumCover}) => {
+
+const MusicPlayer = ({albumCover, isSidebarOpen, setIsSidebarOpen}) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [repeatMode, setRepeatMode] = useState(0);
+  const {repeatMode, setRepeatMode} = useQueue();
   const [volume, setVolume] = useState(0.5);
-  const {currentTrack} = useContext(Context)
-  const {currTrackTitle} = useContext(Context)
-  const {currTrackArtist} = useContext(Context)
+  const [abort, setAbort] = useState(null);
+  const {currentTrack, setCurrentTrack} = useContext(Context)
+  const {currTrackTitle, setCurrTrackTitle} = useContext(Context)
+  const {currTrackArtist, setCurrTrackArtist} = useContext(Context)
+  const {queue, nextTrack, prevTrack, currentId} = useQueue()
 
   useEffect(() => {
     if (currentTrack===null){
       return
     }
+    currentTrack.addEventListener('ended', handleTrackEnded);
+    if (repeatMode === 2){
+      currentTrack.loop = true
+    }
     setIsPlaying(true)
+     // eslint-disable-next-line
   }, [currentTrack]);
 
   useEffect(() => {
     if (currentTrack===null){return}
     currentTrack.volume = volume
-  }, [volume,currentTrack]);
+  }, [volume, currentTrack]);
+
+  useEffect(() => {
+    if (queue.length !== 0){
+      getTrackById(queue[currentId].id, currentTrack, setCurrentTrack, abort, setAbort)
+      setCurrTrackArtist(queue[currentId].artist)
+      setCurrTrackTitle(queue[currentId].title)
+    }
+    // eslint-disable-next-line
+  }, [queue[currentId]]);
 
   const togglePlay = () => {
     if (isPlaying){
@@ -65,17 +84,26 @@ const MusicPlayer = ({albumCover}) => {
   const toggleReplay = () => {
     const newMode = (repeatMode + 1) % 3
     if (newMode === 2) {currentTrack.loop = true}
-    else {currentTrack.loop = false}
+    else {currentTrack.loop = false} 
     setRepeatMode(newMode)   
   }
 
   const handleVolumeChange = (newVolume) =>{
     setVolume(newVolume/100)
   }
-  const toggleTest = () => {
-    console.log(currentTrack.duration)
+  const toggleNext = () => {
+    nextTrack()
+  }
+  const togglePrev = () => {
+    prevTrack()
+  }
+  const toggleQueue = () => {
+    setIsSidebarOpen(!isSidebarOpen)
   }
 
+  const handleTrackEnded = () =>{
+    nextTrack()
+  }
   return (
     currentTrack !== null && (
     <>
@@ -89,7 +117,11 @@ const MusicPlayer = ({albumCover}) => {
         </div>
        
         <div className="player-controls">
-          <img className="control-button img" src={require('./../icons/rewind.png')} alt="Backward" />
+          <img className="control-button img" 
+            src={require('./../icons/rewind.png')} 
+            alt="Backward"
+            onClick={togglePrev}
+          />
 
           <img className="control-button img"
             src={isPlaying ? require('./../icons/pause.png') : require('./../icons/play-button.png')} 
@@ -97,24 +129,32 @@ const MusicPlayer = ({albumCover}) => {
             onClick={togglePlay} 
           />
 
-          <img className="control-button img" src={require("./../icons/fast-forward.png")} alt="Forward" 
-            onClick={toggleTest}
+          <img className="control-button img" 
+            src={require("./../icons/fast-forward.png")} alt="Forward" 
+            onClick={toggleNext}
           />
 
           <img className="control-button replay-button" 
             src={repeatMode < 2 ? require("./../icons/replay.png") : require("./../icons/replay-one.png")}
             style={repeatMode > 0 ? { backgroundColor: '#bebebe', transform: 'translateY(1px)' }: {}} 
-            alt="Replay Mode" onClick={toggleReplay}
+            alt="Replay Mode" 
+            onClick={toggleReplay}
           />
+          
         </div>
-        
-        <div className='volume-controls'>
+
+        <div className='rightside-container'>
+          <img className="control-button queue-button" 
+              src={require("./../icons/list.png")} alt="Open queue" 
+              onClick={toggleQueue}
+            />
             <VolumeSlider volumeChange={handleVolumeChange} />
         </div>
         <div className='progress-bar-container'>
           <ProgressBar />
         </div>
       </div>
+      
       <AlbumCoverBig
         coverSrc={AlbumCover}
       />

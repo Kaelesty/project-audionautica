@@ -1,7 +1,7 @@
 import React, {useContext} from 'react';
 import { Link } from 'react-router-dom';
 import token from '../token';
-import {Context} from "../index"
+import { Context } from "../index"
 import "./menu.css"
 
 

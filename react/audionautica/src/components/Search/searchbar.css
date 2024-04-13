@@ -29,9 +29,9 @@
   .results-container {
     margin-top: 10px;
     width: 100%;
-    height: calc(100vh - 50px - 125px - 67px); /*высота меню и плеера*/
-    overflow-y: scroll; /* Включаем вертикальную прокрутку при необходимости */
-    overflow-x: hidden; /* Скрываем горизонтальную прокрутку */
+    height: calc(100vh - 50px - 125px - 67px); 
+    overflow-y: scroll;
+    overflow-x: hidden; 
     scrollbar-width: thin; 
     scrollbar-color: transparent; 
     -ms-overflow-style: none; 
@@ -44,7 +44,7 @@
   .results-container::-webkit-scrollbar-thumb {
     background-color: #999; 
   } 
-  
+
   .result {
     display: flex;
     align-items: center;

@@ -73,13 +73,24 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  
-  .volume-controls{
+
+  .rightside-container{
     position: absolute; 
-    left: 97%; 
-    transform: translateX(-100%); 
+    display: flex;
     justify-content: center; 
+    align-items: center;
+    width: 270px;
+    left: 99%; 
+    transform: translateX(-100%); 
   }
+  
+  .queue-button{
+    position: flex; 
+    width: 25px;
+    height: 25px;
+    margin-right: 10px;
+  }
+  
   .progress-bar-container{
       position: fixed;
       bottom: 0;
