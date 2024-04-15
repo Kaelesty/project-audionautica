@@ -2,7 +2,7 @@ import React, { useState, useEffect} from 'react';
 import BackURL from '../../urls.js';
 import token from '../../token.js';
 import LoaderIcon from './download.js';
-import Track from '../track.js';
+import Track from '../track/track.js';
 import "./searchbar.css"
 
 

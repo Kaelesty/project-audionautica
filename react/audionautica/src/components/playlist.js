@@ -5,6 +5,14 @@ import nopic from './icons/nopic.png';
 const Playlist = ({ cover, title, creator }) => {
   const [isHovered, setIsHovered] = useState(false);
 
+  const playlistClick = () => {
+    console.log("playlist click")
+  }
+  const playClick = () => {
+    console.log("play click")
+  }
+
+
   if (cover === null){  
     cover = nopic
   }
@@ -13,6 +21,7 @@ const Playlist = ({ cover, title, creator }) => {
       className={`playlist-container ${isHovered ? 'hovered' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={playlistClick}
     >
       <img className="playlist-cover" src={cover} alt="Playlist Cover" />
 
@@ -22,7 +31,10 @@ const Playlist = ({ cover, title, creator }) => {
       </div>
 
       {isHovered && (
-        <button className="play-button">
+        <button className="play-button" onClick={(event) => {
+          event.stopPropagation(); 
+          playClick();
+        }}>
            <img className='playpic' alt=''
             src={require('./icons/play-button.png')} 
             />

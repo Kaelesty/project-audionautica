@@ -4,7 +4,6 @@ import MusicPlayer from '../components/player/player.js';
 import CoverImg from '../components/icons/nopic.png'
 import {Context} from "../index.js"
 import "./const.css"
-import getPlaylistById from '../requests/getplaylistbyid.js';
 import Sidebar from '../components/queue/sidebar.js';
 import { QueueProvider } from '../components/queue/queue.js';
 const ConstPage = () => {
@@ -16,11 +15,6 @@ const ConstPage = () => {
     return <Navigate to="/login" />
   }
 
-  const logPlaylists = async () => {
-    const result = await getPlaylistById(18)
-    console.log(result.tracksid.split("/").slice(0,-1))//скорее всего ошибка при пустом плейлисте
-  }
-  
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   }
@@ -29,8 +23,6 @@ const ConstPage = () => {
       <div className="const-page">
         <QueueProvider>
           <Outlet/>
-          <button onClick={logPlaylists}>Просто кнопка</button>
-          <button onClick={toggleSidebar}>Toggle Sidebar</button>
           <Sidebar isOpen={isSidebarOpen} onClose={toggleSidebar} />
           <div className="Player">
             <MusicPlayer

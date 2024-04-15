@@ -101,9 +101,10 @@ const MusicPlayer = ({albumCover, isSidebarOpen, setIsSidebarOpen}) => {
     setIsSidebarOpen(!isSidebarOpen)
   }
 
-  const handleTrackEnded = () =>{
+  const handleTrackEnded = () => {
     nextTrack()
   }
+
   return (
     currentTrack !== null && (
     <>

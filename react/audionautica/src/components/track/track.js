@@ -1,8 +1,8 @@
 import React, { useState } from "react"
-import { useQueue } from "./queue/queue.js"
-import AddMenu from "./search/addmenu.js"
-import addTrackToPlaylist from "../requests/addtracktoplaylist.js"
-import getUserPlaylists from "../requests/getuserplaylists.js"
+import { useQueue } from "../queue/queue.js"
+import AddMenu from "./addmenu.js"
+import addTrackToPlaylist from "../../requests/addtracktoplaylist.js"
+import getUserPlaylists from "../../requests/getuserplaylists.js"
 
 const Track = ({id, title, artist}) =>{
   const [isOnTrack, setIsOnTrack] = useState(false)
@@ -19,6 +19,7 @@ const Track = ({id, title, artist}) =>{
     let favId = result.created[0]
     addTrackToPlaylist(id, favId)
     console.log("track added to favorites.")
+    
   }
 
   const addQueueButtClick = (id, title, artist) => {
@@ -36,7 +37,7 @@ const Track = ({id, title, artist}) =>{
         <img
           className="play-butt"
           onClick={() => handleTrackClick(id, title, artist)}
-          src={require("./icons/play-button.png")}
+          src={require("../icons/play-button.png")}
           alt="Play"
         />
         
