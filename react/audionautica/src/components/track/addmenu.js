@@ -17,8 +17,19 @@ const AddMenu = ({ onAddToQueue, onAddToFavorites, playlists, trackId, isOnTrack
 
   const addToPlaylist = async (playlistId) => {
     await addTrackToPlaylist(trackId, playlistId)
+    setIsMenuOpen(false)
   }
 
+  const handleQueueAddClick = () =>{
+    setIsMenuOpen(false)
+    onAddToQueue()
+  }
+
+  const handleFavClick = () =>{
+    setIsMenuOpen(false)
+    onAddToFavorites()
+  }
+  
   return (
     <>
       <img className='add-button'
@@ -31,8 +42,8 @@ const AddMenu = ({ onAddToQueue, onAddToFavorites, playlists, trackId, isOnTrack
         <div className="add-menu"
           onMouseLeave={() => setIsMenuOpen(false)}
         >
-          <button onClick={onAddToQueue}>Добавить в очередь</button>
-          <button onClick={onAddToFavorites}>Добавить в избранное</button>
+          <button onClick={handleQueueAddClick}>Добавить в очередь</button>
+          <button onClick={handleFavClick}>Добавить в избранное</button>
           <button
             onMouseEnter={() => setIsPlaylistMenuOpen(true)}
             onMouseLeave={() => setIsPlaylistMenuOpen(false)}

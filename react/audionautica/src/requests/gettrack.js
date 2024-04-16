@@ -36,9 +36,15 @@ async function getTrackById(id, currentTrack, setCurrentTrack, abort, setAbort) 
         signal,
       });
   
+      if (response.status === 404) {
+        console.log("Track not found")
+        return 404
+      }
+
       if (!response.ok) {
         throw new Error('Failed to fetch track');
       }
+      
   
       const reader = response.body.getReader();
       const totalSize = +response.headers.get('Content-Length');
@@ -102,7 +108,7 @@ async function getTrackById(id, currentTrack, setCurrentTrack, abort, setAbort) 
       if (error.name === 'AbortError') {
         console.log('Request aborted');
       } else {
-        console.error('Error handling track click:', error);
+        console.error('Error getting track:', error);
       }
     }
   };

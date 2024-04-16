@@ -27,7 +27,7 @@ export function QueueProvider({ children }) {
   }
 
   const removeFromQueue = (index) => {
-    if (index < currentId){//коректное удаление треуов до текущего
+    if (index < currentId){//коректное удаление треков до текущего
       setCurrentId(currentId - 1);
     }
     else if (index === queue.length - 1 && index === currentId){//запрет на удаление последнего трека в очереди, если он текущий
@@ -63,12 +63,18 @@ export function QueueProvider({ children }) {
     }
   }
 
+  const gotoTrack = (newid) => {
+    setCurrentId(newid)
+  }
+
   const clearQueue = () => {
     setQueue([]);
   }; 
+
   const contextValue = { queue, currentId, addTrackToQueue, 
                          setQueueTrack, removeFromQueue, nextTrack, 
-                         prevTrack, clearQueue, repeatMode, setRepeatMode }
+                         prevTrack, repeatMode, setRepeatMode, 
+                         gotoTrack, clearQueue}
   return (
     <QueueContext.Provider value={contextValue}>
       {children}

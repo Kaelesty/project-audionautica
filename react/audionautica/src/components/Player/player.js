@@ -9,7 +9,6 @@ import getTrackById from '../../requests/gettrack.js';
 import './player.css';
 
 
-
 const MusicPlayer = ({albumCover, isSidebarOpen, setIsSidebarOpen}) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const {repeatMode, setRepeatMode} = useQueue();
@@ -38,8 +37,15 @@ const MusicPlayer = ({albumCover, isSidebarOpen, setIsSidebarOpen}) => {
   }, [volume, currentTrack]);
 
   useEffect(() => {
+    const setTrack = async () => {
+      const response = await getTrackById(queue[currentId].id, currentTrack, setCurrentTrack, abort, setAbort);
+      if (response===404){
+        console.log("skip deleted track")
+        nextTrack()
+      }
+    };
     if (queue.length !== 0){
-      getTrackById(queue[currentId].id, currentTrack, setCurrentTrack, abort, setAbort)
+      setTrack()
       setCurrTrackArtist(queue[currentId].artist)
       setCurrTrackTitle(queue[currentId].title)
     }
