@@ -303,7 +303,10 @@ class PlayListDeleteId(APIView):
 class GetPlayListPoster(APIView):
     def get(self,request):
         if request.method == "GET":
-            if not check_token(request):
+            token = request.GET.get("token","")
+            try:
+                jwt.decode(token, config.secret_key, algorithms=['HS256'])
+            except Exception:
                 return Response(status=status.HTTP_418_IM_A_TEAPOT)
             playlist_id = request.GET.get('id','')
             playlist = PlayList.objects.get(id=playlist_id)
