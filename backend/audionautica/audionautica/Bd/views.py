@@ -1,4 +1,5 @@
-import os, json, hashlib
+import os, json, hashlib, sys
+from config import *
 from datetime import datetime
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -18,18 +19,18 @@ import jwt, datetime
 from django.http import HttpResponse, HttpResponseNotFound, FileResponse
 from django.core.files.storage import default_storage
 
-
-file_path = "C:/Users/greg//Desktop/music/"
-#file_path = "/files/music/"
-#file_path_posters = "/files/posters/"
-file_path_posters = "C:/Users/greg/Desktop/project-audionautica/backend/audionautica/audionautica/posters/"
-secret_key = "secretkey"
+# file_path = "C:/Users/greg//Desktop/music/"
+# # file_path = "/files/music/"
+# # file_path_posters = "/files/posters/"
+# file_path_posters = "C:/Users/greg/Desktop/project-audionautica/backend/audionautica/audionautica/posters/"
+# secret_key = "secretkey"
+config = Config()
 def create_playlist(x):
     playlist = PlayList()
     playlist.title = 'Favorite Playlist'
     playlist.creatorid = str(x)
     playlist.isprivat = 'True'
-    playlist.image = file_path_posters + "kitty.jpg"
+    playlist.image = config.file_path_posters + "kitty.jpg"
     playlist.liked = "0"
     playlist.save()
     return playlist.id
@@ -42,7 +43,7 @@ def make_hash(password):
 def check_token(request):
     token = request.headers['token']
     try:
-        jwt.decode(token, secret_key, algorithms=['HS256'])
+        jwt.decode(token,config.secret_key, algorithms=['HS256'])
         return True
     except Exception:
         return False
@@ -109,7 +110,7 @@ class LoginUser(APIView):
             'exp':datetime.datetime.utcnow()+datetime.timedelta(minutes=720),
             'iat':datetime.datetime.utcnow()
         }
-        token = jwt.encode(payload,secret_key,algorithm='HS256')
+        token = jwt.encode(payload,config.secret_key,algorithm='HS256')
         res = {'token':token}
         response = Response(res)
 
@@ -129,7 +130,7 @@ class UserView(APIView):
         #     raise AuthenticationFailed('Unauthrnticated')
 
         try:
-            payload = jwt.decode(token,secret_key,algorithms=['HS256'])
+            payload = jwt.decode(token,config.secret_key,algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed('Unauthrnticated')
 
@@ -183,7 +184,7 @@ class TrackUpload(APIView):
                 track.tags = request.headers["tags"]
                 track.filepath =""
                 track.save()
-                track.filepath = file_path+ str(track.id) +'.mp3'
+                track.filepath = config.file_path+ str(track.id) +'.mp3'
                 track.save()
                 with open(track.filepath, 'wb') as f:
                     f.write(file)
@@ -264,18 +265,18 @@ class PlayListUpload(APIView):
             playlist = PlayList()
             playlist.title = request.headers["title"]
             token = request.headers['token']
-            payload = jwt.decode(token, secret_key, algorithms=['HS256'])
+            payload = jwt.decode(token, config.secret_key, algorithms=['HS256'])
             playlist.creatorid = payload["id"]
             playlist.description = request.headers["description"]
             playlist.tracksid = request.headers["tracksid"]
             playlist.isprivat = request.headers["isprivat"]
             playlist.save()
-            playlist.image = file_path_posters+ str(playlist.id) +ext
+            playlist.image = config.file_path_posters+ str(playlist.id) +ext
             playlist.save()
             # with open(playlist.image, 'wb') as f:
             #     f.write(image)
             # f.close()
-            path = file_path_posters+ str(playlist.id) +ext
+            path = config.file_path_posters+ str(playlist.id) +ext
             image.name = path
             file_name = default_storage.save(path,image)
             user = Users.objects.filter(id=payload.id).first()
@@ -358,7 +359,7 @@ class LikePlayList(APIView):
         if request.method == "POST":
             token = request.headers["token"]
             playlist_id = str(request.data["playlist_id"])
-            payload = jwt.decode(token, secret_key, algorithms=['HS256'])
+            payload = jwt.decode(token, config.secret_key, algorithms=['HS256'])
             user = Users.objects.filter(id = payload['id']).first()
             if playlist_id not in user.likedplaylist:
                 user_playlists = user.likedplaylist
@@ -381,7 +382,7 @@ class DisLikePlayList(APIView):
         if request.method == "POST":
             token = request.headers["token"]
             playlist_id = str(request.data["playlist_id"])
-            payload = jwt.decode(token, secret_key, algorithms=['HS256'])
+            payload = jwt.decode(token, config.secret_key, algorithms=['HS256'])
             user = Users.objects.filter(id = payload['id']).first()
             if playlist_id in user.likedplaylist:
                 user_playlists = user.likedplaylist
@@ -434,7 +435,7 @@ class UserPlayList(APIView):
             return Response(status=status.HTTP_418_IM_A_TEAPOT)
         json_response = {}
         token = request.headers["token"]
-        payload = jwt.decode(token, secret_key, algorithms=['HS256'])
+        payload = jwt.decode(token, config.secret_key, algorithms=['HS256'])
         user = Users.objects.filter(id=payload['id']).first()
         json_response["liked"]= list(map(int,list(filter(lambda x: x != "",user.likedplaylist.split("/")))))
         all_playlists = PlayList.objects.all()
@@ -453,11 +454,12 @@ class PlayListInfoId(APIView):
         playlist = PlayList.objects.filter(id=playlist_id).first()
         dickt = {}
         dickt["title"] = playlist.title
-        dickt["creatorid"] = playlist.creatorid
         dickt["description"] = playlist.description
         dickt["tracksid"] = playlist.tracksid
         dickt["liked"] = playlist.liked
         dickt["isprivat"] = playlist.isprivat
+        payload = jwt.decode(request.headers["token"], config.secret_key, algorithms=['HS256'])
+        dickt["editable"] = payload.id == playlist.creatorid
         return Response(dickt)
 
 class TrackInfoId(APIView):
@@ -480,7 +482,7 @@ class UserCollectionUpdate(APIView):
         created_playlists = request.data["created_playlists"]
         new_playlists = request.data["new_playlists"]
         token = requests.headers["token"]
-        payload = jwt.decode(token, secret_key, algorithms=['HS256'])
+        payload = jwt.decode(token, config.secret_key, algorithms=['HS256'])
         user = Users.objaect.filter(id=payload.id).first()
         str_liked_playlists_ids ="/".join(list(map(str,liked_playlists_ids)))
         str_liked_playlists_ids += "/"
@@ -525,4 +527,5 @@ class GetAllTracks(APIView):
         json_responce = {}
         json_responce["tracks"] = response
         return Response(json_responce)
-#PLayList info by id
+
+#For Andrey: add two new endpoints: 1) GetAllTrackIds 2) excisting GetTrackById
