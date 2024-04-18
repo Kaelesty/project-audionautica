@@ -280,7 +280,7 @@ class PlayListUpload(APIView):
             image.name = path
             file_name = default_storage.save(path,image)
             user = Users.objects.filter(id=payload["id"]).first()
-            user.lastupdate_date = datetime.now()
+            user.lastupdate_date = datetime.datetime.now()
             user.save()
             return Response(playlist.id, status=status.HTTP_200_OK)
 
