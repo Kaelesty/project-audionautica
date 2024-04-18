@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
-import BackURL from '../../urls';
-import token from '../../token';
-import LoaderIcon from './download';
-import getTrackById from '../../gettrack';
-import {Context} from '../../index.js'
+import React, { useState, useEffect} from 'react';
+import BackURL from '../../urls.js';
+import token from '../../token.js';
+import LoaderIcon from './download.js';
+import Track from '../track/track.js';
 import "./searchbar.css"
 
 
@@ -11,9 +10,6 @@ const SearchBar = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const {currentTrack, setCurrentTrack} = useContext(Context)
-  const {setCurrTrackTitle} = useContext(Context)
-  const {setCurrTrackArtist} = useContext(Context)
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -54,31 +50,7 @@ const SearchBar = () => {
 
   const handleInputChange = (event) => {
     setQuery(event.target.value);
-  };
-
- 
-  const handleTrackClick = async (trackId, trackTitle, trackArtist) => {
-    try {
-      if (currentTrack !== null) {
-        currentTrack.pause();
-      }
-  
-      const trackBlob = await getTrackById(trackId);
-      const trackUrl = URL.createObjectURL(trackBlob);
-      const newTrack = new Audio(trackUrl);
-  
-      newTrack.addEventListener('loadedmetadata', () => {
-        newTrack.play();
-      });
-  
-      setCurrentTrack(newTrack);
-      setCurrTrackTitle(trackTitle)
-      setCurrTrackArtist(trackArtist)
-
-    } catch (error) {
-      console.error("Ошибка при получении трека", error);
-    }
-  };
+  }; 
 
   return (
     <div className="search-bar">
@@ -96,16 +68,12 @@ const SearchBar = () => {
     {!loading && results.length > 0 && (
       <div className="results-container">
        {results.map((result, index) => (
-          <button
-            className="result"
+          <Track
             key={result.id}
-            onClick={() => handleTrackClick(result.id, result.title, result.artist)}
-          >
-            <div>
-              <p>{result.title}</p>
-              <p>{result.artist}</p>
-            </div>
-          </button>
+            id = {result.id}
+            title = {result.title}
+            artist = {result.artist}
+          />
         ))}
       </div>
     )}

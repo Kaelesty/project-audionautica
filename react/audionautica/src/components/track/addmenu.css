@@ -1,0 +1,64 @@
+.add-menu {
+    position: absolute;
+    border: 1px solid #aaaaaa;;
+    width: 200px;
+    transform: translateX(587px) translateY(13px);
+  }
+  
+  .add-menu button {
+    width: 100%;
+    padding: 5px 10px;
+    background-color: #f0f0f0;
+    border: none;
+    cursor: pointer;
+  }
+  .add-menu button:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .playlist-menu {
+    position: absolute;
+    width: 100%;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);   
+    transform: translateX(200px) translateY(-26px);
+  }
+
+  .playlist-menu button {
+    position: flex;
+    display: block;
+    width: 100%;
+    background-color: #ffffff;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    cursor: pointer;
+    text-align: left;
+  }
+  .playlist-menu button:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .playlist-menu button:last-child {
+    border-bottom: none;
+  }
+  
+   .add-button {
+    margin-left: auto;
+    align-items: center;
+    width: 20px;
+    height: 20px;
+    padding: 5px;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    -webkit-user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+  }
+
+  .add-button:hover{
+    background-color: #f0f0f0;
+  }

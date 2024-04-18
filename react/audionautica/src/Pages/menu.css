@@ -1,3 +1,7 @@
+html,body {
+  overflow: hidden;
+}
+
 .menu {
     background-color: #333;
     color: #fff;
