@@ -460,9 +460,9 @@ class PlayListInfoId(APIView):
         dickt["description"] = playlist.description
         dickt["tracksid"] = playlist.tracksid
         dickt["liked"] = playlist.liked
-        dickt["isprivat"] = playlist.isprivat
+        dickt["isprivat"] = playlist.isprivat == "True"
         payload = jwt.decode(request.headers["token"], config.secret_key, algorithms=['HS256'])
-        dickt["editable"] = payload.id == playlist.creatorid
+        dickt["editable"] = payload["id"] == playlist.creatorid
         return Response(dickt)
 
 class TrackInfoId(APIView):
