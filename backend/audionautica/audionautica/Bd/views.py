@@ -525,3 +525,4 @@ class GetAllTracks(APIView):
         json_responce = {}
         json_responce["tracks"] = response
         return Response(json_responce)
+#PLayList info by id
