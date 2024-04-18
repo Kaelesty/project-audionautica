@@ -35,11 +35,9 @@ from Bd.views import (
     DeleteTrackFromPlayList,
     LikePlayList,
     UserPlayList,
-<<<<<<< HEAD
     DisLikePlayList,
     PlayListInfoId,
-=======
->>>>>>> db5f74b34840a9ac03c67521aa7820d1cd55232a
+    GetAllTracks,
 )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -60,19 +58,16 @@ urlpatterns = [
     path('Music/Delete/', TrackDelete.as_view()),
     path('Music/IdDelete/', TrackDeleteId.as_view()),
     path('Music/Search/', TrackSearch.as_view()),
+    path('Music/GetAllTracks/', GetAllTracks.as_view()),
     path('PlayList/Upload/', PlayListUpload.as_view()),
     path('PlayList/GetPoster/', GetPlayListPoster.as_view()),
     path('PlayList/DeleteId/', PlayListDeleteId.as_view()),
     path('PlayList/AddTrackToPlayList/', AddTrackToPlayList.as_view()),
     path('PlayList/DeleteTrackFromPlayList/', DeleteTrackFromPlayList.as_view()),
     path('PlayList/LikePlayList/', LikePlayList.as_view()),
-<<<<<<< HEAD
     path('PlayList/DisLikePlayList/', DisLikePlayList.as_view()),
     path('PlayList/UserPlayList/', UserPlayList.as_view()),
     path('PlayList/PlayListInfoId/', PlayListInfoId.as_view()),
-=======
-    path('PlayList/UserPlayList/', UserPlayList.as_view()),
->>>>>>> db5f74b34840a9ac03c67521aa7820d1cd55232a
     #path('Logout/', LogoutView.as_view()),
     # path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'), #for login give access & refresh token
     # path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), #refreshing

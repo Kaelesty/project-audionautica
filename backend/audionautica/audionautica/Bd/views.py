@@ -278,13 +278,9 @@ class PlayListUpload(APIView):
             path = file_path_posters+ str(playlist.id) +ext
             image.name = path
             file_name = default_storage.save(path,image)
-<<<<<<< HEAD
             user = Users.objects.filter(id=payload.id).first()
             user.lastupdate_date = datetime.now()
             user.save()
-=======
-
->>>>>>> db5f74b34840a9ac03c67521aa7820d1cd55232a
             return Response(playlist.id, status=status.HTTP_200_OK)
 
 class PlayListDeleteId(APIView):
@@ -436,7 +432,6 @@ class UserPlayList(APIView):
     def post(self, request):
         if not check_token(request):
             return Response(status=status.HTTP_418_IM_A_TEAPOT)
-<<<<<<< HEAD
         json_response = {}
         token = request.headers["token"]
         payload = jwt.decode(token, secret_key, algorithms=['HS256'])
@@ -464,10 +459,70 @@ class PlayListInfoId(APIView):
         dickt["liked"] = playlist.liked
         dickt["isprivat"] = playlist.isprivat
         return Response(dickt)
-#PLayList info by id
-=======
-        token = request.headers["token"]
+
+class TrackInfoId(APIView):
+    def post(self,request):
+        if not check_token(request):
+            return Response(status=status.HTTP_418_IM_A_TEAPOT)
+        track_id = request.data["id"]
+        track = Traks.objects.filter(id=track_id).first()
+        dickt = {}
+        dickt["title"] = track.title
+        dickt["artist"] = track.artist
+        dickt["tags"] = track.tags
+        return Response(dickt)
+
+class UserCollectionUpdate(APIView):
+    def post(self, request):
+        if not check_token(request):
+            return Response(status=status.HTTP_418_IM_A_TEAPOT)
+        liked_playlists_ids = request.data["liked_playlists_ids"]
+        created_playlists = request.data["created_playlists"]
+        new_playlists = request.data["new_playlists"]
+        token = requests.headers["token"]
         payload = jwt.decode(token, secret_key, algorithms=['HS256'])
-        user = Users.objects.filter(id=payload['id']).first()
-        return Response(user.likedplaylist)
->>>>>>> db5f74b34840a9ac03c67521aa7820d1cd55232a
+        user = Users.objaect.filter(id=payload.id).first()
+        str_liked_playlists_ids ="/".join(list(map(str,liked_playlists_ids)))
+        str_liked_playlists_ids += "/"
+        uesr.likedplaylist == str_liked_playlists_ids
+        user.lastupdate_date == datetime.datetime.now()
+        user.save()
+        new_playlists_ids = []
+        dickt = {}
+        for i in created_playlists:
+            playlist_id =i["id"]
+            playlist = PlayList.objects.filter(id=playlist_id)
+            playlist.tracksid = i["tracksid"]
+            playlist.save()
+        for i in new_playlists:
+            playlist = PlayList
+            playlist.title = i["title"]
+            playlist.creatorid = user.id
+            playlist.description = i["description"]
+            playlist.tracksid = "/".join(list(map(str,i["tracks_id"])))
+            playlist.tracksid += "/"
+            playlist.isprivat=i["is_privat"]
+            playlist.save()
+            new_playlists_ids.append(int(playlist.id))
+        dickt["new_playlist_ids"]=new_playlists_ids
+        return Response(dickt)
+
+class GetAllTracks(APIView):
+    def get(self,request):
+        # if not check_token(request):
+        #     return Response(status=status.HTTP_418_IM_A_TEAPOT)
+        tracks = Traks.objects.all()
+        dickt = {}
+        response = []
+        for i in tracks:
+            dickt["title"]=i.title
+            dickt["artist"] = i.artist
+            dickt["tags"] = i.tags
+            with open(i.filepath, encoding='ISO-8859-1', errors='ignore') as f:
+                file_data = f.read()
+            dickt["file"] = file_data
+            response.append(dickt)
+        json_responce = {}
+        json_responce["tracks"] = response
+        return Response(json_responce)
+#PLayList info by id
