@@ -279,7 +279,7 @@ class PlayListUpload(APIView):
             path = config.file_path_posters+ str(playlist.id) +ext
             image.name = path
             file_name = default_storage.save(path,image)
-            user = Users.objects.filter(id=payload.id).first()
+            user = Users.objects.filter(id=payload["id"]).first()
             user.lastupdate_date = datetime.now()
             user.save()
             return Response(playlist.id, status=status.HTTP_200_OK)
