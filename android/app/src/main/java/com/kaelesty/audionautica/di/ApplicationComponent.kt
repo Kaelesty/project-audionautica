@@ -6,7 +6,7 @@ import com.kaelesty.audionautica.data.local.dbs.MusicDatabase
 import com.kaelesty.audionautica.presentation.activities.AccessActivity
 import com.kaelesty.audionautica.presentation.activities.AddTrackActivity
 import com.kaelesty.audionautica.presentation.activities.MusicActivity
-import com.kaelesty.audionautica.presentation.services.MusicPlayerService
+import com.kaelesty.audionautica.presentation.player.PlayerService
 import dagger.BindsInstance
 import dagger.Component
 
@@ -23,7 +23,7 @@ interface ApplicationComponent {
 
 	fun inject(activity: AccessActivity)
 	fun inject(activity: MusicActivity)
-	fun inject(service: MusicPlayerService)
+	fun inject(service: PlayerService)
 	fun inject(activity: AddTrackActivity)
 
 	@Component.Factory

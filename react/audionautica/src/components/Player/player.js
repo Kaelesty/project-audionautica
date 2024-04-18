@@ -92,11 +92,13 @@ const MusicPlayer = ({albumCover, isSidebarOpen, setIsSidebarOpen}) => {
     if (newMode === 2) {currentTrack.loop = true}
     else {currentTrack.loop = false} 
     setRepeatMode(newMode)   
+
   }
 
   const handleVolumeChange = (newVolume) =>{
     setVolume(newVolume/100)
   }
+
   const toggleNext = () => {
     nextTrack()
   }
@@ -130,6 +132,7 @@ const MusicPlayer = ({albumCover, isSidebarOpen, setIsSidebarOpen}) => {
             onClick={togglePrev}
           />
 
+
           <img className="control-button img"
             src={isPlaying ? require('./../icons/pause.png') : require('./../icons/play-button.png')} 
             alt={isPlaying ? 'Pause' : 'Play'} 
@@ -155,13 +158,14 @@ const MusicPlayer = ({albumCover, isSidebarOpen, setIsSidebarOpen}) => {
               src={require("./../icons/list.png")} alt="Open queue" 
               onClick={toggleQueue}
             />
+
             <VolumeSlider volumeChange={handleVolumeChange} />
         </div>
         <div className='progress-bar-container'>
           <ProgressBar />
         </div>
       </div>
-      
+
       <AlbumCoverBig
         coverSrc={AlbumCover}
       />

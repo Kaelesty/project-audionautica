@@ -12,10 +12,10 @@ const Playlist = ({ cover, title, creator }) => {
     console.log("play click")
   }
 
-
   if (cover === null){  
     cover = nopic
   }
+
   return (
     <div
       className={`playlist-container ${isHovered ? 'hovered' : ''}`}
@@ -24,7 +24,7 @@ const Playlist = ({ cover, title, creator }) => {
       onClick={playlistClick}
     >
       <img className="playlist-cover" src={cover} alt="Playlist Cover" />
-
+      
       <div className="playlist-info">
         <h3 className="playlist-title">{title}</h3>
         <p className="playlist-creator">{creator}</p>

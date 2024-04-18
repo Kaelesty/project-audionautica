@@ -20,7 +20,7 @@ sealed class NavigationItem(
 	)
 
 	object MusicPlaylists: NavigationItem(
-		Screen.MusicPlaylists,
+		Screen.Playlists,
 		icon = Icons.Outlined.List,
 		description = "Playlists Navigation Icon",
 	)

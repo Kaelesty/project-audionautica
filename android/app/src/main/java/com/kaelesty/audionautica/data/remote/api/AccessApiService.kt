@@ -16,7 +16,7 @@ import retrofit2.http.POST
 @ApplicationScope
 interface AccessApiService {
 	@POST("Login/")
-	suspend fun login(@Body loginDto: LoginDto): Response<String>
+	suspend fun login(@Body loginDto: LoginDto): Response<LoginResponse>
 
 	@POST("Register/")
 	suspend fun register(@Body registerDto: RegisterDto): Response<RegisterResponse>
@@ -25,5 +25,5 @@ interface AccessApiService {
 	suspend fun checkConnection(): Response<Unit>
 
 	@POST("User/")
-	suspend fun checkAuth(@Body token: String): Response<CheckAuthResponse>
+	suspend fun checkAuth(@Header("token") token: String,): Response<CheckAuthResponse>
 }

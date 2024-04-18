@@ -12,7 +12,6 @@ import AlbumCover from './components/icons/nopic.png';
 import HomePage from './pages/home';
 
 
-
 export const Context = React.createContext();
 
 const App = () => { 
