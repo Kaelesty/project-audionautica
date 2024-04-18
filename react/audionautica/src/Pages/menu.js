@@ -1,18 +1,21 @@
 import React, {useContext} from 'react';
 import { Link } from 'react-router-dom';
 import token from '../token';
-import {Context} from "../index"
+import { Context } from "../index"
 import "./menu.css"
-
 
 
 const Menu = () => {
   const {isLoggedIn, setIsLoggedIn} = useContext(Context);
-  
+  const { currentTrack, setCurrentTrack} = useContext(Context)  
 
   const handleLogout = () => {
     token.removeToken()
-    setIsLoggedIn(false);
+    if (currentTrack){ 
+      currentTrack.pause()
+      setCurrentTrack(null)
+    }
+    setIsLoggedIn(false)
   }
 
   return (
@@ -22,10 +25,10 @@ const Menu = () => {
           <Link to="/login" className='ButtonLink'>
             <button onClick={handleLogout}>Выход</button>
           </Link>
-          <Link to="/home/">Домой</Link>
-          <Link to="/home/rec">Рекомендации</Link>
-          <Link to="/home/search">Поиск</Link>
-          <Link to="/home/test">Тест</Link>
+          <Link to="/home">Домой</Link>
+          <Link to="/rec">Рекомендации</Link>
+          <Link to="/search">Поиск</Link>
+          <Link to="/test">Тест</Link>
         </>
       ) : (
         <>

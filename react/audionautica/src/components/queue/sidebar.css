@@ -1,0 +1,42 @@
+.sidebar {
+    width: 20vw;
+    height: calc(100vh - 178px);
+    position: fixed;
+    top: 54px;
+    right: -20vw;
+    background-color: #333;
+    transition: right 0.3s ease;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    scrollbar-width: thin; 
+    scrollbar-color: transparent; 
+    -ms-overflow-style: none; 
+  }
+
+  .sidebar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb {
+    background-color: #e0e0e0; 
+    border-radius: 5px;
+  } 
+
+  .sidebar::-webkit-scrollbar-thumb:hover {
+    background-color: #ececec;
+  }
+
+
+  .sidebar.open {
+    right: 8px;
+  }
+
+  .track{
+    margin: 10px;
+  }
+  
+  .trackinfo {
+    margin: 0;
+    padding: 0;
+    color: white;
+  }

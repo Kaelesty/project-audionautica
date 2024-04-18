@@ -55,11 +55,11 @@ const LoginPage = () => {
                 <h2>Авторизация</h2>
                 <form onSubmit={handleSubmit}>
                     <div>
-                        <label htmlFor="login">Имя пользователя:</label>
+                        <label htmlFor="login">Email:</label>
                         <input
                             type="text"
-                            id="login"
-                            name="login"
+                            id="email"
+                            name="email"
                             value={login}
                             onChange={handleLoginChange}
                             required

@@ -1,47 +1,85 @@
 .search-bar {
-    width: 100%;
-    max-width: 600px; 
-    margin: 0 auto; 
-    padding: 10px;
-  }
+  position: relative;
+  width: 100%;
+  max-width: 600px; 
+  margin: 0 auto; 
+  padding: 10px;
+  height: calc(100vh - 50px - 125px);
+}
   
-  .input-container {
-    position: relative;
-  }
-  
-  .search-input {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    outline: none;
-  }
-  
-  .loading,
-  .no-results {
-    margin-top: 10px;
-    font-size: 14px;
-  }
-  
-  .results-container {
-    margin-top: 10px;
-  }
-  
-  .result {
-    width: 100%;
-    padding: 5px;
-    margin-bottom: 5px;
-    background-color: #f0f0f0;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .result p {
-    margin: 0;
-  }
-  
-  .result:hover {
-    background-color: #e0e0e0;
-  }
+.input-container {
+  position: relative;
+}
+
+.search-input {
+  width: 572px;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+}
+
+.loading,
+.no-results {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.results-container {
+  margin-top: 10px;
+  width: 100%;
+  height: calc(100vh - 50px - 125px - 67px); 
+  overflow-y: scroll;
+  overflow-x: hidden; 
+  scrollbar-width: thin; 
+  scrollbar-color: transparent; 
+  -ms-overflow-style: none; 
+}
+.results-container::-webkit-scrollbar {
+  width: 6px;
+}
+.results-container::-webkit-scrollbar-thumb {
+  background-color: #999; 
+  border-radius: 5px;
+ } 
+ .results-container::-webkit-scrollbar-thumb:hover {
+  background-color: #777;
+}
+.result {
+  display: flex;
+  align-items: center;
+  width: auto;
+  padding: 5px;
+  margin-bottom: 5px;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.play-butt {
+  margin-right: 5px;
+  width: 20px;
+  height: 20px;
+  padding: 10px;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  -webkit-user-drag: none;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+.play-butt:hover{
+  background-color: #f0f0f0;
+}
+.result p {
+  margin: 0;
+  text-align: left;
+}
+
+.result:hover {
+  background-color: #e0e0e0;
+}
+
