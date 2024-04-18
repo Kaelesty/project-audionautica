@@ -1,0 +1,14 @@
+.Player {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+@media screen and (max-width: 680px) {
+    .Player {
+      display: none;
+    }
+  }
+
+  
