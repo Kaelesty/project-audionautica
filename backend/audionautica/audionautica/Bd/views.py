@@ -255,6 +255,17 @@ class TrackSearch(APIView):
             print(array)
             json_response['tracks'] = array
         return Response(json_response)
+class TrackInfoId(APIView):
+    def post(self,request):
+        if not check_token(request):
+            return Response(status=status.HTTP_418_IM_A_TEAPOT)
+        track_id = request.data["id"]
+        track = Traks.objects.filter(id=track_id).first()
+        dickt = {}
+        dickt["title"] = track.title
+        dickt["artist"] = track.artist
+        dickt["tags"] = track.tags
+        return Response(dickt)
 class PlayListUpload(APIView):
     def post(self, request):
         if request.method == "POST":
@@ -465,17 +476,6 @@ class PlayListInfoId(APIView):
         dickt["editable"] = payload["id"] == playlist.creatorid
         return Response(dickt)
 
-class TrackInfoId(APIView):
-    def post(self,request):
-        if not check_token(request):
-            return Response(status=status.HTTP_418_IM_A_TEAPOT)
-        track_id = request.data["id"]
-        track = Traks.objects.filter(id=track_id).first()
-        dickt = {}
-        dickt["title"] = track.title
-        dickt["artist"] = track.artist
-        dickt["tags"] = track.tags
-        return Response(dickt)
 
 class UserCollectionUpdate(APIView):
     def post(self, request):
@@ -532,3 +532,4 @@ class GetAllTracks(APIView):
         return Response(json_responce)
 
 #For Andrey: add two new endpoints: 1) GetAllTrackIds 2) excisting GetTrackById
+#Zip PlayList posters
