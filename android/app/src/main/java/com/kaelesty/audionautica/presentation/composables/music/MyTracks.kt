@@ -36,7 +36,7 @@ fun MyTracks(
 	onCreateTrack: () -> Unit,
 	libraryTracks: LiveData<List<Track>>,
 	onPlay: (Track) -> Unit,
-	selectPlaylistDialog: MutableState<Track?>,
+	//selectPlaylistDialog: MutableState<Track?>,
 	onDeleteTrack: (Track) -> Unit,
 	offlineMode: Boolean,
 	playerMediaController: MediaController?
@@ -84,7 +84,7 @@ fun MyTracks(
 						}
 					},
 					onAdd = {
-						selectPlaylistDialog.value = it
+						//selectPlaylistDialog.value = it
 					},
 					onSecondary = {
 						deleteTrackDialog = it

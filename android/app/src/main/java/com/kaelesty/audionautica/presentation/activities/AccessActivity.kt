@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.core.os.BuildCompat
 import com.kaelesty.audionautica.di.DaggerApplicationComponent
 import com.kaelesty.audionautica.presentation.composables.access.AccessScreen
 import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme

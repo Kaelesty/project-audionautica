@@ -4,6 +4,8 @@ import android.net.Uri
 import androidx.core.net.toUri
 import com.kaelesty.audionautica.data.local.dbmodels.TrackDbModel
 import com.kaelesty.audionautica.data.remote.entities.TrackDto
+import com.kaelesty.audionautica.data.remote.entities.TrackInfoIdRequest
+import com.kaelesty.audionautica.data.remote.entities.TrackInfoIdResponse
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.entities.TrackExp
 import java.io.File
@@ -32,5 +34,12 @@ class TrackMapper @Inject constructor() {
 		dto.title,
 		dto.artist,
 		tags = dto.tags.split(TRACK_TAGS_STRINGIFICATION_DELIMITER),
+	)
+
+	fun infoIdResponseToDomain(id: Int, dto: TrackInfoIdResponse) = Track(
+		id = id,
+		title = dto.title,
+		artist = dto.artist,
+		tags = dto.tags.split(TRACK_TAGS_STRINGIFICATION_DELIMITER)
 	)
 }

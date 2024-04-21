@@ -4,15 +4,21 @@ import com.kaelesty.audionautica.data.local.daos.PlaylistDao
 import com.kaelesty.audionautica.data.local.daos.TokenDao
 import com.kaelesty.audionautica.data.local.daos.TrackDao
 import com.kaelesty.audionautica.data.local.dbs.MusicDatabase
+import com.kaelesty.audionautica.data.player.PlayerQueueController
 import com.kaelesty.audionautica.data.playlists.PlaylistsApiService
 import com.kaelesty.audionautica.data.remote.api.AccessApiService
 import com.kaelesty.audionautica.data.remote.api.ApiServiceFactory
 import com.kaelesty.audionautica.data.remote.api.MusicApiService
+import com.kaelesty.audionautica.data.repos.MusicRepo
 import dagger.Module
 import dagger.Provides
 
 @Module
 class DataModule {
+
+	@Provides
+	@ApplicationScope
+	fun providePQC(musicRepo: MusicRepo) = PlayerQueueController(musicRepo)
 
 	@Provides
 	@ApplicationScope

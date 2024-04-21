@@ -26,19 +26,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.kaelesty.audionautica.domain.playlists.Playlist
+import com.kaelesty.audionautica.domain.playlists.UserPlaylist
 import com.kaelesty.audionautica.presentation.ui.fonts.SpaceGrotesk
-import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
 
 @Composable
 fun AddTrackToPlalistDialog(
 	onDimissRequest: () -> Unit,
 	onAcceptRequest: (Int) -> Unit,
-	playlists: List<Playlist>
+	playlists: List<UserPlaylist.Entire>
 ) {
 	Dialog(
 		onDismissRequest = { onDimissRequest() }

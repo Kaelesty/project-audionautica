@@ -2,6 +2,8 @@ package com.kaelesty.audionautica.data.remote.api
 
 import com.kaelesty.audionautica.data.remote.entities.DownloadTrackDto
 import com.kaelesty.audionautica.data.remote.entities.SearchDto
+import com.kaelesty.audionautica.data.remote.entities.TrackInfoIdRequest
+import com.kaelesty.audionautica.data.remote.entities.TrackInfoIdResponse
 import com.kaelesty.audionautica.data.remote.entities.TracksSearchResponse
 import com.kaelesty.audionautica.di.ApplicationScope
 import okhttp3.MultipartBody
@@ -43,5 +45,9 @@ interface MusicApiService {
 		@Part musicFile: MultipartBody.Part,
 	): Response<ResponseBody>
 
-
+	@POST("TrackInfoId/")
+	suspend fun trackInfoId(
+		@Header("token") token: String,
+		@Body body: TrackInfoIdRequest,
+	): Response<TrackInfoIdResponse>
 }

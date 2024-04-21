@@ -1,26 +1,23 @@
 package com.kaelesty.audionautica.data.repos
 
 import android.app.Application
-import android.content.ContentResolver
 import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.map
 import com.kaelesty.audionautica.data.local.daos.PlaylistDao
 import com.kaelesty.audionautica.data.local.daos.TrackDao
-import com.kaelesty.audionautica.data.mappers.PlaylistMapper
 import com.kaelesty.audionautica.data.mappers.TrackMapper
 import com.kaelesty.audionautica.data.remote.api.MusicApiService
 import com.kaelesty.audionautica.data.remote.entities.DownloadTrackDto
 import com.kaelesty.audionautica.data.remote.entities.SearchDto
+import com.kaelesty.audionautica.data.remote.entities.TrackInfoIdRequest
 import com.kaelesty.audionautica.data.repos.tools.FileUploaderTool
 import com.kaelesty.audionautica.data.repos.tools.JwtTool
 import com.kaelesty.audionautica.di.ApplicationScope
-import com.kaelesty.audionautica.domain.playlists.Playlist
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.entities.TrackExp
 import com.kaelesty.audionautica.domain.entities.TracksToPlay
@@ -32,7 +29,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
@@ -47,9 +43,7 @@ class MusicRepo @Inject constructor(
 	private val trackDao: TrackDao,
 	private val playlistDao: PlaylistDao,
 	private val trackMapper: TrackMapper,
-	private val playlistMapper: PlaylistMapper,
 	private val musicApiService: MusicApiService,
-	private val contentResolver: ContentResolver,
 	private val application: Application,
 	private val jwtTool: JwtTool,
 	private val uploader: FileUploaderTool,
@@ -268,14 +262,6 @@ class MusicRepo @Inject constructor(
 //		)
 	}
 
-	override fun getPlaylists(): LiveData<List<Playlist>> {
-//		return playlistDao.getAll().map { list ->
-//			list.map { dbModel ->
-//				playlistMapper.DbModelToDomain(dbModel)
-//			}
-//		}
-		return MutableLiveData()
-	}
 
 	override suspend fun removeTrackFromPlaylist(track: Track, playlistId: Int) {
 //		val playlist = playlistMapper.DbModelToDomain(playlistDao.getPlaylist(playlistId))
@@ -297,12 +283,6 @@ class MusicRepo @Inject constructor(
 //		val result = trackDao.getById(playlist.trackIds)
 //		return result.map { trackMapper.dbModelToDomain(it) }
 		return listOf()
-	}
-
-	override suspend fun createPlaylist(playlist: Playlist) {
-//		playlistDao.createPlaylist(
-//			playlistMapper.DomainToDbModel(playlist)
-//		)
 	}
 
 	override suspend fun deletePlaylist(playlistId: Int) {
@@ -334,5 +314,28 @@ class MusicRepo @Inject constructor(
 //				playlistDao.createPlaylist(playlist)
 //			}
 //		}
+	}
+
+	override suspend fun getTrackById(id: Int): Track? {
+		return try {
+			val response = musicApiService.trackInfoId(
+				token = jwtTool.getToken(),
+				body = TrackInfoIdRequest(
+					id = id
+				)
+			)
+			when (response.code()) {
+				200 -> {
+					return trackMapper.infoIdResponseToDomain(id, response.body() ?: throw IOException())
+				}
+				else -> {
+					throw IOException()
+				}
+			}
+		}
+		catch (e: Exception) {
+			Log.d("CatchException", e.message.toString())
+			null
+		}
 	}
 }

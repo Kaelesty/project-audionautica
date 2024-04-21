@@ -4,15 +4,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kaelesty.audionautica.domain.playlists.Playlist
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.player.IPlayerQueueController
 import com.kaelesty.audionautica.domain.usecases.AddTrackToPlaylistUseCase
-import com.kaelesty.audionautica.domain.usecases.CreatePlaylistUseCase
-import com.kaelesty.audionautica.domain.usecases.DeletePlaylistUseCase
 import com.kaelesty.audionautica.domain.usecases.DeleteTrackFromPlaylistUseCase
 import com.kaelesty.audionautica.domain.usecases.DeleteTrackUseCase
-import com.kaelesty.audionautica.domain.usecases.GetAllPlaylistsUseCase
 import com.kaelesty.audionautica.domain.usecases.GetAllTracksUseCase
 import com.kaelesty.audionautica.domain.usecases.GetPlaylistTracksUseCase
 import com.kaelesty.audionautica.domain.usecases.SaveTrackUseCase
@@ -23,13 +19,10 @@ import javax.inject.Inject
 
 class MusicViewModel @Inject constructor(
 	private val searchTracksUseCase: SearchTracksUseCase,
-	private val getAllPlaylistsUseCase: GetAllPlaylistsUseCase,
 	private val addTrackToPlaylistUseCase: AddTrackToPlaylistUseCase,
 	private val deleteTrackFromPlaylistUseCase: DeleteTrackFromPlaylistUseCase,
 	private val getPlaylistTracksUseCase: GetPlaylistTracksUseCase,
-	private val createPlaylistUseCase: CreatePlaylistUseCase,
 	private val getAllTracksUseCase: GetAllTracksUseCase,
-	private val deletePlaylistUseCase: DeletePlaylistUseCase,
 	private val saveTrackUseCase: SaveTrackUseCase,
 	private val deleteTrackUseCase: DeleteTrackUseCase,
 	private val pqc: IPlayerQueueController
@@ -66,10 +59,6 @@ class MusicViewModel @Inject constructor(
 		}
 	}
 
-	fun getPlaylists(): LiveData<List<Playlist>> {
-		return getAllPlaylistsUseCase()
-	}
-
 	fun removeTrackFromPlaylist(track: Track, id: Int) {
 		viewModelScope.launch(Dispatchers.IO) {
 			deleteTrackFromPlaylistUseCase(track, id)
@@ -80,17 +69,6 @@ class MusicViewModel @Inject constructor(
 		return getPlaylistTracksUseCase(id)
 	}
 
-	fun createPlaylist(playlist: Playlist) {
-		viewModelScope.launch(Dispatchers.IO) {
-			createPlaylistUseCase(playlist)
-		}
-	}
-
-	fun deletePlaylist(playlistId: Int) {
-		viewModelScope.launch(Dispatchers.IO) {
-			deletePlaylistUseCase(playlistId)
-		}
-	}
 
 	fun getAllTracks(): LiveData<List<Track>> {
 		return getAllTracksUseCase()

@@ -2,7 +2,6 @@ package com.kaelesty.audionautica.data.playlists
 
 import com.kaelesty.audionautica.di.ApplicationScope
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -32,9 +31,14 @@ interface PlaylistsApiService {
 		@Body body: PlaylistIdRequest
 	): Response<ResponseBody>
 
-
 	@POST("UserPlayList/")
 	suspend fun getPlaylists(
 		@Header("token") token: String,
-	): Response<String>
+	): Response<UserPlaylistResponse>
+
+	@POST("PlayListInfoId/")
+	suspend fun playlistInfoId(
+		@Header("token") token: String,
+		@Body body: EntirePlaylistRequest
+	): Response<EntirePlaylistResponse>
 }

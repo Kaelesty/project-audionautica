@@ -2,7 +2,8 @@ package com.kaelesty.audionautica.di
 
 import androidx.lifecycle.ViewModel
 import com.kaelesty.audionautica.presentation.player.PlayerViewModel
-import com.kaelesty.audionautica.presentation.playlists.PlaylistsViewModel
+import com.kaelesty.audionautica.presentation.playlists.list.PlaylistsViewModel
+import com.kaelesty.audionautica.presentation.playlists.details.PlaylistDetailsViewModel
 import com.kaelesty.audionautica.presentation.playlists.upload.PlaylistUploadViewModel
 import com.kaelesty.audionautica.presentation.viewmodels.AccessViewModel
 import com.kaelesty.audionautica.presentation.viewmodels.MusicViewModel
@@ -17,26 +18,37 @@ interface ViewModelsModule {
 	@IntoMap
 	@StringKey("AccessViewModel")
 	@Binds
+	@ApplicationScope
 	fun bindAccessViewModel(impl: AccessViewModel): ViewModel
 
 	@IntoMap
 	@StringKey("MusicViewModel")
 	@Binds
+	@ApplicationScope
 	fun bindsMusicViewModel(impl: MusicViewModel): ViewModel
 
 	@IntoMap
 	@StringKey("PlayerViewModel")
 	@Binds
+	@ApplicationScope
 	fun bindsPlayerViewModel(impl: PlayerViewModel): ViewModel
 
 	@IntoMap
 	@StringKey("PlaylistsViewModel")
 	@Binds
+	@ApplicationScope
 	fun bindsPlaylistsViewModel(impl: PlaylistsViewModel): ViewModel
 
 	@IntoMap
 	@StringKey("PlaylistUploadViewModel")
 	@Binds
+	@ApplicationScope
 	fun bindsPlaylistUploadViewModel(impl: PlaylistUploadViewModel): ViewModel
+
+	@IntoMap
+	@StringKey("PlaylistDetailsViewModel")
+	@Binds
+	@ApplicationScope
+	fun bindsPlaylistDetailsViewModel(impl: PlaylistDetailsViewModel): ViewModel
 
 }

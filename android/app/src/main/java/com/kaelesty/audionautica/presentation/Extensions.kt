@@ -19,6 +19,10 @@ fun MediaController.getCurrentTrack(): Track? {
 
 fun MediaController.isPlaying(): Boolean = playbackState?.state == PlaybackState.STATE_PLAYING
 
+fun androidx.media3.common.MediaMetadata.getCurrentPlaylistId(): Int {
+	return (extras?.getLong(PlayerService.CUSTOM_METADATA_KEY_PLAYLIST_ID) ?: -1).toInt()
+}
+
 fun MediaMetadata.getCurrentTrack(): Track? {
 	return Track(
 		artist = getString(MediaMetadata.METADATA_KEY_ARTIST) ?: return null,

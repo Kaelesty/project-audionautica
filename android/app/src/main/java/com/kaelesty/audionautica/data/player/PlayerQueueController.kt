@@ -6,13 +6,14 @@ import com.kaelesty.audionautica.domain.entities.PlayReadyTrack
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.player.IPlayerQueueController
 import com.kaelesty.audionautica.domain.player.PlayerQueueCommand
+import com.kaelesty.audionautica.domain.playlists.UserPlaylist
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
-class PlayerQueueController @Inject constructor(
+class PlayerQueueController (
 	private val musicRepo: MusicRepo
 ) : IPlayerQueueController {
 
@@ -34,6 +35,13 @@ class PlayerQueueController @Inject constructor(
 				)
 			)
 		}
+	}
+
+	override suspend fun setQueueAsPlaylist(playlist: UserPlaylist.Entire, tracks: List<Track>) {
+		_queueCommands.emit(
+			PlayerQueueCommand.SetPlaylist(playlist)
+		)
+		setQueue(tracks)
 	}
 
 	override fun getQueueFlow(): SharedFlow<PlayerQueueCommand> {

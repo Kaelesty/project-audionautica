@@ -25,7 +25,7 @@ fun Search(
 	tracksSearchResults: LiveData<List<Track>>,
 	onPlay: (Track) -> Unit,
 	playerMediaController: MediaController?,
-	selectPlaylistDialog: MutableState<Track?>,
+	//selectPlaylistDialog: MutableState<Track?>,
 	onSaveTrack: (Track) -> Unit,
 	libraryTracksLD: LiveData<List<Track>>,
 ) {
@@ -60,7 +60,7 @@ fun Search(
 						}
 					},
 					onAdd = {
-						selectPlaylistDialog.value = it
+						//selectPlaylistDialog.value = it
 					},
 					onSecondary = if (it !in libraryTracks) {
 						{ onSaveTrack(it) }

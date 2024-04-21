@@ -1,12 +1,13 @@
 package com.kaelesty.audionautica.domain.playlists
 
+
+
 sealed class UserPlaylists {
 
-	object Loading: UserPlaylists()
+	object Error: UserPlaylists()
 
 	data class Result(
-		val playlists_ids: List<Int>
+		val liked: List<Int>,
+		val created: List<Int>,
 	): UserPlaylists()
-
-	object Empty: UserPlaylists()
 }

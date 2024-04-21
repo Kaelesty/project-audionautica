@@ -10,9 +10,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -20,16 +17,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.kaelesty.audionautica.R
-import com.kaelesty.audionautica.domain.playlists.Playlist
-import com.kaelesty.audionautica.domain.entities.Track
-import com.kaelesty.audionautica.presentation.composables.dialogues.AddTrackToPlalistDialog
-import com.kaelesty.audionautica.presentation.composables.dialogues.EditPlaylistDialog
 import com.kaelesty.audionautica.presentation.player.PlayerBar
 import com.kaelesty.audionautica.presentation.navigation.MusicNavGraph
 import com.kaelesty.audionautica.presentation.navigation.Screen
 import com.kaelesty.audionautica.presentation.navigation.rememberMusicNavigationState
+import com.kaelesty.audionautica.presentation.playlists.details.PlaylistDetails
 import com.kaelesty.audionautica.presentation.playlists.upload.AddPlaylistScreen
-import com.kaelesty.audionautica.presentation.playlists.Playlists
+import com.kaelesty.audionautica.presentation.playlists.list.Playlists
 import com.kaelesty.audionautica.presentation.viewmodels.MusicViewModel
 import com.kaelesty.audionautica.presentation.viewmodels.ViewModelFactory
 import kotlinx.coroutines.flow.SharedFlow
@@ -56,36 +50,8 @@ fun MusicScreen(
 		color = Color.White
 	)
 
-	val selectPlaylistDialog = rememberSaveable {
-		mutableStateOf<Track?>(null)
-	}
 
-	val editPlaylistDialog = rememberSaveable {
-		mutableStateOf<Playlist?>(null)
-	}
 
-	val playlists by vm.getPlaylists().observeAsState(listOf())
-
-	selectPlaylistDialog.value?.let { track ->
-		AddTrackToPlalistDialog(
-			onDimissRequest = { selectPlaylistDialog.value = null },
-			onAcceptRequest = { playlistId ->
-				vm.addTrackToPlaylist(track, playlistId)
-				selectPlaylistDialog.value = null
-			},
-			playlists = playlists
-		)
-	}
-
-	editPlaylistDialog.value?.let { playlist ->
-		EditPlaylistDialog(
-			onDismissRequest = { editPlaylistDialog.value = null },
-			playlist = playlist,
-			playlistTracks = vm.getPlaylistTracks(playlist.id),
-			onDeleteTrackFromPlaylist = { track, id -> vm.removeTrackFromPlaylist(track, id) },
-			onDeletePlaylist = { vm.deletePlaylist(it) }
-		)
-	}
 
 	Scaffold(
 		modifier = Modifier
@@ -123,7 +89,7 @@ fun MusicScreen(
 					onSearch = { vm.search(it) },
 					tracksSearchResults = vm.tracksSearchResults,
 					onPlay = { vm.playTrack(it) },
-					selectPlaylistDialog = selectPlaylistDialog,
+					//selectPlaylistDialog = selectPlaylistDialog,
 					onSaveTrack = { vm.saveTrack(it) },
 					libraryTracksLD = vm.getAllTracks(),
 					playerMediaController = playerMediaController
@@ -135,6 +101,9 @@ fun MusicScreen(
 					navigateToAddScreen = {
 						Log.d("NavTag", "to AddScreen")
 						navigationState.navHostController.navigate(Screen.PlaylistsCreate.route)
+					},
+					navigateToDetailsScreen = {
+						navigationState.navHostController.navigate(Screen.PlaylistsDetails.getRouteWithArgs(it))
 					}
 				)
 			},
@@ -144,7 +113,7 @@ fun MusicScreen(
 					libraryTracks = vm.getAllTracks(),
 					onDeleteTrack = { vm.deleteTrack(it) },
 					onPlay = { vm.playTrack(it) },
-					selectPlaylistDialog = selectPlaylistDialog,
+					//selectPlaylistDialog = selectPlaylistDialog,
 					offlineMode = offlineMode,
 					playerMediaController = playerMediaController
 				)
@@ -159,6 +128,9 @@ fun MusicScreen(
 						navigationState.navHostController.popBackStack()
 					}
 				)
+			},
+			playlistDetailsContent = {
+				PlaylistDetails(playlist = it, viewModelFactory = viewModelFactory)
 			}
 		)
 	}
