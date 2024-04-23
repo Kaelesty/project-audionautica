@@ -581,4 +581,6 @@ class PlayListTracksInfoId(APIView):
         array = []
         for i in playlist.tracksid:
             array += Traks.objects.filter(id=i)
-        #to do
+        json_response = {}
+        json_response["tracks"] = array
+        return Response(json_response)
