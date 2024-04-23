@@ -38,6 +38,7 @@ from Bd.views import (
     DisLikePlayList,
     PlayListInfoId,
     GetAllTracks,
+    TrackInfoId,
 )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -58,6 +59,7 @@ urlpatterns = [
     path('Music/Delete/', TrackDelete.as_view()),
     path('Music/IdDelete/', TrackDeleteId.as_view()),
     path('Music/Search/', TrackSearch.as_view()),
+    path('Music/TrackInfoId/', TrackInfoId.as_view()),
     path('Music/GetAllTracks/', GetAllTracks.as_view()),
     path('PlayList/Upload/', PlayListUpload.as_view()),
     path('PlayList/GetPoster/', GetPlayListPoster.as_view()),
