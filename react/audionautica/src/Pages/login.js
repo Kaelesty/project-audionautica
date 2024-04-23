@@ -55,11 +55,12 @@ const LoginPage = () => {
                 <h2>Авторизация</h2>
                 <form onSubmit={handleSubmit}>
                     <div>
-                        <label htmlFor="login">Email:</label>
+                        <label htmlFor="email">Email:</label>
                         <input
                             type="text"
                             id="email"
                             name="email"
+                            autoComplete="username"
                             value={login}
                             onChange={handleLoginChange}
                             required

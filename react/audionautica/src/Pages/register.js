@@ -78,6 +78,7 @@ const RegisterPage = () => {
                             type="email"
                             id="email"
                             name="email"
+                            autoComplete="username"
                             value={email}
                             onChange={handleEmailChange}
                             required
@@ -97,7 +98,7 @@ const RegisterPage = () => {
                     <div>
                         <label htmlFor="confirm-password">Подтвердите пароль:</label>
                         <input
-                            type="password"
+                            type="confirm-password"
                             id="confirm-password"
                             name="confirm-password"
                             value={confirmPassword}

@@ -37,19 +37,39 @@
     background-color: #e0e0e0;
   }
   
-  .remove-button{
+  .right-container{
     margin-left: auto;
+    align-items: center;
+
+  }
+
+  .remove-button{
     font-size: 25px;
     font-weight: bold;
     background-color: transparent; 
     border: none;
     cursor: pointer; 
     border-radius: 10px;
+    margin: 0px 1px;
   }
 
  .remove-button:hover{
     background-color: #f0f0f0; 
   }
+
+  .move-button{
+    font-size: 25px;
+    background-color: transparent; 
+    border: none;
+    cursor: pointer; 
+    border-radius: 10px;
+    margin: 0px 1px;
+  }
+
+  .move-button:hover{
+    background-color: #f0f0f0; 
+  }
+
 /* Анимация играющего трека */
   .track-animation-container {
     margin-right: 5px;
