@@ -27,7 +27,10 @@ const SidebarTrack = ({id, title, artist, listIndex, handlePlay}) =>{
         <p>{title}</p>
         <p>{artist}</p>
       </div>
-      <button className="remove-button" onClick={() => removeFromQueue(listIndex)}>&times;</button>
+      <div className="right-container">
+        <button className="move-button">=</button>
+        <button className="remove-button" onClick={() => removeFromQueue(listIndex)}>&times;</button>
+      </div>
     </div>
   );
 }

@@ -10,7 +10,8 @@ import SearchBar from './components/search/searchbar';
 import Playlist from './components/playlist';
 import AlbumCover from './components/icons/nopic.png';
 import HomePage from './pages/home';
-
+import PlaylistPage from './pages/playlistpage';
+import NotFoundPage from './pages/notfound';
 
 export const Context = React.createContext();
 
@@ -37,7 +38,9 @@ const App = () => {
             <Route path="rec/" element={<Recomendations/>} />
             <Route path="search/" element={<SearchBar/>} />
             <Route path="test/" element={<Playlist title={"Title"} creator={"Creator"} cover={AlbumCover}/>} />
+            <Route path="playlist/:id"element={<PlaylistPage/>}/>
           </Route>
+          <Route path='*' element={<NotFoundPage/>}/>
         </Routes>
       </Context.Provider>
     </Router>

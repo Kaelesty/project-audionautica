@@ -12,6 +12,7 @@ const ConstPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   if (!isLoggedIn){
+    console.log(isLoggedIn)
     return <Navigate to="/login" />
   }
 
