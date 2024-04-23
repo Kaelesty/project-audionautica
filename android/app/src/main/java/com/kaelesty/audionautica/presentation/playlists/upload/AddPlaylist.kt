@@ -32,7 +32,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kaelesty.audionautica.presentation.composables.access.GradientCard
 import com.kaelesty.audionautica.presentation.composables.access.TextInput
 import com.kaelesty.audionautica.presentation.composables.dialogues.LoadingDialog
-import com.kaelesty.audionautica.presentation.playlists.PlaylistsViewModel
 import com.kaelesty.audionautica.presentation.ui.fonts.SpaceGrotesk
 import com.kaelesty.audionautica.presentation.viewmodels.ViewModelFactory
 import kotlinx.coroutines.flow.SharedFlow
@@ -59,6 +58,7 @@ fun AddPlaylistScreen(
 		}
 		is PlaylistUploadState.Finished -> {
 			navigateToListScreen()
+			viewModel.resetState()
 		}
 		else -> {}
 	}
@@ -106,15 +106,6 @@ fun AddPlaylistScreen(
 				hint = "Description"
 			)
 			Spacer(modifier = Modifier.height(12.dp))
-
-//			TextInput(
-//				value = uriString,
-//				hint = "Image",
-//				modifier = Modifier.clickable {
-//					requestImageUri()
-//				},
-//				isReadOnly = true,
-//			)
 			Row(
 				verticalAlignment = Alignment.CenterVertically
 			) {

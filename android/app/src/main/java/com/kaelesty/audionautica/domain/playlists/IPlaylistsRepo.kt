@@ -4,10 +4,18 @@ import android.net.Uri
 
 interface IPlaylistsRepo {
 
-	suspend fun getPlaylists(): List<Playlist>
+	suspend fun getPlaylists(): UserPlaylists
 
 	suspend fun uploadPlaylist(
-		playlist: Playlist,
+		playlist: UserPlaylist.Entire,
 		uri: Uri
 	): Boolean
+
+	suspend fun likePlaylist(
+		playlist_id: Int
+	): Boolean
+
+	suspend fun loadEntirePlaylist(
+		playlist_id: Int
+	): UserPlaylist
 }

@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kaelesty.audionautica.presentation.composables.access.GradientCard
@@ -54,8 +55,12 @@ fun MusicNavigationBar(
 		GradientCard {
 			Row(verticalAlignment = Alignment.CenterVertically) {
 				items.forEach { item ->
+					val selected = navBackStackEntry?.destination?.hierarchy?.any {
+						it.route == item.screen.route
+					} ?: false
+
 					NavigationBarItem(
-						selected = navBackStackEntry?.destination?.route == item.screen.route,
+						selected = selected,
 						onClick = {
 							navigationState.navigateTo(item.screen.route)
 						},

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -71,14 +72,14 @@ fun PlayerBar(
 			Row(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(horizontal = 6.dp, vertical = 4.dp),
+					.padding(horizontal = 6.dp),
 				verticalAlignment = Alignment.CenterVertically
 			) {
 				Text(
 					text = "${track.title} - ${track.artist}",
 					fontFamily = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) SpaceGrotesk else FontFamily.SansSerif,
 					fontWeight = FontWeight.Normal,
-					fontSize = 16.sp,
+					fontSize = 18.sp,
 					modifier = Modifier
 						.weight(1f)
 				)
@@ -87,6 +88,8 @@ fun PlayerBar(
 					fontFamily = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) SpaceGrotesk else FontFamily.SansSerif,
 					fontWeight = FontWeight.Thin,
 					fontSize = 14.sp,
+					modifier = Modifier
+						.width(40.dp)
 				)
 				Box(
 					modifier = Modifier

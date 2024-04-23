@@ -22,26 +22,26 @@ import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
 fun LoadingDialog(
 	) {
 	Dialog({}) {
+		LoadingCard()
+	}
+}
 
-		val text = rememberSaveable {
-			mutableStateOf("")
-		}
-
-		Card(
-			modifier = Modifier
-				.width(200.dp)
-				.height(200.dp)
-				.padding(16.dp),
-			shape = RoundedCornerShape(16.dp),
+@Composable
+fun LoadingCard() {
+	Card(
+		modifier = Modifier
+			.width(200.dp)
+			.height(200.dp)
+			.padding(16.dp),
+		shape = RoundedCornerShape(16.dp),
+	) {
+		Box(modifier = Modifier
+			.align(Alignment.CenterHorizontally)
+			.fillMaxSize()
 		) {
-			Box(modifier = Modifier
-				.align(Alignment.CenterHorizontally)
-				.fillMaxSize()
-			) {
-				CircularProgressIndicator(
-					modifier = Modifier.fillMaxSize().padding(18.dp)
-				)
-			}
+			CircularProgressIndicator(
+				modifier = Modifier.fillMaxSize().padding(18.dp)
+			)
 		}
 	}
 }

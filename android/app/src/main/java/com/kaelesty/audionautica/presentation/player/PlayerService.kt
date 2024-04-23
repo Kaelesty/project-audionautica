@@ -11,10 +11,12 @@ import android.media.session.PlaybackState
 import android.os.Binder
 import android.os.Bundle
 import android.util.Log
+import androidx.media3.common.BuildConfig
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.kaelesty.audionautica.domain.player.PlayerQueueCommand
+import com.kaelesty.audionautica.domain.playlists.UserPlaylist
 import com.kaelesty.audionautica.presentation.activities.MusicActivity
 import com.kaelesty.audionautica.system.ModifiedApplication
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +30,8 @@ class PlayerService : Service() {
 	private val component by lazy {
 		(application as ModifiedApplication).component
 	}
+
+	private var currentPlaylist: UserPlaylist.Entire? = null
 
 
 	private val player by lazy {
@@ -159,6 +163,9 @@ class PlayerService : Service() {
 										CUSTOM_METADATA_TAGS_DELIMITER
 									)
 								)
+								putLong(CUSTOM_METADATA_KEY_PLAYLIST_ID,
+									(currentPlaylist?.id ?: -1).toLong()
+								)
 							})
 							//.putString(MediaMetadata.METADATA_KEY_TITLE, it.track.metadata.title)
 							//.putString(MediaMetadata.METADATA_KEY_ARTIST, it.track.metadata.artist)
@@ -174,6 +181,11 @@ class PlayerService : Service() {
 
 					is PlayerQueueCommand.DropQueue -> {
 						player.clearMediaItems()
+						currentPlaylist = null
+					}
+
+					is PlayerQueueCommand.SetPlaylist -> {
+						currentPlaylist = it.playlist
 					}
 				}
 			}
@@ -213,6 +225,7 @@ class PlayerService : Service() {
 		}
 
 		val CUSTOM_METADATA_KEY_ID = "__id__"
+		val CUSTOM_METADATA_KEY_PLAYLIST_ID = "__id__"
 		val CUSTOM_METADATA_KEY_TAGS = "__tags__"
 		val CUSTOM_METADATA_TAGS_DELIMITER = "%"
 	}

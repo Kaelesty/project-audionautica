@@ -3,14 +3,11 @@ package com.kaelesty.audionautica.presentation.playlists.upload
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kaelesty.audionautica.domain.playlists.Playlist
-import com.kaelesty.audionautica.domain.player.IPlayerQueueController
 import com.kaelesty.audionautica.domain.playlists.UploadPlaylistUseCase
-import com.kaelesty.audionautica.domain.usecases.GetAllPlaylistsUseCase
+import com.kaelesty.audionautica.domain.playlists.UserPlaylist
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,6 +17,12 @@ class PlaylistUploadViewModel @Inject constructor(
 
 	private val _stateFlow: MutableStateFlow<PlaylistUploadState> = MutableStateFlow(PlaylistUploadState.Initial)
 	val stateFlow: StateFlow<PlaylistUploadState> get() = _stateFlow
+
+	fun resetState() {
+		viewModelScope.launch(Dispatchers.IO) {
+			_stateFlow.emit(PlaylistUploadState.Initial)
+		}
+	}
 
 	fun uploadPlaylist(
 		uri: Uri?,
@@ -55,14 +58,15 @@ class PlaylistUploadViewModel @Inject constructor(
 		viewModelScope.launch(Dispatchers.IO) {
 			_stateFlow.emit(PlaylistUploadState.Uploading)
 			val result = uploadPlaylistUseCase(
-				Playlist(
+				UserPlaylist.Entire(
 					id = -1,
-					creatorId = -1,
+					isEditable = true,
 					trackIds = trackIds,
 					title = title,
 					isPrivate = isPrivate,
 					desc = desc,
-					imageUrl = ""
+					imageUrl = "",
+					likes = 0
 				),
 				uri
 			)

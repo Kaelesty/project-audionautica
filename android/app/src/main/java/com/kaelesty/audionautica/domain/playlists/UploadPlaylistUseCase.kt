@@ -7,5 +7,5 @@ class UploadPlaylistUseCase @Inject constructor(
 	private val repo: IPlaylistsRepo
 ) {
 
-	suspend operator fun invoke(playlist: Playlist, uri: Uri) = repo.uploadPlaylist(playlist, uri)
+	suspend operator fun invoke(playlist: UserPlaylist.Entire, uri: Uri) = repo.uploadPlaylist(playlist, uri)
 }

@@ -1,4 +1,4 @@
-package com.kaelesty.audionautica.presentation.composables.addtrack
+package com.kaelesty.audionautica.presentation.addtrack
 
 import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi

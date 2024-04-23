@@ -2,9 +2,13 @@ package com.kaelesty.audionautica.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import com.google.gson.Gson
+import com.kaelesty.audionautica.domain.playlists.UserPlaylist
 
 @Composable
 fun MusicNavGraph(
@@ -14,6 +18,7 @@ fun MusicNavGraph(
 	musicPlaylistsScreenContent: @Composable () -> Unit,
 	musicLibraryScreenContent: @Composable () -> Unit,
 	addPlaylistContent: @Composable () -> Unit,
+	playlistDetailsContent: @Composable (UserPlaylist.Entire) -> Unit,
 ) {
 	NavHost(
 		navController = navHostController,
@@ -33,6 +38,19 @@ fun MusicNavGraph(
 			}
 			composable(Screen.PlaylistsCreate.route) {
 				addPlaylistContent()
+			}
+			composable(
+				route = Screen.PlaylistsDetails.route,
+				arguments = listOf(
+					navArgument(Screen.KEY_PLAYLIST) {
+						type = NavType.StringType
+					}
+				)
+			) {
+				val json = it.arguments?.getString(Screen.KEY_PLAYLIST)
+				playlistDetailsContent(
+					Gson().fromJson(json, UserPlaylist.Entire::class.java)
+				)
 			}
 		}
 
