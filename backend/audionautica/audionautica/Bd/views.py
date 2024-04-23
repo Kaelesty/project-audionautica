@@ -579,6 +579,14 @@ class PlayListTracksInfoId(APIView):
         playlist_id = request.data["playlist_id"]
         playlist = PlayList.objects.filter(id=playlist_id).first()
         array = []
-        for i in playlist.tracksid:
-            array += Traks.objects.filter(id=i)
-        #to do
+        for i in list(map(int, list(filter(lambda x: x != "", playlist.tracksid.split("/"))))):
+            track = Traks.objects.filter(id=i).first()
+            dict = {}
+            dict["id"] = track.id
+            dict["title"] = track.title
+            dict["artist"] = track.artist
+            dict["tags"] = track.tags
+            array.append(dict)
+        json_response = {}
+        json_response["tracks"] = array
+        return Response(json_response)
