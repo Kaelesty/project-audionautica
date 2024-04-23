@@ -10,7 +10,7 @@ const SearchBar = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-   
+
   useEffect(() => {
     const fetchSearchResults = async () => {
       setLoading(true);

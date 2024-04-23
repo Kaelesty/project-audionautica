@@ -16,7 +16,29 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include, re_path
-from Bd.views import UsersAPIViwe, RegisterUser,CheckConnection, LoginUser, TokenViwe, UserView, GetTrack, TrackUpload, TrackDelete, TrackSearch, TrackDeleteId
+from Bd.views import (
+    UsersAPIViwe,
+    RegisterUser,
+    CheckConnection,
+    LoginUser,
+    TokenViwe,
+    UserView,
+    GetTrack,
+    TrackUpload,
+    TrackDelete,
+    TrackSearch,
+    TrackDeleteId,
+    PlayListUpload,
+    GetPlayListPoster,
+    PlayListDeleteId,
+    AddTrackToPlayList,
+    DeleteTrackFromPlayList,
+    LikePlayList,
+    UserPlayList,
+    DisLikePlayList,
+    PlayListInfoId,
+    GetAllTracks,
+)
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -36,6 +58,16 @@ urlpatterns = [
     path('Music/Delete/', TrackDelete.as_view()),
     path('Music/IdDelete/', TrackDeleteId.as_view()),
     path('Music/Search/', TrackSearch.as_view()),
+    path('Music/GetAllTracks/', GetAllTracks.as_view()),
+    path('PlayList/Upload/', PlayListUpload.as_view()),
+    path('PlayList/GetPoster/', GetPlayListPoster.as_view()),
+    path('PlayList/DeleteId/', PlayListDeleteId.as_view()),
+    path('PlayList/AddTrackToPlayList/', AddTrackToPlayList.as_view()),
+    path('PlayList/DeleteTrackFromPlayList/', DeleteTrackFromPlayList.as_view()),
+    path('PlayList/LikePlayList/', LikePlayList.as_view()),
+    path('PlayList/DisLikePlayList/', DisLikePlayList.as_view()),
+    path('PlayList/UserPlayList/', UserPlayList.as_view()),
+    path('PlayList/PlayListInfoId/', PlayListInfoId.as_view()),
     #path('Logout/', LogoutView.as_view()),
     # path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'), #for login give access & refresh token
     # path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), #refreshing

@@ -1,5 +1,6 @@
 package com.kaelesty.audionautica.presentation.composables.music
 
+import android.media.session.MediaController
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -16,7 +17,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -28,26 +28,24 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.presentation.composables.dialogues.ConfirmTrackDeleteDialog
-import kotlinx.coroutines.flow.SharedFlow
+import com.kaelesty.audionautica.presentation.getCurrentTrack
+import com.kaelesty.audionautica.presentation.isPlaying
 
 @Composable
 fun MyTracks(
 	onCreateTrack: () -> Unit,
 	libraryTracks: LiveData<List<Track>>,
-	playingFlow: SharedFlow<Boolean>,
-	onPause: () -> Unit,
 	onPlay: (Track) -> Unit,
 	selectPlaylistDialog: MutableState<Track?>,
 	onDeleteTrack: (Track) -> Unit,
-	trackFlow: SharedFlow<Track>,
-	pausedTrackId: MutableState<Int>,
-	onResume: () -> Unit,
-	offlineMode: Boolean
+	offlineMode: Boolean,
+	playerMediaController: MediaController?
 ) {
 
 	val tracks by libraryTracks.observeAsState(initial = listOf())
-	val playing by playingFlow.collectAsState(initial = false)
 
+	val playing = playerMediaController?.isPlaying() ?: false
+	val playingTrack = playerMediaController?.getCurrentTrack() ?: Track(-1, "", "", listOf())
 
 	var deleteTrackDialog by rememberSaveable {
 		mutableStateOf<Track?>(null)
@@ -73,14 +71,13 @@ fun MyTracks(
 					onClick = { clickedTrack ->
 						if (playing) {
 							if (track.id == clickedTrack.id) {
-								onPause()
-								pausedTrackId.value = track.id
+								playerMediaController?.transportControls?.pause()
 							} else {
 								onPlay(clickedTrack)
 							}
 						} else {
-							if (pausedTrackId.value == clickedTrack.id) {
-								onResume()
+							if (playingTrack.id == clickedTrack.id) {
+								playerMediaController?.transportControls?.play()
 							} else {
 								onPlay(clickedTrack)
 							}
@@ -120,7 +117,7 @@ fun MyTracks(
 					contentDescription = null
 				)
 			}
-			Spacer(Modifier.height(180.dp))
+			Spacer(Modifier.height(230.dp))
 		}
 	}
 }

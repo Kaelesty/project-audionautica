@@ -13,7 +13,6 @@ import HomePage from './pages/home';
 import PlaylistPage from './pages/playlistpage';
 import NotFoundPage from './pages/notfound';
 
-
 export const Context = React.createContext();
 
 const App = () => { 
