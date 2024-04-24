@@ -155,15 +155,15 @@ class UserView(APIView):
         return Response(serializer.data)
 
 
-# class LogoutView(APIView):
-#     def post(self, request):
-#         response = Response()
-#         #response.delete_cookie('jwt')
-#         response.data = {
-#             'message':'success'
-#         }
-#         return response
-
+class UserInfoId(APIView):
+    def post(self, request):
+        if not check_token(request):
+            return Response(status=status.HTTP_418_IM_A_TEAPOT)
+        user_id = request.data['id']
+        user = Users.objects.filter(id=user_id).first()
+        json_respose = {}
+        json_respose['username'] = user.name
+        return Response(json_respose)
 class GetTrack(APIView):
     def post(self, request):
         if not check_token(request):
@@ -508,8 +508,9 @@ class PlayListInfoId(APIView):
         dickt["tracksid"] = playlist.tracksid
         dickt["liked"] = playlist.liked
         dickt["isprivat"] = playlist.isprivat == "True"
+        dickt["creator_id"] = playlist.creatorid
         payload = jwt.decode(request.headers["token"], config.secret_key, algorithms=['HS256'])
-        dickt["editable"] = payload["id"] == playlist.creatorid
+        dickt["editable"] = payload["id"] == int(playlist.creatorid)
         return Response(dickt)
 
 
