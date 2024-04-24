@@ -287,7 +287,7 @@ class MusicRepo @Inject constructor(
 	}
 
 	override suspend fun deletePlaylist(playlistId: Int) {
-		playlistDao.deletePlaylist(playlistId)
+		//playlistDao.deletePlaylist(playlistId)
 		Log.d("AudionauticaTag", "deleting playlist $playlistId")
 	}
 

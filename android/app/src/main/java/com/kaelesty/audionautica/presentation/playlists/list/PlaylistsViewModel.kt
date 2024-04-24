@@ -1,12 +1,14 @@
 package com.kaelesty.audionautica.presentation.playlists.list
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kaelesty.audionautica.domain.playlists.GetPlaylistCollectionUseCase
 import com.kaelesty.audionautica.domain.playlists.GetPlaylistsUseCase
 import com.kaelesty.audionautica.domain.playlists.LoadEntirePlaylistUseCase
+import com.kaelesty.audionautica.domain.playlists.UpdatePlaylistCollectionUseCase
 import com.kaelesty.audionautica.domain.playlists.UserPlaylist
 import com.kaelesty.audionautica.domain.playlists.UserPlaylists
-import com.kaelesty.audionautica.domain.usecases.GetTrackByIdCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,11 +19,27 @@ import javax.inject.Inject
 class PlaylistsViewModel @Inject constructor(
 	private val getPlaylistsUseCase: GetPlaylistsUseCase,
 	private val loadEntirePlaylistUseCase: LoadEntirePlaylistUseCase,
-	private val getTrackByIdUseCase: GetTrackByIdCase,
+
+	private val getPlaylistCollectionUseCase: GetPlaylistCollectionUseCase,
+	private val updatePlaylistCollectionUseCase: UpdatePlaylistCollectionUseCase,
 ): ViewModel() {
 
 	private val _stateFlow: MutableStateFlow<PlaylistsState> = MutableStateFlow(PlaylistsState.Loading)
 	val stateFlow: StateFlow<PlaylistsState> get() = _stateFlow.asStateFlow()
+
+	val playlistCollection by lazy {
+		getPlaylistCollectionUseCase()
+	}
+
+	init {
+		updatePlaylistCollection()
+	}
+
+	fun updatePlaylistCollection() {
+		viewModelScope.launch(Dispatchers.IO) {
+			updatePlaylistCollectionUseCase()
+		}
+	}
 
 	fun updatePlaylist(id: Int) {
 		viewModelScope.launch(Dispatchers.IO) {

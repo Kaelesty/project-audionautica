@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -38,71 +39,39 @@ fun Playlists(
 	val vm = viewModelFactory.create(PlaylistsViewModel::class.java)
 	Log.d("ReCoTag", "Playlists")
 
-	vm.loadPlaylists()
+	//vm.loadPlaylists()
 
-	val userPlaylists by vm.stateFlow.collectAsState()
+	val playlists by vm.playlistCollection.observeAsState(initial = listOf())
 
-	when (userPlaylists) {
-		is PlaylistsState.Loading -> {
-			LoadingDialog()
-		}
-
-		is PlaylistsState.Empty -> {
-			Column(
-				modifier = Modifier
-					.padding(12.dp)
-					.fillMaxHeight(),
-			) {}
-			AddButton(
-				action = { navigateToAddScreen() }
-			)
-		}
-
-		is PlaylistsState.Result -> {
-			val playlists = (userPlaylists as PlaylistsState.Result).playlists
-			LazyColumn(
-				modifier = Modifier
-					.padding(12.dp)
-					.fillMaxHeight(),
-				content = {
-					items(
-						items = playlists,
-						key = {
-							when (it) {
-								is UserPlaylist.IdOnly -> {
-									it.id
-								}
-								is UserPlaylist.Entire -> {
-									it.id
-								}
-							}
-						}
-					) {
-						SideEffect {
-							if (it is UserPlaylist.IdOnly) {
-								vm.updatePlaylist(it.id)
-							}
-						}
-						PlaylistCard(
-							state = it,
-							onShowPlaylistDetails = {
-								navigateToDetailsScreen(it)
-							}
-						)
-						Spacer(modifier = Modifier.height(12.dp))
-					}
-					item {
-						Spacer(Modifier.height(300.dp))
-					}
+	LazyColumn(
+		modifier = Modifier
+			.padding(12.dp)
+			.fillMaxHeight(),
+		content = {
+			items(
+				items = playlists,
+				key = {
+					it.id
 				}
-			)
-			AddButton(
-				action = {
-					navigateToAddScreen()
-				}
-			)
+			) {
+				PlaylistCard(
+					state = it,
+					onShowPlaylistDetails = {
+						navigateToDetailsScreen(it)
+					}
+				)
+				Spacer(modifier = Modifier.height(12.dp))
+			}
+			item {
+				Spacer(Modifier.height(300.dp))
+			}
 		}
-	}
+	)
+	AddButton(
+		action = {
+			navigateToAddScreen()
+		}
+	)
 }
 
 @Composable

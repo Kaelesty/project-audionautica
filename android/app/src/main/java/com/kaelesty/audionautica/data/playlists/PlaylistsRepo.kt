@@ -1,30 +1,23 @@
 package com.kaelesty.audionautica.data.playlists
 
-import android.app.Application
-import android.content.ContentResolver
 import android.net.Uri
-import android.provider.OpenableColumns
 import android.util.Log
-import androidx.core.net.toFile
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.map
+import com.kaelesty.audionautica.data.local.daos.PlaylistDao
 import com.kaelesty.audionautica.data.mappers.PlaylistMapper
-import com.kaelesty.audionautica.data.remote.api.MusicApiService
 import com.kaelesty.audionautica.data.repos.tools.FileUploaderTool
 import com.kaelesty.audionautica.data.repos.tools.JwtTool
 import com.kaelesty.audionautica.data.repos.tools.UrlTool
 import com.kaelesty.audionautica.domain.playlists.IPlaylistsRepo
 import com.kaelesty.audionautica.domain.playlists.UserPlaylist
 import com.kaelesty.audionautica.domain.playlists.UserPlaylists
-import okhttp3.MultipartBody
-import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
-import java.io.InputStream
 import javax.inject.Inject
 
 class PlaylistsRepo @Inject constructor(
 	private val apiService: PlaylistsApiService,
+	private val dao: PlaylistDao,
 	private val jwtTool: JwtTool,
 	private val urlTool: UrlTool,
 	private val uploader: FileUploaderTool,
@@ -32,6 +25,41 @@ class PlaylistsRepo @Inject constructor(
 ): IPlaylistsRepo {
 
 	val PLAYLIST_TRACKIDS_DELIMITER = "/"
+
+	override suspend fun updatePlaylistCollection() {
+		try {
+			val response = apiService.getPlaylists(
+				token = jwtTool.getToken()
+			)
+			when (response.code()) {
+				200 -> {
+					response.body()?.let {
+						(it.created + it.liked).forEach { id ->
+							val playlist = loadEntirePlaylist(id)
+							if (playlist is UserPlaylist.Entire) {
+								dao.updatePlaylist(
+									playlistMapper.domainToDbModel(playlist)
+								)
+							}
+						}
+					}
+				}
+				else -> {
+
+				}
+			}
+		} catch (e: Exception) {
+
+		}
+	}
+
+	override fun getPlaylistCollection(): LiveData<List<UserPlaylist.Entire>> {
+		return dao.getAll().map { list ->
+			list.mapNotNull {
+				playlistMapper.DbModelToDomain(it)
+			}
+		}
+	}
 
 	override suspend fun getPlaylists(): UserPlaylists {
 		try {

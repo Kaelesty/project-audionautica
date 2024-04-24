@@ -1,6 +1,7 @@
 package com.kaelesty.audionautica.domain.playlists
 
 import android.net.Uri
+import androidx.lifecycle.LiveData
 
 interface IPlaylistsRepo {
 
@@ -18,4 +19,8 @@ interface IPlaylistsRepo {
 	suspend fun loadEntirePlaylist(
 		playlist_id: Int
 	): UserPlaylist
+
+	suspend fun updatePlaylistCollection()
+
+	fun getPlaylistCollection(): LiveData<List<UserPlaylist.Entire>>
 }
