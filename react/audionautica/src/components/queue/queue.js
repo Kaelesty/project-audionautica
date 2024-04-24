@@ -62,6 +62,12 @@ export function QueueProvider({ children }) {
       setCurrentId(newId)
     }
   }
+  
+  const setQueuePlaylist = (tracks) => {
+    clearQueue()
+    setQueue(tracks)
+    setCurrentId(0)
+  }
 
   const gotoTrack = (newid) => {
     setCurrentId(newid)
@@ -74,7 +80,7 @@ export function QueueProvider({ children }) {
   const contextValue = { queue, currentId, addTrackToQueue, 
                          setQueueTrack, removeFromQueue, nextTrack, 
                          prevTrack, repeatMode, setRepeatMode, 
-                         gotoTrack, clearQueue}
+                         gotoTrack, setQueuePlaylist ,clearQueue}
   return (
     <QueueContext.Provider value={contextValue}>
       {children}
