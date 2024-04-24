@@ -6,6 +6,7 @@ import {Context} from "../index.js"
 import "./const.css"
 import Sidebar from '../components/queue/sidebar.js';
 import { QueueProvider } from '../components/queue/queue.js';
+
 const ConstPage = () => {
   const albumCover = CoverImg;
   const {isLoggedIn} = useContext(Context);
