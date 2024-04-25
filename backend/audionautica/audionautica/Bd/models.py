@@ -40,3 +40,13 @@ class PlayList(models.Model):
 
     class Meta:
         verbose_name = "PlayList"
+
+class Recommendations(models.Model):
+    track_id = models.CharField("track_id", max_length=240)
+    #some fields
+
+    def __str__(self):
+        return 'id {}'.format(self.id)
+
+    class Meta:
+        verbose_name = "Recommendations"
