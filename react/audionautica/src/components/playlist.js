@@ -1,15 +1,42 @@
 import React, { useState } from 'react';
-import './playlist.css';
 import nopic from './icons/nopic.png'; 
+import { useNavigate } from 'react-router-dom';
+import useQueue from './queue/queue';
+import getPlaylistById from '../requests/getplaylistbyid';
+import getTrackInfoById from '../requests/gettrackinfobyid';
+import './playlist.css';
 
-const Playlist = ({ cover, title, creator }) => {
+const Playlist = ({ cover, title, creator, id }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const navigate = useNavigate();
+  const {setQueuePlaylist} = useQueue();
 
   const playlistClick = () => {
-    console.log("playlist click")
+    navigate(`/playlist/${id}`);
   }
-  const playClick = () => {
-    console.log("play click")
+  
+  const playClick = async () => {
+    try {
+      const response = await getPlaylistById(id);
+      if (response.tracksid === ""){
+        return
+      }
+      else {
+        const tracksid = response.tracksid.split("/").slice(0,-1)
+        const tracksData = await Promise.all(tracksid.map(async (id) => {
+          const track = await getTrackInfoById(id);
+          return {
+            id: id,
+            title: track.title,
+            artist: track.artist
+          };
+        }));
+        setQueuePlaylist(tracksData)
+      }
+
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   }
 
   if (cover === null){  

@@ -3,6 +3,7 @@ package com.kaelesty.audionautica.presentation.playlists.upload
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kaelesty.audionautica.domain.playlists.UpdatePlaylistCollectionUseCase
 import com.kaelesty.audionautica.domain.playlists.UploadPlaylistUseCase
 import com.kaelesty.audionautica.domain.playlists.UserPlaylist
 import kotlinx.coroutines.Dispatchers
@@ -13,6 +14,7 @@ import javax.inject.Inject
 
 class PlaylistUploadViewModel @Inject constructor(
 	private val uploadPlaylistUseCase: UploadPlaylistUseCase,
+	private val updatePlaylistCollectionUseCase: UpdatePlaylistCollectionUseCase
 ): ViewModel() {
 
 	private val _stateFlow: MutableStateFlow<PlaylistUploadState> = MutableStateFlow(PlaylistUploadState.Initial)
@@ -72,6 +74,7 @@ class PlaylistUploadViewModel @Inject constructor(
 			)
 
 			if (result) {
+				updatePlaylistCollectionUseCase()
 				_stateFlow.emit(PlaylistUploadState.Finished)
 			}
 			else {

@@ -30,29 +30,6 @@ abstract class MusicDatabase() : RoomDatabase() {
 
 	private val dbSetupScope = CoroutineScope(Dispatchers.IO)
 
-	fun checkFavoritesCreated() {
-		/*
-		Adding tracks to favorites is done through a special playlist "Favorites",
-		which is not displayed in the general list of playlists.
-		It must always exist, therefore, every time we create a database instance,
-		we check whether it has been created.
-		 */
-		with(this.playlistDao()) {
-			val value = getAll().value
-			if (value.isNullOrEmpty()) {
-				dbSetupScope.launch {
-					createPlaylistWithoutReplacing(
-						PlaylistDbModel(
-							id = null,
-							title = "Favorites",
-							trackIds = listOf(),
-						)
-					)
-				}
-			}
-		}
-	}
-
 	companion object {
 
 		private var instance: MusicDatabase? = null

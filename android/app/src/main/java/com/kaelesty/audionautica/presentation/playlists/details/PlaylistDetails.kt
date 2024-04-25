@@ -55,9 +55,8 @@ fun PlaylistDetails(
 
 	val vm = viewModel<PlaylistDetailsViewModel>(factory = viewModelFactory)
 	val playerViewModel = viewModel<PlayerViewModel>(factory = viewModelFactory)
-	vm.setPlaylist(playlist)
 
-	val tracks by vm.tracksFlow.collectAsState()
+	val tracks = vm.getTracks(playlist.id)
 	val player by vm.player.collectAsState()
 
 	val currentPlaylistId = player?.currentMediaItem?.mediaMetadata?.getCurrentPlaylistId()
@@ -157,15 +156,51 @@ fun PlaylistDetails(
 
 		if (tracks.isEmpty()) {
 
-			Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+			if (playlist.trackIds.isNotEmpty()) {
+				Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+					Card(
+						colors = CardDefaults.cardColors(
+							containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+						),
+					) {
+						CircularProgressIndicator(
+							modifier = Modifier.padding(12.dp)
+						)
+					}
+				}
+			}
+
+			else {
 				Card(
 					colors = CardDefaults.cardColors(
 						containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
 					),
+					modifier = Modifier
+						.padding(12.dp)
+						.fillMaxWidth()
+						.height(100.dp)
 				) {
-					CircularProgressIndicator(
-						modifier = Modifier.padding(12.dp)
-					)
+					Column(
+						modifier = Modifier
+							.padding(16.dp)
+							,
+						horizontalAlignment = Alignment.CenterHorizontally
+					) {
+						Text(
+							"Playlist is empty...",
+							color = MaterialTheme.colorScheme.onSurface,
+							fontFamily = getFont(),
+							fontSize = 24.sp,
+							fontWeight = FontWeight.ExtraBold,
+						)
+						Text(
+							"Try to add some tracks!",
+							color = MaterialTheme.colorScheme.onSurface,
+							fontFamily = getFont(),
+							fontSize = 20.sp,
+							fontWeight = FontWeight.Bold,
+						)
+					}
 				}
 			}
 

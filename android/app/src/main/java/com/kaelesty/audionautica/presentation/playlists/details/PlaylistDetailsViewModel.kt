@@ -25,18 +25,8 @@ class PlaylistDetailsViewModel @Inject constructor(
 
 	private var playlist_id = -1
 
-	fun setPlaylist(playlist: UserPlaylist.Entire) {
-		if (playlist.id == playlist_id) return
-		playlist_id = playlist.id
-		viewModelScope.launch(Dispatchers.IO) {
-			_tracksFlow.emit(listOf())
-		}
-		viewModelScope.launch(Dispatchers.IO) {
-			_tracksFlow.emit(
-				playlist.trackIds.mapNotNull { getTrackByIdCase(it) }
-			)
-		}
-	}
+	// Fix state unthrow bug!
+
 
 	fun play() {
 		if (_tracksFlow.value.isEmpty()) return

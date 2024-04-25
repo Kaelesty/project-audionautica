@@ -1,15 +1,7 @@
 package com.kaelesty.audionautica.data.repos
 
-import android.app.Application
-import android.content.Context
 import android.util.Log
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import com.kaelesty.audionautica.data.remote.api.AccessApiService
-import com.kaelesty.audionautica.data.remote.entities.JwtDto
 import com.kaelesty.audionautica.data.remote.entities.LoginDto
 import com.kaelesty.audionautica.data.remote.entities.RegisterDto
 import com.kaelesty.audionautica.data.repos.tools.JwtTool

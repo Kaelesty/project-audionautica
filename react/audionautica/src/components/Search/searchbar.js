@@ -3,6 +3,7 @@ import BackURL from '../../urls.js';
 import token from '../../token.js';
 import LoaderIcon from './download.js';
 import Track from '../track/track.js';
+import useQueue from '../queue/queue.js';
 import "./searchbar.css"
 
 
@@ -10,6 +11,7 @@ const SearchBar = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const {setQueueTrack} = useQueue()
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -52,6 +54,10 @@ const SearchBar = () => {
     setQuery(event.target.value);
   }; 
 
+  const onPlayClick = async (id, title, artist) => {
+    setQueueTrack({id, title, artist})
+  }
+
   return (
     <div className="search-bar">
     <div className="input-container">
@@ -69,10 +75,11 @@ const SearchBar = () => {
       <div className="results-container">
        {results.map((result, index) => (
           <Track
-            key={result.id}
+            key={index}
             id = {result.id}
             title = {result.title}
             artist = {result.artist}
+            onPlayClick={onPlayClick}
           />
         ))}
       </div>
