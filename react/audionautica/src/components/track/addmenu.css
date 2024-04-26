@@ -62,3 +62,21 @@
   .add-button:hover{
     background-color: #f0f0f0;
   }
+
+  .add-menu2 {
+    position: absolute;
+    border: 1px solid #aaaaaa;;
+    width: 200px;
+    transform: translateX(593px) translateY(13px);
+  }
+  
+  .add-menu2 button {
+    width: 100%;
+    padding: 5px 10px;
+    background-color: #f0f0f0;
+    border: none;
+    cursor: pointer;
+  }
+  .add-menu2 button:hover {
+    background-color: #e0e0e0;
+  }

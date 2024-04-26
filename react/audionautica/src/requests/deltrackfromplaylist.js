@@ -1,7 +1,7 @@
 import BackURL from "../urls";
 import token from "../token";
 
-async function addTrackToPlaylist(trackId, playlistId) {
+async function deleteTrackFromPlaylist(trackId, playlistId) {
     const requestData = {
         "playlist_id": playlistId,
         "track_id": trackId
@@ -29,4 +29,4 @@ async function addTrackToPlaylist(trackId, playlistId) {
     }
 }
 
-export default addTrackToPlaylist
+export default deleteTrackFromPlaylist

@@ -33,7 +33,6 @@ const Playlist = ({ cover, title, creator, id }) => {
         }));
         setQueuePlaylist(tracksData)
       }
-
     } catch (error) {
       console.error('Error fetching data:', error);
     }

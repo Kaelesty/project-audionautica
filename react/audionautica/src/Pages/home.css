@@ -3,7 +3,7 @@
   height: calc(100vh - 50px - 125px); /*высота меню и плеера*/
   overflow-y: scroll; 
   overflow-x: hidden; 
-  scrollbar-width: thin; 
+  scrollbar-width: auto; 
   scrollbar-color: transparent; 
   -ms-overflow-style: none; 
 }

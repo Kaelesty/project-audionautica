@@ -1,15 +1,18 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import Playlist from '../components/playlist';
 import getUserPlaylists from '../requests/getuserplaylists';
 import LoaderIcon from '../components/search/download';
 import getPlaylistById from '../requests/getplaylistbyid';
 import getUsernameById from '../requests/getusernamebyid';
+import { Context } from "../index.js"
+import BackURL from '../urls.js';
+import token from '../token.js';
 import "./home.css"
 
 const HomePage = () => {
   const [isLoading, setIsLoading] = useState(true)
-  const [createdPlaylists, setCreatedPlaylists] = useState([]) 
-  const [savedPlaylists, setSavedPlaylists] = useState([]) 
+  const {createdPlaylists, setCreatedPlaylists} = useContext(Context) 
+  const {savedPlaylists, setSavedPlaylists} = useContext(Context) 
 
   useEffect(() => {
     console.log("created: ",createdPlaylists)
@@ -52,6 +55,7 @@ const HomePage = () => {
     };
 
     fetchUserPlaylists();
+    // eslint-disable-next-line
   }, []);
 
   return (
@@ -67,7 +71,7 @@ const HomePage = () => {
           <div className="playlists-container">
           {createdPlaylists.map((playlist, index) => (
             <Playlist key={index} 
-              cover = {playlist.cover}
+              cover = {BackURL + "/PlayList/GetPoster/?id=" + playlist.id + "&token=" + token.getToken()}
               title = {playlist.title}
               creator = {playlist.creator}
               id = {playlist.id}
@@ -80,7 +84,7 @@ const HomePage = () => {
         <div className="playlists-container">
           {savedPlaylists.map((playlist, index) => (
             <Playlist key={index}  
-              cover = {playlist.cover}
+              cover = {BackURL + "/PlayList/GetPoster/?id=" + playlist.id + "&token=" + token.getToken()}
               title = {playlist.title}
               creator = {playlist.creator}
               id = {playlist.id}

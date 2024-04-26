@@ -42,7 +42,6 @@ const Track = ({id, title, artist, onPlayClick}) =>{
         <AddMenu
           onAddToFavorites={() =>addToFavButtClick(id)}
           onAddToQueue={() =>addQueueButtClick(id, title, artist)}
-          playlists={[1,2,3]}
           trackId={id}
           isOnTrack = {isOnTrack}
         />

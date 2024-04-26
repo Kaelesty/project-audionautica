@@ -1,7 +1,7 @@
 import BackURL from "../urls";
 import token from "../token";
 
-async function disikePlaylist(playlist_id) {
+async function dislikePlaylist(playlist_id) {
     try {
         const response = await fetch(BackURL + "/PlayList/DisLikePlayList/", {
             method: 'POST',
@@ -25,4 +25,4 @@ async function disikePlaylist(playlist_id) {
     }
 }
 
-export default disikePlaylist
+export default dislikePlaylist

@@ -18,11 +18,15 @@ const App = () => {
   const [currentTrack, setCurrentTrack] = useState(null)
   const [currTrackTitle, setCurrTrackTitle] = useState("")
   const [currTrackArtist, setCurrTrackArtist] = useState("")
+  const [createdPlaylists, setCreatedPlaylists] = useState([])
+  const [savedPlaylists, setSavedPlaylists] = useState([])
 
   const contextValue = {isLoggedIn, setIsLoggedIn, 
                         currentTrack, setCurrentTrack,
                         currTrackTitle, setCurrTrackTitle,
-                        currTrackArtist, setCurrTrackArtist}
+                        currTrackArtist, setCurrTrackArtist,
+                        createdPlaylists, setCreatedPlaylists,
+                        savedPlaylists, setSavedPlaylists}
   
   return (
     <Router> 

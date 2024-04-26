@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import addTrackToPlaylist from '../../requests/addtracktoplaylist';
+import { Context } from '../../index';
 import "./addmenu.css"
 
-const AddMenu = ({ onAddToQueue, onAddToFavorites, playlists, trackId, isOnTrack}) => {
+const AddMenu = ({ onAddToQueue, onAddToFavorites, trackId, isOnTrack}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPlaylistMenuOpen, setIsPlaylistMenuOpen] = useState(false);
+  const {createdPlaylists} = useContext(Context)
 
   useEffect(() => {
     if (isOnTrack){return}
@@ -55,9 +57,9 @@ const AddMenu = ({ onAddToQueue, onAddToFavorites, playlists, trackId, isOnTrack
               onMouseLeave={() => setIsPlaylistMenuOpen(false)}
               onMouseEnter={() => setIsPlaylistMenuOpen(true)}
             >
-              {playlists.map((playlist, index) => (
-                <button key={index} onClick={() => addToPlaylist(playlist)}>
-                  {playlist}
+              {createdPlaylists.map((playlist, index) => (
+                <button key={index} onClick={() => addToPlaylist(playlist.id)}>
+                  {playlist.title}
                 </button>
               ))}
             </div>
