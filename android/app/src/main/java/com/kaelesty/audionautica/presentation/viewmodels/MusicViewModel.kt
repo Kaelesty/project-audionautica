@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kaelesty.audionautica.domain.entities.Track
-import com.kaelesty.audionautica.domain.player.IPlayerQueueController
+import com.kaelesty.audionautica.domain.player.IPlayerController
 import com.kaelesty.audionautica.domain.usecases.AddTrackToPlaylistUseCase
 import com.kaelesty.audionautica.domain.usecases.DeleteTrackFromPlaylistUseCase
 import com.kaelesty.audionautica.domain.usecases.DeleteTrackUseCase
@@ -25,7 +25,7 @@ class MusicViewModel @Inject constructor(
 	private val getAllTracksUseCase: GetAllTracksUseCase,
 	private val saveTrackUseCase: SaveTrackUseCase,
 	private val deleteTrackUseCase: DeleteTrackUseCase,
-	private val pqc: IPlayerQueueController
+	private val pqc: IPlayerController
 ): ViewModel() {
 
 	private val _tracksSearchResults = MutableLiveData<List<Track>>()

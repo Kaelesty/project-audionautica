@@ -2,16 +2,21 @@ package com.kaelesty.audionautica.presentation.player
 
 import android.media.session.MediaController
 import android.os.Build
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -19,8 +24,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,23 +42,24 @@ import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.presentation.composables.access.GradientCard
 import com.kaelesty.audionautica.presentation.ui.fonts.SpaceGrotesk
 import com.kaelesty.audionautica.presentation.viewmodels.ViewModelFactory
+import java.math.BigDecimal
 import java.time.temporal.ValueRange
+import kotlin.math.log
 
 @Composable
 fun PlayerBar(
-	playerMediaController: MediaController,
 	viewModelFactory: ViewModelFactory
 ) {
 
 	val vm: PlayerViewModel = viewModel(factory = viewModelFactory)
 
-	vm.setMediaController(playerMediaController)
-
+	val pc = vm.pc
 
 	val playerState by vm.playerState.collectAsState()
-	val track = playerState.meta ?: Track(-1, "", "", listOf())
+	val track = playerState.meta ?: Track(- 1, "", "", listOf())
 
 	var progress = playerState.progress
+	Log.d("PlayerBar", progress.toString())
 	var isSeeking by remember {
 		mutableStateOf(false)
 	}
@@ -67,7 +75,20 @@ fun PlayerBar(
 	val leftMinutes = (left / 60000).toInt()
 	val leftSeconds = (left / 1000).toInt() - leftMinutes * 60
 
-	GradientCard {
+	var expanded by rememberSaveable {
+		mutableStateOf(false)
+	}
+
+	var speedSliderPosition by rememberSaveable {
+		mutableFloatStateOf(100f)
+	}
+
+	GradientCard(
+		modifier = Modifier
+			.clickable {
+				expanded = ! expanded
+			}
+	) {
 		Column {
 			Row(
 				modifier = Modifier
@@ -103,7 +124,7 @@ fun PlayerBar(
 						contentDescription = null,
 						modifier = Modifier
 							.clickable {
-								playerMediaController.transportControls.skipToPrevious()
+								pc.playPrev()
 							}
 							.size(45.dp)
 							.padding(horizontal = 8.dp)
@@ -114,12 +135,10 @@ fun PlayerBar(
 					contentDescription = null,
 					modifier = Modifier
 						.clickable {
-							playerMediaController.transportControls.let {
-								if (playing) {
-									it.pause()
-								} else {
-									it.play()
-								}
+							if (playing) {
+								pc.pause()
+							} else {
+								pc.play()
 							}
 						}
 						.size(45.dp)
@@ -130,7 +149,7 @@ fun PlayerBar(
 					contentDescription = null,
 					modifier = Modifier
 						.clickable {
-							playerMediaController.transportControls.fastForward()
+							pc.playNext()
 						}
 						.size(51.dp)
 						.padding(horizontal = 8.dp)
@@ -145,12 +164,66 @@ fun PlayerBar(
 				},
 				modifier = Modifier
 					.padding(horizontal = 6.dp),
-				valueRange = 0f..duration.toFloat(),
+				valueRange = 0f .. duration.toFloat(),
 				onValueChangeFinished = {
-					vm.setPlayingProgress(seekingProgress)
+					pc.seekTo(seekingProgress.toLong())
 					isSeeking = false
 				}
 			)
+			if (expanded) {
+				Row(
+					verticalAlignment = Alignment.CenterVertically,
+					modifier = Modifier.padding(16.dp)
+				) {
+					Slider(
+						value = speedSliderPosition,
+						onValueChange = {
+							speedSliderPosition = it
+						},
+						onValueChangeFinished = {
+							pc.setPlaybackSpeed(speedSliderPosition / 100)
+						},
+						valueRange = 50f..200f,
+						steps = 14,
+						modifier = Modifier.weight(1f)
+					)
+					Text(
+						text = "${String.format("%.1f", speedSliderPosition / 100)}x",
+						fontFamily = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) SpaceGrotesk else FontFamily.SansSerif,
+						fontWeight = FontWeight.Thin,
+						fontSize = 18.sp,
+						modifier = Modifier
+							.width(50.dp)
+					)
+
+
+				}
+				LazyColumn(
+					modifier = Modifier
+						.fillMaxSize()
+						.padding(16.dp)
+				) {
+					itemsIndexed(
+						playerState.queue ?: listOf(),
+						key = { index, it ->
+							it.id
+						}
+					) { index, it ->
+						Text(
+							text = "${it.title} - ${it.artist}",
+							fontFamily = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) SpaceGrotesk else FontFamily.SansSerif,
+							fontWeight = if (index == playerState.currentQueuePosition) FontWeight.ExtraBold else FontWeight.Thin,
+							fontSize = 18.sp,
+							modifier = Modifier
+								.fillMaxWidth()
+								.clickable {
+									pc.playFromPosition(index)
+								}
+						)
+						Spacer(Modifier.height(6.dp))
+					}
+				}
+			}
 		}
 	}
 }

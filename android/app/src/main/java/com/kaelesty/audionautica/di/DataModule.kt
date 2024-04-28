@@ -4,8 +4,9 @@ import com.kaelesty.audionautica.data.local.daos.PlaylistDao
 import com.kaelesty.audionautica.data.local.daos.TokenDao
 import com.kaelesty.audionautica.data.local.daos.TrackDao
 import com.kaelesty.audionautica.data.local.dbs.MusicDatabase
-import com.kaelesty.audionautica.data.player.PlayerQueueController
+import com.kaelesty.audionautica.data.player.PlayerController
 import com.kaelesty.audionautica.data.playlists.PlaylistsApiService
+import com.kaelesty.audionautica.data.reco.RecoApiService
 import com.kaelesty.audionautica.data.remote.api.AccessApiService
 import com.kaelesty.audionautica.data.remote.api.ApiServiceFactory
 import com.kaelesty.audionautica.data.remote.api.MusicApiService
@@ -18,7 +19,7 @@ class DataModule {
 
 	@Provides
 	@ApplicationScope
-	fun providePQC(musicRepo: MusicRepo) = PlayerQueueController(musicRepo)
+	fun providePQC(musicRepo: MusicRepo) = PlayerController(musicRepo)
 
 	@Provides
 	@ApplicationScope
@@ -36,6 +37,12 @@ class DataModule {
 	@ApplicationScope
 	fun providePlaylistApiService(): PlaylistsApiService {
 		return ApiServiceFactory.playlistsService
+	}
+
+	@Provides
+	@ApplicationScope
+	fun provideRecoApiService(): RecoApiService {
+		return ApiServiceFactory.recoService
 	}
 
 	@Provides

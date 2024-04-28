@@ -149,10 +149,10 @@ class PlayerService : Service() {
 		super.onCreate()
 
 		scope.launch(Dispatchers.Main) {
-			viewModel.getQueueFlow().collect {
+			viewModel.commandFlow.collect {
 
 				when (it) {
-					is PlayerQueueCommand.AddToQueue -> {
+					is PlayerQueueCommand.Play -> {
 						val metadata = androidx.media3.common.MediaMetadata.Builder()
 							.setArtist(it.track.metadata.artist)
 							.setTitle(it.track.metadata.title)
@@ -179,13 +179,9 @@ class PlayerService : Service() {
 						mediaSessionCallback.onPlay()
 					}
 
-					is PlayerQueueCommand.DropQueue -> {
+					is PlayerQueueCommand.Drop -> {
 						player.clearMediaItems()
 						currentPlaylist = null
-					}
-
-					is PlayerQueueCommand.SetPlaylist -> {
-						currentPlaylist = it.playlist
 					}
 				}
 			}
