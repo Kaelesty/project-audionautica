@@ -1,15 +1,16 @@
 package com.kaelesty.audionautica.presentation.playlists.list
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kaelesty.audionautica.domain.playlists.GetPlaylistCollectionUseCase
 import com.kaelesty.audionautica.domain.playlists.GetPlaylistsUseCase
 import com.kaelesty.audionautica.domain.playlists.LoadEntirePlaylistUseCase
+import com.kaelesty.audionautica.domain.playlists.NukePlaylistsCacheUseCase
 import com.kaelesty.audionautica.domain.playlists.UpdatePlaylistCollectionUseCase
 import com.kaelesty.audionautica.domain.playlists.UserPlaylist
 import com.kaelesty.audionautica.domain.playlists.UserPlaylists
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,6 +23,7 @@ class PlaylistsViewModel @Inject constructor(
 
 	private val getPlaylistCollectionUseCase: GetPlaylistCollectionUseCase,
 	private val updatePlaylistCollectionUseCase: UpdatePlaylistCollectionUseCase,
+	private val nukePlaylistsCacheUseCase: NukePlaylistsCacheUseCase
 ): ViewModel() {
 
 	private val _stateFlow: MutableStateFlow<PlaylistsState> = MutableStateFlow(PlaylistsState.Loading)
@@ -37,6 +39,8 @@ class PlaylistsViewModel @Inject constructor(
 
 	fun updatePlaylistCollection() {
 		viewModelScope.launch(Dispatchers.IO) {
+			nukePlaylistsCacheUseCase()
+			delay(30)
 			updatePlaylistCollectionUseCase()
 		}
 	}

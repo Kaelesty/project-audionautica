@@ -23,4 +23,6 @@ interface IPlaylistsRepo {
 	suspend fun updatePlaylistCollection()
 
 	fun getPlaylistCollection(): LiveData<List<UserPlaylist.Entire>>
+
+	suspend fun nukeTable()
 }

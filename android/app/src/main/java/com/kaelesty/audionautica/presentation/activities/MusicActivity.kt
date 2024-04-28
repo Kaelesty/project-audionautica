@@ -17,6 +17,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.MutableState
 import com.kaelesty.audionautica.domain.entities.Track
+import com.kaelesty.audionautica.domain.playlists.NukePlaylistsCacheUseCase
 import com.kaelesty.audionautica.presentation.composables.music.MusicScreen
 import com.kaelesty.audionautica.presentation.player.PlayerService
 import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
@@ -26,6 +27,7 @@ import com.kaelesty.audionautica.system.ModifiedApplication
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -48,14 +50,8 @@ class MusicActivity : ComponentActivity() {
 
 	private val scope = CoroutineScope(Dispatchers.IO)
 
-	private val playingFlow = MutableSharedFlow<Boolean>()
-	private val trackFlow = MutableSharedFlow<Track>()
-
 	private val _requestedImageFlow = MutableSharedFlow<Uri?>()
 	val requestedImageFlow: SharedFlow<Uri?> get() = _requestedImageFlow
-
-	private val _playerMediaControllerFlow: MutableStateFlow<MediaController?> = MutableStateFlow(null)
-	val playerMediaControllerFlow: StateFlow<MediaController?> get() = _playerMediaControllerFlow.asStateFlow()
 
 	val getImage = registerForActivityResult(ActivityResultContracts.GetContent()) {
 		scope.launch {
@@ -74,51 +70,9 @@ class MusicActivity : ComponentActivity() {
 
 			override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
 				binder = p1 as PlayerService.MusicPlayerServiceBinder
-				try {
-					val playerMediaController = MediaController(
-						this@MusicActivity,
-						(binder as PlayerService.MusicPlayerServiceBinder).getMediasessionToken()
-					)
-					playerMediaController.registerCallback(
-						object : MediaController.Callback() {
-							override fun onPlaybackStateChanged(state: PlaybackState?) {
-								super.onPlaybackStateChanged(state)
-								state?.let {
-									val playing = it.state == PlaybackState.STATE_PLAYING
-									scope.launch {
-										playingFlow.emit(playing)
-									}
-								}
-							}
-
-							override fun onMetadataChanged(metadata: MediaMetadata?) {
-								super.onMetadataChanged(metadata)
-								try {
-									val track = Track(
-										metadata?.getLong(PlayerService.CUSTOM_METADATA_KEY_ID)?.toInt() ?: throw RuntimeException("Metadata id not found"),
-										metadata.getString(MediaMetadata.METADATA_KEY_TITLE),
-										metadata.getString(MediaMetadata.METADATA_KEY_ARTIST),
-										metadata.getString(PlayerService.CUSTOM_METADATA_KEY_TAGS)
-											.split(PlayerService.CUSTOM_METADATA_TAGS_DELIMITER)
-									)
-									scope.launch {
-										trackFlow.emit(track)
-									}
-								}
-								catch (e: RuntimeException) {
-									Log.d("AudionauticaTag", e.message ?: "no message")
-								}
-							}
-						}
-					)
-					scope.launch { _playerMediaControllerFlow.emit(playerMediaController) }
-				} catch (e: RemoteException) {
-					scope.launch { _playerMediaControllerFlow.emit(null) }
-				}
 			}
 
 			override fun onServiceDisconnected(p0: ComponentName?) {
-				scope.launch { _playerMediaControllerFlow.emit(null) }
 				binder = null
 			}
 		}
@@ -135,7 +89,6 @@ class MusicActivity : ComponentActivity() {
 					viewModelFactory = viewModelFactory,
 					offlineMode = isOffline,
 					launchCreateTrackActivity = { launchAddTrackActivity() },
-					playerMediaControllerFlow = playerMediaControllerFlow,
 					onRequestImage = {
 						getImage.launch("image/*")
 					},

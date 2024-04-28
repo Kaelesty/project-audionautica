@@ -33,7 +33,6 @@ import kotlinx.coroutines.flow.StateFlow
 fun MusicScreen(
 	viewModelFactory: ViewModelFactory,
 	offlineMode: Boolean,
-	playerMediaControllerFlow: StateFlow<MediaController?>,
 	launchCreateTrackActivity: () -> Unit,
 
 	onRequestImage: () -> Unit,
@@ -41,7 +40,6 @@ fun MusicScreen(
 ) {
 
 	val vm: MusicViewModel = viewModel(factory = viewModelFactory)
-	val playerMediaController by playerMediaControllerFlow.collectAsState()
 
 	val navigationState = rememberMusicNavigationState()
 
@@ -58,12 +56,9 @@ fun MusicScreen(
 			.fillMaxSize(),
 		bottomBar = {
 			Column {
-				playerMediaController?.let {
-					PlayerBar(
-						playerMediaController = it,
-						viewModelFactory = viewModelFactory
-					)
-				}
+				PlayerBar(
+					viewModelFactory = viewModelFactory
+				)
 				MusicNavigationBar(navigationState, offlineMode)
 			}
 		},
@@ -89,10 +84,8 @@ fun MusicScreen(
 					onSearch = { vm.search(it) },
 					tracksSearchResults = vm.tracksSearchResults,
 					onPlay = { vm.playTrack(it) },
-					//selectPlaylistDialog = selectPlaylistDialog,
 					onSaveTrack = { vm.saveTrack(it) },
 					libraryTracksLD = vm.getAllTracks(),
-					playerMediaController = playerMediaController
 				)
 			},
 			musicPlaylistsScreenContent = {
@@ -115,7 +108,6 @@ fun MusicScreen(
 					onPlay = { vm.playTrack(it) },
 					//selectPlaylistDialog = selectPlaylistDialog,
 					offlineMode = offlineMode,
-					playerMediaController = playerMediaController
 				)
 			},
 			addPlaylistContent = {

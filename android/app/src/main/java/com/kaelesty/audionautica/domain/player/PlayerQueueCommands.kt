@@ -5,9 +5,7 @@ import com.kaelesty.audionautica.domain.playlists.UserPlaylist
 
 sealed class PlayerQueueCommand {
 
-	object DropQueue: PlayerQueueCommand()
+	object Drop: PlayerQueueCommand()
 
-	class AddToQueue(val track: PlayReadyTrack): PlayerQueueCommand()
-
-	class SetPlaylist(val playlist: UserPlaylist.Entire): PlayerQueueCommand()
+	class Play(val track: PlayReadyTrack): PlayerQueueCommand()
 }
