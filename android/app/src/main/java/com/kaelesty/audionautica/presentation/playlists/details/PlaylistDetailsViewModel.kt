@@ -1,11 +1,12 @@
 package com.kaelesty.audionautica.presentation.playlists.details
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.kaelesty.audionautica.data.player.PlayerController
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.playlists.UserPlaylist
 import com.kaelesty.audionautica.domain.usecases.GetTrackByIdCase
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +22,7 @@ class PlaylistDetailsViewModel @Inject constructor(
 		MutableStateFlow(PlaylistDetailsState.Empty)
 	val stateFlow: StateFlow<PlaylistDetailsState> get() = _stateFlow
 
+	private val scope = CoroutineScope(Dispatchers.IO)
 
 	fun setPlaylist(playlist: UserPlaylist.Entire) {
 		val currentPlaylist: UserPlaylist.Entire? = when (_stateFlow.value) {
@@ -36,11 +38,12 @@ class PlaylistDetailsViewModel @Inject constructor(
 		}
 
 		fun loadTracks(playlist: UserPlaylist.Entire) {
-			viewModelScope.launch(Dispatchers.IO) {
+			scope.launch(Dispatchers.IO) {
 				_stateFlow.emit(
 					PlaylistDetailsState.LoadingTracks(playlist)
 				)
 				val tracks = mutableListOf<Track>()
+				Log.d("PDWM", "Message!")
 				playlist.trackIds.forEach {
 					getTrackByIdCase(it)?.let { track ->
 						tracks.add(track)
@@ -83,14 +86,14 @@ class PlaylistDetailsViewModel @Inject constructor(
 	}
 
 	fun play() {
-		viewModelScope.launch(Dispatchers.IO) {
+		scope.launch(Dispatchers.Main) {
 			sendPlaylistToPlay()
 		}
 	}
 
 	fun playFromPosition(pos: Int) {
 		try {
-			viewModelScope.launch(Dispatchers.IO) {
+			scope.launch(Dispatchers.IO) {
 				val playerState = pqc.getStateFlow().value
 				val detailsState = _stateFlow.value
 

@@ -151,15 +151,18 @@ class PlayerController (
 	}
 
 	override suspend fun setQueue(tracks_: List<Track>, startPosition: Int) {
-		tracks = tracks_
-		currentPosition = startPosition
-		submitNextTrack(true)
 		scope.launch {
+			_skippingFlow.emit(true)
+			tracks = tracks_
+			currentPosition = startPosition
+			submitNextTrack(true)
+			originalTracks = tracks_
 			_stateFlow.emit(
 				_stateFlow.value.copy(
 					queue = tracks_
 				)
 			)
+			_skippingFlow.emit(false)
 		}
 	}
 
@@ -241,15 +244,19 @@ class PlayerController (
 
 	override fun setShuffle(state: Boolean) {
 		shuffle = state
+		val currentTrack = tracks[currentPosition]
 		tracks = if (shuffle) {
 			originalTracks.shuffled()
 		} else {
 			originalTracks
 		}
+		currentPosition = tracks.indexOf(currentTrack)
 		scope.launch {
 			_stateFlow.emit(
 				_stateFlow.value.copy(
-					shuffle = shuffle
+					shuffle = shuffle,
+					queue = tracks,
+					currentQueuePosition = currentPosition
 				)
 			)
 		}
