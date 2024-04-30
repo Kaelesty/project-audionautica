@@ -7,8 +7,6 @@ import Menu from './pages/menu';
 import ConstPage from './pages/const';
 import Recomendations from './components/recomendations';
 import SearchBar from './components/search/searchbar';
-import Playlist from './components/playlist';
-import AlbumCover from './components/icons/nopic.png';
 import HomePage from './pages/home';
 import PlaylistPage from './pages/playlistpage';
 import NotFoundPage from './pages/notfound';
@@ -37,7 +35,6 @@ const App = () => {
             <Route path="home/" element={<HomePage/>} />
             <Route path="rec/" element={<Recomendations/>} />
             <Route path="search/" element={<SearchBar/>} />
-            <Route path="test/" element={<Playlist title={"Title"} creator={"Creator"} cover={AlbumCover}/>} />
             <Route path="playlist/:id"element={<PlaylistPage/>}/>
           </Route>
           <Route path='*' element={<NotFoundPage/>}/>
