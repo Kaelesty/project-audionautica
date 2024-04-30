@@ -1,7 +1,7 @@
 package com.kaelesty.audionautica.di
 
 import com.kaelesty.audionautica.data.local.daos.PlaylistDao
-import com.kaelesty.audionautica.data.local.daos.TokenDao
+import com.kaelesty.audionautica.data.local.daos.AccessDao
 import com.kaelesty.audionautica.data.local.daos.TrackDao
 import com.kaelesty.audionautica.data.local.dbs.MusicDatabase
 import com.kaelesty.audionautica.data.player.PlayerController
@@ -59,7 +59,7 @@ class DataModule {
 
 	@Provides
 	@ApplicationScope
-	fun provideTokenDao(db: MusicDatabase): TokenDao {
+	fun provideTokenDao(db: MusicDatabase): AccessDao {
 		return db.tokenDao()
 	}
 }

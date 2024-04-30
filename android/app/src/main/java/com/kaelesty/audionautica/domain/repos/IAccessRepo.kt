@@ -16,4 +16,12 @@ interface IAccessRepo {
 	suspend fun checkAuth(): CheckAuthRC
 
 	suspend fun logout() // no return because we just del token from datastore. nothing can go wrong ;)
+
+	suspend fun getLogins(): List<String>
+
+	suspend fun getPassword(login: String): String
+
+	suspend fun removeLogin(login: String)
+
+	suspend fun saveLogin(login: String, password: String)
 }
