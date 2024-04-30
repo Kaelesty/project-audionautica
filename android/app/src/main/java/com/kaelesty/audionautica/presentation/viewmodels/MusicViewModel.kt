@@ -40,9 +40,21 @@ class MusicViewModel @Inject constructor(
 
 	fun playTrack(track: Track) {
 		viewModelScope.launch {
-			pqc.setQueue(
-				listOf(track)
-			)
+			val playerState = pqc.getStateFlow().value
+			val pos = playerState.currentQueuePosition
+			if (pos != -1 && playerState.queue?.get(pos)?.id == track.id) {
+				if (playerState.playing) {
+					pqc.pause()
+				}
+				else {
+					pqc.play()
+				}
+			}
+			else {
+				pqc.setQueue(
+					listOf(track)
+				)
+			}
 		}
 	}
 

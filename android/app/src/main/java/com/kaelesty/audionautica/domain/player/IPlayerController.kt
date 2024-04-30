@@ -44,6 +44,20 @@ sealed class Repeat {
 	object False: Repeat()
 	object True: Repeat()
 	object One: Repeat()
+
+}
+
+fun Repeat.toInt() = when (this) {
+	is Repeat.False -> 0
+	is Repeat.True -> 1
+	is Repeat.One -> 2
+}
+
+fun Int.toRepeatMode() = when(this) {
+	0 -> Repeat.False
+	1 -> Repeat.True
+	2 -> Repeat.One
+	else -> throw Exception("Could not convert $this to RepeatMode")
 }
 
 data class PlayerState(

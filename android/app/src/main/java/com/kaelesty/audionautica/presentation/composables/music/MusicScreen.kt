@@ -77,7 +77,7 @@ fun MusicScreen(
 		MusicNavGraph(
 			navHostController = navigationState.navHostController,
 			startDestination =
-			if (! offlineMode) Screen.MusicSearch.route
+			if (! offlineMode) Screen.Playlists.route
 			else Screen.MusicLibrary.route,
 			musicSearchScreenContent = {
 				Search(

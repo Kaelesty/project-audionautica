@@ -41,7 +41,7 @@ fun Search(
 				TrackCard(
 					track = it,
 					onClick = { clickedTrack ->
-
+						onPlay(it)
 					},
 					onAdd = {
 						//selectPlaylistDialog.value = it

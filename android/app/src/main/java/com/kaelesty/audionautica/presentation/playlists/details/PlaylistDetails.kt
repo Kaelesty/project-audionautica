@@ -27,6 +27,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -58,8 +60,10 @@ fun PlaylistDetails(
 
 	val vm = viewModel<PlaylistDetailsViewModel>(factory = viewModelFactory)
 	val playerViewModel = viewModel<PlayerViewModel>(factory = viewModelFactory)
-
-	vm.setPlaylist(playlist)
+  
+	LaunchedEffect(key1 = playlist.id) {
+		vm.setPlaylist(playlist)
+	}
 
 	val playerState by playerViewModel.playerState.collectAsState()
 
@@ -310,7 +314,7 @@ fun TopPlaylistCard(
 				) {
 					Icon(
 						painterResource(
-							id = if (playerState.playing) R.drawable.pause else R.drawable.play
+							id = if (playerState.playing && playerState.playlistId == playlist.id) R.drawable.pause else R.drawable.play
 						),
 						contentDescription = "play from start"
 					)

@@ -39,6 +39,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kaelesty.audionautica.R
 import com.kaelesty.audionautica.domain.entities.Track
+import com.kaelesty.audionautica.domain.player.toInt
+import com.kaelesty.audionautica.domain.player.toRepeatMode
 import com.kaelesty.audionautica.presentation.composables.access.GradientCard
 import com.kaelesty.audionautica.presentation.ui.fonts.SpaceGrotesk
 import com.kaelesty.audionautica.presentation.viewmodels.ViewModelFactory
@@ -155,8 +157,9 @@ fun PlayerBar(
 						.padding(horizontal = 8.dp)
 				)
 			}
+			val sliderVal = if (isSeeking) seekingProgress else progress.toFloat()
 			Slider(
-				value = if (isSeeking) seekingProgress else progress.toFloat(),
+				value = if (sliderVal > 0) sliderVal else 0f,
 
 				onValueChange = {
 					isSeeking = true
@@ -183,7 +186,7 @@ fun PlayerBar(
 						onValueChangeFinished = {
 							pc.setPlaybackSpeed(speedSliderPosition / 100)
 						},
-						valueRange = 50f..200f,
+						valueRange = 50f .. 200f,
 						steps = 14,
 						modifier = Modifier.weight(1f)
 					)
@@ -196,7 +199,41 @@ fun PlayerBar(
 							.width(50.dp)
 					)
 
+					var repeatState by rememberSaveable {
+						mutableStateOf(playerState.repeat.toInt())
+					}
 
+					Icon(
+						painter = painterResource(
+							id = when (repeatState) {
+								0 -> R.drawable.repeat_no
+								1 -> R.drawable.repeat_yes
+								else -> R.drawable.repeat_one
+							}
+						),
+						contentDescription = null,
+						modifier = Modifier
+							.clickable {
+								repeatState += 1
+								if (repeatState == 3) repeatState = 0
+								pc.setRepeat(repeatState.toRepeatMode())
+							}
+							.size(51.dp)
+							.padding(horizontal = 8.dp)
+					)
+					Icon(
+						painter = painterResource(
+							id = if (playerState.shuffle) R.drawable.shuffle_yes
+							else R.drawable.shuffle_no
+						),
+						contentDescription = null,
+						modifier = Modifier
+							.clickable {
+								pc.setShuffle(!playerState.shuffle)
+							}
+							.size(51.dp)
+							.padding(horizontal = 8.dp)
+					)
 				}
 				LazyColumn(
 					modifier = Modifier

@@ -1,9 +1,12 @@
 package com.kaelesty.audionautica.data.repos
 
 import android.util.Log
+import com.kaelesty.audionautica.data.local.daos.AccessDao
+import com.kaelesty.audionautica.data.local.dbmodels.LoginDbModel
 import com.kaelesty.audionautica.data.remote.api.AccessApiService
 import com.kaelesty.audionautica.data.remote.entities.LoginDto
 import com.kaelesty.audionautica.data.remote.entities.RegisterDto
+import com.kaelesty.audionautica.data.repos.tools.AesTool
 import com.kaelesty.audionautica.data.repos.tools.JwtTool
 import com.kaelesty.audionautica.di.ApplicationScope
 import com.kaelesty.audionautica.domain.repos.IAccessRepo
@@ -16,7 +19,9 @@ import javax.inject.Inject
 @ApplicationScope
 class AccessRepo @Inject constructor(
 	private val accessApiService: AccessApiService,
-	private val jwtTool: JwtTool
+	private val jwtTool: JwtTool,
+	private val aesTool: AesTool,
+	private val accessDao: AccessDao,
 ) : IAccessRepo {
 
 
@@ -106,4 +111,25 @@ class AccessRepo @Inject constructor(
 		}
 	}
 
+
+	override suspend fun getLogins(): List<String> {
+		return accessDao.getLogins()
+	}
+
+	override suspend fun saveLogin(login: String, password: String) {
+		accessDao.saveLogin(
+			LoginDbModel(
+				login,
+				aesTool.encrypt(password)
+			)
+		)
+	}
+
+	override suspend fun getPassword(login: String): String {
+		return aesTool.decrypt(accessDao.getPassword(login))
+	}
+
+	override suspend fun removeLogin(login: String) {
+		accessDao.removeLogin(login)
+	}
 }
