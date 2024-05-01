@@ -39,6 +39,9 @@ from Bd.views import (
     PlayListInfoId,
     GetAllTracks,
     TrackInfoId,
+    PlayListTracksInfoId,
+    UserInfoId,
+    WeatherReco,
 )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -54,6 +57,7 @@ urlpatterns = [
     path('Auth/Register/', RegisterUser.as_view()),
     path('Auth/Login/', LoginUser.as_view()),
     path('Auth/User/', UserView.as_view()),
+    path('Auth/UserInfoId/', UserInfoId.as_view()),
     path('Music/GetTrack/', GetTrack.as_view()),
     path('Music/Upload/', TrackUpload.as_view()),
     path('Music/Delete/', TrackDelete.as_view()),
@@ -70,6 +74,8 @@ urlpatterns = [
     path('PlayList/DisLikePlayList/', DisLikePlayList.as_view()),
     path('PlayList/UserPlayList/', UserPlayList.as_view()),
     path('PlayList/PlayListInfoId/', PlayListInfoId.as_view()),
+    path('PlayLst/PlayListTracksInfoId/', PlayListTracksInfoId.as_view()),
+    path('Reco/WeatherReco/', WeatherReco.as_view()),
     #path('Logout/', LogoutView.as_view()),
     # path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'), #for login give access & refresh token
     # path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), #refreshing

@@ -43,7 +43,6 @@ class PlaylistDetailsViewModel @Inject constructor(
 					PlaylistDetailsState.LoadingTracks(playlist)
 				)
 				val tracks = mutableListOf<Track>()
-				Log.d("PDWM", "Message!")
 				playlist.trackIds.forEach {
 					getTrackByIdCase(it)?.let { track ->
 						tracks.add(track)
@@ -119,7 +118,7 @@ class PlaylistDetailsViewModel @Inject constructor(
 			}
 		}
 		catch (e: Exception){
-			123
+
 		}
 	}
 

@@ -155,14 +155,16 @@ class UserView(APIView):
         return Response(serializer.data)
 
 
-# class LogoutView(APIView):
-#     def post(self, request):
-#         response = Response()
-#         #response.delete_cookie('jwt')
-#         response.data = {
-#             'message':'success'
-#         }
-#         return response
+class UserInfoId(APIView):
+    def post(self, request):
+        if not check_token(request):
+            return Response(status=status.HTTP_418_IM_A_TEAPOT)
+        user_id = request.data['id']
+        user = Users.objects.filter(id=user_id).first()
+        json_respose = {}
+        json_respose['username'] = user.name
+        return Response(json_respose)
+
 
 class GetTrack(APIView):
     def post(self, request):
@@ -508,8 +510,9 @@ class PlayListInfoId(APIView):
         dickt["tracksid"] = playlist.tracksid
         dickt["liked"] = playlist.liked
         dickt["isprivat"] = playlist.isprivat == "True"
+        dickt["creator_id"] = playlist.creatorid
         payload = jwt.decode(request.headers["token"], config.secret_key, algorithms=['HS256'])
-        dickt["editable"] = payload["id"] == playlist.creatorid
+        dickt["editable"] = payload["id"] == int(playlist.creatorid)
         return Response(dickt)
 
 
@@ -579,6 +582,20 @@ class PlayListTracksInfoId(APIView):
         playlist_id = request.data["playlist_id"]
         playlist = PlayList.objects.filter(id=playlist_id).first()
         array = []
-        for i in playlist.tracksid:
-            array += Traks.objects.filter(id=i)
-        #to do
+        for i in list(map(int, list(filter(lambda x: x != "", playlist.tracksid.split("/"))))):
+            track = Traks.objects.filter(id=i).first()
+            dict = {}
+            dict["id"] = track.id
+            dict["title"] = track.title
+            dict["artist"] = track.artist
+            dict["tags"] = track.tags
+            array.append(dict)
+        json_response = {}
+        json_response["tracks"] = array
+        return Response(json_response)
+
+class WeatherReco(APIView):
+    def post(self, request):
+        pass
+        # if not check_token(request):
+        #     return Response(status=status.HTTP_418_IM_A_TEAPOT)

@@ -4,22 +4,16 @@ import AddMenu from "./addmenu.js"
 import addTrackToPlaylist from "../../requests/addtracktoplaylist.js"
 import getUserPlaylists from "../../requests/getuserplaylists.js"
 
-const Track = ({id, title, artist}) =>{
+const Track = ({id, title, artist, onPlayClick}) =>{
   const [isOnTrack, setIsOnTrack] = useState(false)
-  const {addTrackToQueue, setQueueTrack } = useQueue()
+  const {addTrackToQueue} = useQueue()
 
-
-  const handleTrackClick = async (id, title, artist) => {
-    
-    setQueueTrack({id, title, artist})
-  }
 
   const addToFavButtClick = async (id) => {
     const result = await getUserPlaylists()
     let favId = result.created[0]
     addTrackToPlaylist(id, favId)
     console.log("track added to favorites.")
-    
   }
 
   const addQueueButtClick = (id, title, artist) => {
@@ -36,7 +30,7 @@ const Track = ({id, title, artist}) =>{
       >
         <img
           className="play-butt"
-          onClick={() => handleTrackClick(id, title, artist)}
+          onClick={() => onPlayClick(id, title, artist)}
           src={require("../icons/play-button.png")}
           alt="Play"
         />

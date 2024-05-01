@@ -1,0 +1,86 @@
+.playlistpage-container {
+    max-width: 600px;
+    margin: 15px auto;
+    padding: 20px;
+    border: 1px solid #999;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  }
+  
+  .playlistpage-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .playlistpage-cover {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    margin-right: 20px;
+  }
+  
+  .playlistpage-info {
+    flex-grow: 1;
+  }
+  
+  .playlistpage-title {
+    font-size: 24px;
+    margin: 0;
+  }
+  
+  .playlistpage-creator {
+    font-size: 16px;
+    margin: 5px 0;
+  }
+
+  .pprightside-container{
+    display: flex;
+    margin-left: auto;
+    align-items: center;
+    gap: 10px
+  }
+  .like-button {
+    width: 45px;
+    padding: 8px;
+    font-size: 24px;
+    background-color: #ffffff;
+    color: #000000;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    
+  }
+  
+  .like-button:hover{
+    background-color: #cfcfcf
+  }
+   
+  .play-button img {
+    width: 20px;
+    height: 20px;
+  }
+  
+ 
+  .tracklist {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .playlist-play-button {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background-color: #8b2ef5;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .playlist-play-button:hover{
+    background-color: #9137f7;
+  }
+
+
+  
