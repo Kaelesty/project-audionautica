@@ -6,6 +6,7 @@ import com.kaelesty.audionautica.data.remote.entities.LoginDto
 import com.kaelesty.audionautica.data.remote.entities.LoginResponse
 import com.kaelesty.audionautica.data.remote.entities.RegisterDto
 import com.kaelesty.audionautica.data.remote.entities.RegisterResponse
+import com.kaelesty.audionautica.data.remote.entities.UserInfoResponse
 import com.kaelesty.audionautica.di.ApplicationScope
 import retrofit2.Response
 import retrofit2.http.Body
@@ -26,4 +27,7 @@ interface AccessApiService {
 
 	@POST("User/")
 	suspend fun checkAuth(@Header("token") token: String,): Response<CheckAuthResponse>
+
+	@POST("aboba/")
+	suspend fun getUserInfo(@Header("token") token: String): Response<UserInfoResponse>
 }

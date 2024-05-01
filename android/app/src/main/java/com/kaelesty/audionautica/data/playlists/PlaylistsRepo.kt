@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import com.kaelesty.audionautica.data.local.daos.PlaylistDao
 import com.kaelesty.audionautica.data.mappers.PlaylistMapper
+import com.kaelesty.audionautica.data.repos.AccessRepo
 import com.kaelesty.audionautica.data.repos.tools.FileUploaderTool
 import com.kaelesty.audionautica.data.repos.tools.JwtTool
 import com.kaelesty.audionautica.data.repos.tools.UrlTool
@@ -21,7 +22,8 @@ class PlaylistsRepo @Inject constructor(
 	private val jwtTool: JwtTool,
 	private val urlTool: UrlTool,
 	private val uploader: FileUploaderTool,
-	private val playlistMapper: PlaylistMapper
+	private val playlistMapper: PlaylistMapper,
+	private val accessRepo: AccessRepo,
 ): IPlaylistsRepo {
 
 	val PLAYLIST_TRACKIDS_DELIMITER = "/"
@@ -47,6 +49,9 @@ class PlaylistsRepo @Inject constructor(
 							}
 						}
 					}
+				}
+				418 -> {
+					accessRepo.logout()
 				}
 				else -> {
 
@@ -78,6 +83,10 @@ class PlaylistsRepo @Inject constructor(
 							liked = it.created
 						)
 					}
+				}
+				418 -> {
+					accessRepo.logout()
+					return UserPlaylists.Error
 				}
 				else -> {
 					return UserPlaylists.Error
@@ -114,6 +123,9 @@ class PlaylistsRepo @Inject constructor(
 					playlist_id = playlist_id.toString()
 				)
 			)
+			if (response.code() == 418) {
+				accessRepo.logout()
+			}
 			return response.code() == 200
 		} catch (e: Exception) {
 			false
@@ -138,6 +150,10 @@ class PlaylistsRepo @Inject constructor(
 							token = jwtTool.getToken()
 						)
 					)
+				}
+				418 -> {
+					accessRepo.logout()
+					throw IOException()
 				}
 				else -> {
 					throw IOException()

@@ -20,6 +20,8 @@ sealed class Screen(
 		private const val ROUTE_PLAYLISTS_DETAILS = "playlists_details/{$KEY_PLAYLIST}"
 
 		private const val ROUTE_MUSIC_LIBRARY = "music_library"
+
+		private const val ROUTE_SETTINGS = "settings"
 	}
 
 	object MusicSearch: Screen(ROUTE_MUSIC_SEARCH)
@@ -38,6 +40,8 @@ sealed class Screen(
 	}
 
 	object MusicLibrary: Screen(ROUTE_MUSIC_LIBRARY)
+
+	object Settings: Screen(ROUTE_SETTINGS)
 }
 
 fun String.encode() = Uri.encode(this)

@@ -59,19 +59,23 @@ fun AccessScreen(
 
 	val vm = viewModel<AccessViewModel>(factory = viewModelFactory)
 
-	LaunchedEffect(key1 = 1) {
-		vm.checkConnectionAndAuth()
-	}
 
 	val state by vm.stateFlow.collectAsState()
 
 	when (state) {
+		is AccessViewModel.AccessScreenState.Initial -> {
+			vm.checkConnectionAndAuth(
+				(state as AccessViewModel.AccessScreenState.Initial).autoAuth
+			)
+		}
+
 		is AccessViewModel.AccessScreenState.Loading -> {
 			LoadingDialog()
 		}
 
 		is AccessViewModel.AccessScreenState.Finish -> {
 			onFinish((state as AccessViewModel.AccessScreenState.Finish).runMode)
+			vm.resetAfterFinish() // reset state to normal to avoid instant finish after logout
 		}
 
 		is AccessViewModel.AccessScreenState.Normal -> {
@@ -96,11 +100,24 @@ fun AccessScreen(
 		}
 
 		is AccessViewModel.AccessScreenState.ChooseLogin -> {
-			ChooseLogin(
-				vm,
-				(state as AccessViewModel.AccessScreenState.ChooseLogin).logins,
-				(state as AccessViewModel.AccessScreenState.ChooseLogin).errorMessage
-			)
+			Box(
+				modifier = Modifier
+					.fillMaxSize(),
+				contentAlignment = Alignment.Center
+			) {
+				Image(
+					painter = painterResource(id = R.drawable.space_background),
+					contentDescription = "Background",
+					contentScale = ContentScale.FillBounds,
+					modifier = Modifier
+						.fillMaxSize()
+				)
+				ChooseLogin(
+					vm,
+					(state as AccessViewModel.AccessScreenState.ChooseLogin).logins,
+					(state as AccessViewModel.AccessScreenState.ChooseLogin).errorMessage
+				)
+			}
 		}
 	}
 
@@ -145,6 +162,7 @@ fun ChooseLogin(
 							fontStyle = FontStyle.Normal,
 							fontFamily = getFont(),
 							fontWeight = FontWeight.SemiBold,
+							modifier = Modifier.weight(1f)
 							)
 						Icon(
 							imageVector = Icons.Filled.Clear,
@@ -171,24 +189,45 @@ fun ChooseLogin(
 				)
 			}
 			Spacer(Modifier.height(4.dp))
-			Button(
-				onClick = {
-					vm.runOfflineMode()
-				},
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(horizontal = 90.dp),
-				shape = RoundedCornerShape(8.dp),
-				colors = ButtonDefaults.buttonColors(
-					containerColor = MaterialTheme.colorScheme.primaryContainer,
-					contentColor = MaterialTheme.colorScheme.surface
-				)
-			) {
-				Text(
-					"Continue offline",
-					color = MaterialTheme.colorScheme.onSurface,
-					fontFamily = getFont()
-				)
+			Row {
+				Button(
+					onClick = {
+						vm.runOfflineMode()
+					},
+					modifier = Modifier
+						.weight(1f)
+						.padding(horizontal = 6.dp),
+					shape = RoundedCornerShape(8.dp),
+					colors = ButtonDefaults.buttonColors(
+						containerColor = MaterialTheme.colorScheme.primaryContainer,
+						contentColor = MaterialTheme.colorScheme.surface
+					)
+				) {
+					Text(
+						"Continue offline",
+						color = MaterialTheme.colorScheme.onSurface,
+						fontFamily = getFont()
+					)
+				}
+				Button(
+					onClick = {
+						vm.toDefaultAuth()
+					},
+					modifier = Modifier
+						.weight(1f)
+						.padding(horizontal = 6.dp),
+					shape = RoundedCornerShape(8.dp),
+					colors = ButtonDefaults.buttonColors(
+						containerColor = MaterialTheme.colorScheme.primaryContainer,
+						contentColor = MaterialTheme.colorScheme.surface
+					)
+				) {
+					Text(
+						"Default auth",
+						color = MaterialTheme.colorScheme.onSurface,
+						fontFamily = getFont()
+					)
+				}
 			}
 		}
 	}

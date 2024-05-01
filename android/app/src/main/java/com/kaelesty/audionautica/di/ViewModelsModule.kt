@@ -5,6 +5,7 @@ import com.kaelesty.audionautica.presentation.player.PlayerViewModel
 import com.kaelesty.audionautica.presentation.playlists.list.PlaylistsViewModel
 import com.kaelesty.audionautica.presentation.playlists.details.PlaylistDetailsViewModel
 import com.kaelesty.audionautica.presentation.playlists.upload.PlaylistUploadViewModel
+import com.kaelesty.audionautica.presentation.settings.SettingsViewModel
 import com.kaelesty.audionautica.presentation.viewmodels.AccessViewModel
 import com.kaelesty.audionautica.presentation.viewmodels.MusicViewModel
 import dagger.Binds
@@ -51,4 +52,9 @@ interface ViewModelsModule {
 	@ApplicationScope
 	fun bindsPlaylistDetailsViewModel(impl: PlaylistDetailsViewModel): ViewModel
 
+	@IntoMap
+	@StringKey("SettingsViewModel")
+	@Binds
+	@ApplicationScope
+	fun bindsSettingsViewModel(impl: SettingsViewModel): ViewModel
 }

@@ -18,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -39,9 +40,9 @@ fun Playlists(
 	val vm = viewModelFactory.create(PlaylistsViewModel::class.java)
 	Log.d("ReCoTag", "Playlists")
 
-	//vm.loadPlaylists()
 
 	val playlists by vm.playlistCollection.observeAsState(initial = listOf())
+	vm.updatePlaylistCollection()
 
 	LazyColumn(
 		modifier = Modifier

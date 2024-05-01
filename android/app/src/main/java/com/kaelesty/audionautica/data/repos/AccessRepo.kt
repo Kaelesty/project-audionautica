@@ -2,7 +2,9 @@ package com.kaelesty.audionautica.data.repos
 
 import android.util.Log
 import com.kaelesty.audionautica.data.local.daos.AccessDao
+import com.kaelesty.audionautica.data.local.daos.PlaylistDao
 import com.kaelesty.audionautica.data.local.dbmodels.LoginDbModel
+import com.kaelesty.audionautica.data.playlists.PlaylistsRepo
 import com.kaelesty.audionautica.data.remote.api.AccessApiService
 import com.kaelesty.audionautica.data.remote.entities.LoginDto
 import com.kaelesty.audionautica.data.remote.entities.RegisterDto
@@ -14,6 +16,10 @@ import com.kaelesty.audionautica.domain.returncodes.CheckAuthRC
 import com.kaelesty.audionautica.domain.returncodes.CheckConnectionRC
 import com.kaelesty.audionautica.domain.returncodes.LoginRC
 import com.kaelesty.audionautica.domain.returncodes.RegisterRC
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import java.io.IOException
 import javax.inject.Inject
 
 @ApplicationScope
@@ -22,7 +28,10 @@ class AccessRepo @Inject constructor(
 	private val jwtTool: JwtTool,
 	private val aesTool: AesTool,
 	private val accessDao: AccessDao,
+	private val playlistsDao: PlaylistDao
 ) : IAccessRepo {
+
+	private val logoutFlow = MutableSharedFlow<Unit>()
 
 
 	override suspend fun login(email: String, password: String): LoginRC {
@@ -34,6 +43,7 @@ class AccessRepo @Inject constructor(
 				200 -> {
 					val jwt = response.body()?.jwt ?: throw IllegalStateException("EMPTY JWT")
 					jwtTool.saveToken(jwt)
+					saveLogin(email, password)
 					LoginRC.OK
 				}
 
@@ -58,6 +68,29 @@ class AccessRepo @Inject constructor(
 
 	override suspend fun logout() {
 		jwtTool.delToken()
+		playlistsDao.nukeTable()
+		logoutFlow.emit(Unit)
+	}
+
+	override suspend fun getLogoutFlow(): SharedFlow<Unit> {
+		return logoutFlow.asSharedFlow()
+	}
+
+	override suspend fun getUserInfo(): Pair<String, String>? {
+		return try {
+			val res = accessApiService.getUserInfo(jwtTool.getToken())
+			when (res.code()) {
+				200 -> {
+					val body = res.body() ?: throw IOException()
+					Pair(body.email, body.username)
+				}
+				else -> {
+					throw IOException()
+				}
+			}
+		} catch (e: IOException) {
+			null
+		}
 	}
 
 	override suspend fun checkAuth(): CheckAuthRC {

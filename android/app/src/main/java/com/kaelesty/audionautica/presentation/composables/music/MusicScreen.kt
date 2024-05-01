@@ -1,6 +1,5 @@
 package com.kaelesty.audionautica.presentation.composables.music
 
-import android.media.session.MediaController
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -8,8 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -17,6 +14,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.kaelesty.audionautica.R
+import com.kaelesty.audionautica.presentation.settings.Settings
 import com.kaelesty.audionautica.presentation.player.PlayerBar
 import com.kaelesty.audionautica.presentation.navigation.MusicNavGraph
 import com.kaelesty.audionautica.presentation.navigation.Screen
@@ -27,7 +25,6 @@ import com.kaelesty.audionautica.presentation.playlists.list.Playlists
 import com.kaelesty.audionautica.presentation.viewmodels.MusicViewModel
 import com.kaelesty.audionautica.presentation.viewmodels.ViewModelFactory
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun MusicScreen(
@@ -123,6 +120,9 @@ fun MusicScreen(
 			},
 			playlistDetailsContent = {
 				PlaylistDetails(playlist = it, viewModelFactory = viewModelFactory)
+			},
+			settingsContent = {
+				Settings(isOffline = offlineMode, viewModelFactory = viewModelFactory)
 			}
 		)
 	}

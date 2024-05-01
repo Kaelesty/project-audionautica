@@ -1,6 +1,9 @@
 package com.kaelesty.audionautica.presentation.activities
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -25,7 +28,17 @@ class AccessActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 
 		component.inject(this)
+
 		super.onCreate(savedInstanceState)
+
+		intent.getStringExtra(MESSAGE_EXTRA_KEY)?.let {
+			Toast.makeText(
+				this@AccessActivity,
+				it,
+				Toast.LENGTH_LONG
+			).show()
+		}
+
 		setContent {
 			AudionauticaTheme {
 				AccessScreen(
@@ -49,5 +62,17 @@ class AccessActivity : ComponentActivity() {
 			)
 		)
 		finish()
+	}
+
+	companion object {
+
+		private const val MESSAGE_EXTRA_KEY = "IS_OFFLINE"
+
+		fun newIntent(
+			context: Context,
+			message: String,
+		) = Intent(context, AccessActivity::class.java).apply {
+			putExtra(MESSAGE_EXTRA_KEY, message)
+		}
 	}
 }

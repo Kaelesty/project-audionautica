@@ -11,4 +11,6 @@ sealed class PlaylistsState {
 	): PlaylistsState()
 
 	object Empty: PlaylistsState()
+
+	object Initial: PlaylistsState()
 }
