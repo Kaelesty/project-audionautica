@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+from config import *
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,9 +28,9 @@ SECRET_KEY = 'django-insecure-(u@svuz86an9hbplikwo*e@v$6n1#kkyfo-x0+br#n7x2dha0i
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '127.0.0.1','fbe-188-244-132-93.ngrok-free.app'
+    '127.0.0.1', config.allowed_host
 ]
-CSRF_TRUSTED_ORIGINS = ['https://fbea-188-244-132-93.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://'+config.allowed_host]
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
 

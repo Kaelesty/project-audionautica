@@ -165,6 +165,9 @@ class UserInfoId(APIView):
         json_respose['username'] = user.name
         return Response(json_respose)
 
+class UserInfoId(APIView):
+
+
 
 class GetTrack(APIView):
     def post(self, request):
@@ -599,3 +602,4 @@ class WeatherReco(APIView):
         pass
         # if not check_token(request):
         #     return Response(status=status.HTTP_418_IM_A_TEAPOT)
+
