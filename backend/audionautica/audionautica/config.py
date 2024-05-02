@@ -7,4 +7,6 @@ class Config:
     file_path_posters = "/home/project-audionautica/backend/audionautica/audionautica/posters/"
     #file_path_posters = "C:/Users/greg/Desktop/project-audionautica/backend/audionautica/audionautica/posters/"
     secret_key = "secretkey"
+
     allowed_host = 'ac0a-188-244-133-127.ngrok-free.app'
+
