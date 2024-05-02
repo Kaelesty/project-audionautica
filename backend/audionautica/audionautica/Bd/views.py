@@ -165,9 +165,6 @@ class UserInfoId(APIView):
         json_respose['username'] = user.name
         return Response(json_respose)
 
-class UserInfoId(APIView):
-
-
 
 class GetTrack(APIView):
     def post(self, request):
