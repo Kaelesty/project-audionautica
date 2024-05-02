@@ -599,4 +599,3 @@ class WeatherReco(APIView):
         pass
         # if not check_token(request):
         #     return Response(status=status.HTTP_418_IM_A_TEAPOT)
-

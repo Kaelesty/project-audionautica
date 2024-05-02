@@ -24,15 +24,11 @@ fun Search(
 	onSearch: (String) -> Unit,
 	tracksSearchResults: LiveData<List<Track>>,
 	onPlay: (Track) -> Unit,
-	playerMediaController: MediaController?,
-	//selectPlaylistDialog: MutableState<Track?>,
 	onSaveTrack: (Track) -> Unit,
 	libraryTracksLD: LiveData<List<Track>>,
 ) {
 	val tracks by tracksSearchResults.observeAsState(listOf())
 
-	val playingTrack = playerMediaController?.getCurrentTrack() ?: Track(-1, "", "", listOf())
-	val playing = playerMediaController?.isPlaying() ?: false
 
 	val libraryTracks by libraryTracksLD.observeAsState(initial = listOf())
 
@@ -45,19 +41,7 @@ fun Search(
 				TrackCard(
 					track = it,
 					onClick = { clickedTrack ->
-						if (playing) {
-							if (playingTrack.id == clickedTrack.id) {
-								playerMediaController?.transportControls?.play()
-							} else {
-								onPlay(clickedTrack)
-							}
-						} else {
-							if (playingTrack.id == clickedTrack.id) {
-								playerMediaController?.transportControls?.play()
-							} else {
-								onPlay(clickedTrack)
-							}
-						}
+						onPlay(it)
 					},
 					onAdd = {
 						//selectPlaylistDialog.value = it

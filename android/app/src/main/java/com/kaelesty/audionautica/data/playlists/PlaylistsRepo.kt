@@ -26,6 +26,10 @@ class PlaylistsRepo @Inject constructor(
 
 	val PLAYLIST_TRACKIDS_DELIMITER = "/"
 
+	override suspend fun nukeTable() {
+		dao.nukeTable()
+	}
+
 	override suspend fun updatePlaylistCollection() {
 		try {
 			val response = apiService.getPlaylists(
