@@ -61,7 +61,7 @@ const Playlist = ({ cover, title, creator, id }) => {
           event.stopPropagation(); 
           playClick();
         }}>
-           <img className='playpic' alt=''
+          <img className='playpic' alt=''
             src={require('./icons/play-button.png')} 
             />
         </button>

@@ -7,16 +7,13 @@ import getUsernameById from '../requests/getusernamebyid';
 import { Context } from "../index.js"
 import BackURL from '../urls.js';
 import token from '../token.js';
+import CreatePlaylist from '../components/createplaylist.js';
 import "./home.css"
 
 const HomePage = () => {
   const [isLoading, setIsLoading] = useState(true)
   const {createdPlaylists, setCreatedPlaylists} = useContext(Context) 
   const {savedPlaylists, setSavedPlaylists} = useContext(Context) 
-
-  useEffect(() => {
-    console.log("created: ",createdPlaylists)
-  },[createdPlaylists])
 
   useEffect(() => {
     const fetchUserPlaylists = async () => {
@@ -67,7 +64,6 @@ const HomePage = () => {
       ) : ( 
       <div>
         <h2>Созданные плейлисты</h2>
-        {createdPlaylists && createdPlaylists.length > 0 ? (
           <div className="playlists-container">
           {createdPlaylists.map((playlist, index) => (
             <Playlist key={index} 
@@ -77,7 +73,8 @@ const HomePage = () => {
               id = {playlist.id}
             />
           ))}
-        </div>) : (<p>Пока что здесь пусто</p>)}
+          <CreatePlaylist/>
+        </div>
         
         <h2>Сохраненные плейлисты</h2>
         {savedPlaylists && savedPlaylists.length > 0  ? (

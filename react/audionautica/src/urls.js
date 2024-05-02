@@ -1,3 +1,3 @@
-const BackURL = "https://46e8-188-244-133-127.ngrok-free.app"
+const BackURL = "https://4c6d-193-32-202-60.ngrok-free.app"
 
 export default BackURL;

@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Context } from '../../index';
+import { useNavigate } from 'react-router-dom';
 import "./addmenu.css"
 
-const PlaylistAddMenu = ({ onAddToQueue, onAddToFavorites, onDelete, onAddToPlaylist, trackId, isOnTrack}) => {
+const PlaylistAddMenu = ({ onAddToQueue, onAddToFavorites, onDelete, onAddToPlaylist, isOnTrack}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPlaylistMenuOpen, setIsPlaylistMenuOpen] = useState(false);
   const {createdPlaylists} = useContext(Context)
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (isOnTrack){return}
@@ -34,6 +36,10 @@ const PlaylistAddMenu = ({ onAddToQueue, onAddToFavorites, onDelete, onAddToPlay
   const handleAddToPlaylist = (playlistId) =>{
     onAddToPlaylist(playlistId)
     setIsMenuOpen(false)
+  }
+  
+  const createPlaylist = () =>{
+    navigate("/createplaylist")
   }
   
   return (
@@ -67,7 +73,7 @@ const PlaylistAddMenu = ({ onAddToQueue, onAddToFavorites, onDelete, onAddToPlay
                   {playlist.title}
                 </button>
               ))}
-              <button style={{ textAlign: "center" }}>+</button>
+              <button onClick={createPlaylist} style={{ textAlign: "center" }}>+</button>
             </div>
           )}
         </div>

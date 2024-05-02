@@ -10,6 +10,7 @@ import SearchBar from './components/search/searchbar';
 import HomePage from './pages/home';
 import PlaylistPage from './pages/playlistpage';
 import NotFoundPage from './pages/notfound';
+import PlaylistForm from './pages/createplaylistpage';
 
 export const Context = React.createContext();
 
@@ -39,7 +40,8 @@ const App = () => {
             <Route path="home/" element={<HomePage/>} />
             <Route path="rec/" element={<Recomendations/>} />
             <Route path="search/" element={<SearchBar/>} />
-            <Route path="playlist/:id"element={<PlaylistPage/>}/>
+            <Route path="playlist/:id" element={<PlaylistPage/>}/>
+            <Route path="createplaylist/" element={<PlaylistForm/>}/>
           </Route>
           <Route path='*' element={<NotFoundPage/>}/>
         </Routes>
