@@ -32,6 +32,9 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -68,6 +71,10 @@ fun PlaylistDetails(
 
 	val playlist by vm.playlist.observeAsState(null)
 
+	var editTracksetDialogState by rememberSaveable {
+		mutableStateOf(false)
+	}
+
 	if (playlist == null) {
 		Loading()
 		return
@@ -86,6 +93,7 @@ fun PlaylistDetails(
 			is PlaylistDetailsViewModel.PlaylistDetailsState.Empty -> {
 				Loading()
 			}
+
 			is PlaylistDetailsViewModel.PlaylistDetailsState.TracksLoaded -> {
 				with(state as PlaylistDetailsViewModel.PlaylistDetailsState.TracksLoaded) {
 					TopPlaylistCard(
@@ -99,9 +107,21 @@ fun PlaylistDetails(
 						playerState = playerState,
 						vm = vm
 					)
+					if (editTracksetDialogState) {
+						UpdatePlaylistTracksetDialog(
+							onSubmit = {
+								vm.updatePlaylistTrackset(it)
+								editTracksetDialogState = false
+							},
+							onDismiss = { editTracksetDialogState = false },
+							tracks = tracks,
+							playlist = playlist as UserPlaylist.Entire
+						)
+					}
 				}
 
 			}
+
 			is PlaylistDetailsViewModel.PlaylistDetailsState.LoadingTracks -> {
 				TopPlaylistCard(
 					playlist = playlist as UserPlaylist.Entire,
@@ -138,9 +158,7 @@ fun Tracks(
 						)
 					}
 				}
-			}
-
-			else {
+			} else {
 				Card(
 					colors = CardDefaults.cardColors(
 						containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
@@ -152,8 +170,7 @@ fun Tracks(
 				) {
 					Column(
 						modifier = Modifier
-							.padding(16.dp)
-						,
+							.padding(16.dp),
 						horizontalAlignment = Alignment.CenterHorizontally
 					) {
 						Text(
@@ -234,7 +251,8 @@ fun Tracks(
 						}
 						if (it.id == playerState.meta?.id && playlist.id == playerState.playlistId) {
 							Icon(
-								Icons.Filled.KeyboardArrowLeft, contentDescription = "current track cursor",
+								Icons.Filled.KeyboardArrowLeft,
+								contentDescription = "current track cursor",
 								modifier = Modifier
 									.size(30.dp)
 							)
@@ -337,7 +355,7 @@ fun TopPlaylistCard(
 				contentAlignment = Alignment.Center
 			) {
 				IconButton(
-					onClick = {  },
+					onClick = { },
 					modifier = Modifier.size(40.dp)
 				) {
 					Icon(Icons.Filled.MoreVert, contentDescription = "details of playlist")

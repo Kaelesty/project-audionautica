@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import com.kaelesty.audionautica.data.local.daos.PlaylistDao
 import com.kaelesty.audionautica.data.mappers.PlaylistMapper
+import com.kaelesty.audionautica.data.remote.entities.SearchDto
 import com.kaelesty.audionautica.data.repos.AccessRepo
 import com.kaelesty.audionautica.data.repos.tools.CacheTool
 import com.kaelesty.audionautica.data.repos.tools.FileUploaderTool
@@ -32,6 +33,63 @@ class PlaylistsRepo @Inject constructor(
 
 	override suspend fun nukeTable() {
 		cacheTool.clearPlaylistsCache()
+	}
+
+	override suspend fun updatePlaylistTrackset(playlistId: Int, trackIds: List<Int>): Boolean {
+		return try {
+			val response = apiService.updatePlaylistTrackset(
+				token = jwtTool.getToken(),
+				body = UpdatePlaylistTracksetRequest(
+					playlistId, trackIds
+				)
+			)
+			when (response.code()) {
+				200 -> {
+					updatePlaylistById(playlistId)
+					true
+				}
+				418 -> {
+					accessRepo.logout()
+					false
+				}
+				else -> {
+					false
+				}
+			}
+		} catch (e: Exception) {
+			false
+		}
+	}
+
+	override suspend fun searchPlaylists(query: String): List<UserPlaylist.Entire> {
+		return try {
+			val response = apiService.searchPlaylists(
+				token = jwtTool.getToken(),
+				body = SearchDto(
+					query
+				)
+			)
+			when (response.code()) {
+				200 -> {
+					response.body()?.playlists?.map { playlistMapper.IdResponseToDomain(
+						res = it,
+						imageUrl = urlTool.getPlaylistPosterUrl(
+							id = it.id,
+							token = jwtTool.getToken()
+						)
+					) } ?: listOf()
+				}
+				418 -> {
+					accessRepo.logout()
+					throw IOException()
+				}
+				else -> {
+					throw IOException()
+				}
+			}
+		} catch (e: Exception) {
+			listOf()
+		}
 	}
 
 	override suspend fun addTrackToPlaylist(trackId: Int, playlistId: Int): Boolean {

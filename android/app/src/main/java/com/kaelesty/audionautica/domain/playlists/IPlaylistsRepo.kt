@@ -6,8 +6,6 @@ import com.kaelesty.audionautica.domain.entities.Track
 
 interface IPlaylistsRepo {
 
-
-
 	suspend fun addTrackToPlaylist(trackId: Int, playlistId: Int): Boolean
 
 	suspend fun getPlaylists(): UserPlaylists
@@ -34,4 +32,8 @@ interface IPlaylistsRepo {
 	fun getPlaylistCollection(): LiveData<List<UserPlaylist.Entire>>
 
 	suspend fun nukeTable()
+
+	suspend fun updatePlaylistTrackset(playlistId: Int, trackIds: List<Int>): Boolean
+
+	suspend fun searchPlaylists(query: String): List<UserPlaylist.Entire>
 }

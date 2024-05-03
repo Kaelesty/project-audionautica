@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.kaelesty.audionautica.data.player.PlayerController
 import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.playlists.LoadLiveEntirePlaylistUseCase
+import com.kaelesty.audionautica.domain.playlists.UpdatePlaylistTracksetUseCase
 import com.kaelesty.audionautica.domain.playlists.UserPlaylist
 import com.kaelesty.audionautica.domain.usecases.GetTrackByIdCase
 import kotlinx.coroutines.CoroutineScope
@@ -20,7 +21,8 @@ import javax.inject.Inject
 class PlaylistDetailsViewModel @Inject constructor(
 	private val getTrackByIdCase: GetTrackByIdCase,
 	private val getLiveEntirePlaylistUseCase: LoadLiveEntirePlaylistUseCase,
-	private val pqc: PlayerController
+	private val pqc: PlayerController,
+	private val updatePlaylistTracksetUseCase: UpdatePlaylistTracksetUseCase
 ) : ViewModel() {
 
 	private val _stateFlow: MutableStateFlow<PlaylistDetailsState> =
@@ -35,6 +37,14 @@ class PlaylistDetailsViewModel @Inject constructor(
 	fun setPlaylist(playlistId: Int) {
 		scope.launch(Dispatchers.IO) {
 			_playlist = getLiveEntirePlaylistUseCase(playlistId)
+		}
+	}
+
+	fun updatePlaylistTrackset(trackIds: List<Int>) {
+		scope.launch(Dispatchers.IO) {
+			if (updatePlaylistTracksetUseCase(_playlist.value?.id ?: return@launch, trackIds)) {
+				loadTracks(_playlist.value as UserPlaylist.Entire)
+			}
 		}
 	}
 
