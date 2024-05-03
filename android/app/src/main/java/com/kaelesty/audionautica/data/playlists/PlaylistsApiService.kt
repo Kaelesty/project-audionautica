@@ -41,4 +41,10 @@ interface PlaylistsApiService {
 		@Header("token") token: String,
 		@Body body: EntirePlaylistRequest
 	): Response<EntirePlaylistResponse>
+
+	@POST("AddTrackToPlayList/")
+	suspend fun addTrackToPlayList(
+		@Header("token") token: String,
+		@Body body: AddTrackToPlaylistRequest
+	): Response<ResponseBody>
 }

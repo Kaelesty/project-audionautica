@@ -27,7 +27,4 @@ interface AccessApiService {
 
 	@POST("User/")
 	suspend fun checkAuth(@Header("token") token: String,): Response<CheckAuthResponse>
-
-	@POST("aboba/")
-	suspend fun getUserInfo(@Header("token") token: String): Response<UserInfoResponse>
 }

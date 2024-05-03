@@ -7,6 +7,7 @@ import androidx.lifecycle.map
 import com.kaelesty.audionautica.data.local.daos.PlaylistDao
 import com.kaelesty.audionautica.data.mappers.PlaylistMapper
 import com.kaelesty.audionautica.data.repos.AccessRepo
+import com.kaelesty.audionautica.data.repos.tools.CacheTool
 import com.kaelesty.audionautica.data.repos.tools.FileUploaderTool
 import com.kaelesty.audionautica.data.repos.tools.JwtTool
 import com.kaelesty.audionautica.data.repos.tools.UrlTool
@@ -24,12 +25,44 @@ class PlaylistsRepo @Inject constructor(
 	private val uploader: FileUploaderTool,
 	private val playlistMapper: PlaylistMapper,
 	private val accessRepo: AccessRepo,
+	private val cacheTool: CacheTool,
 ): IPlaylistsRepo {
 
-	val PLAYLIST_TRACKIDS_DELIMITER = "/"
+	private val PLAYLIST_TRACKIDS_DELIMITER = "/"
 
 	override suspend fun nukeTable() {
-		dao.nukeTable()
+		cacheTool.clearPlaylistsCache()
+	}
+
+	override suspend fun addTrackToPlaylist(trackId: Int, playlistId: Int): Boolean {
+		return try {
+			val response = apiService.addTrackToPlayList(
+				token = jwtTool.getToken(),
+				body = AddTrackToPlaylistRequest(
+					track_id = trackId,
+					playlist_id = playlistId,
+				)
+			)
+			if (response.code() == 418) {
+				accessRepo.logout()
+			}
+			if (response.code() == 200) {
+				updatePlaylistById(playlistId)
+				true
+			}
+			false
+		} catch (e: Exception) {
+			false
+		}
+	}
+
+	private suspend fun updatePlaylistById(playlistId: Int) {
+		val playlist = loadEntirePlaylist(playlistId)
+		if (playlist is UserPlaylist.Entire) {
+			dao.updatePlaylist(
+				playlistMapper.domainToDbModel(playlist)
+			)
+		}
 	}
 
 	override suspend fun updatePlaylistCollection() {
@@ -41,12 +74,7 @@ class PlaylistsRepo @Inject constructor(
 				200 -> {
 					response.body()?.let {
 						(it.created + it.liked).forEach { id ->
-							val playlist = loadEntirePlaylist(id)
-							if (playlist is UserPlaylist.Entire) {
-								dao.updatePlaylist(
-									playlistMapper.domainToDbModel(playlist)
-								)
-							}
+							updatePlaylistById(id)
 						}
 					}
 				}
@@ -98,15 +126,20 @@ class PlaylistsRepo @Inject constructor(
 		return UserPlaylists.Error
 	}
 
+	override fun loadLiveEntirePlaylist(playlistId: Int): LiveData<UserPlaylist> {
+		return dao.getLivePlaylist(playlistId).map { playlistMapper.DbModelToDomain(it) ?: UserPlaylist.IdOnly(playlistId) }
+	}
+
 	override suspend fun uploadPlaylist(playlist: UserPlaylist.Entire, uri: Uri): Boolean {
 		return try {
+			val file = uploader.getMultipartOfFile(uri, "Image")
 			val response = apiService.uploadPlaylist(
 				title = playlist.title,
 				desc = playlist.desc,
 				token = jwtTool.getToken(),
 				trackIds = playlist.trackIds.joinToString(PLAYLIST_TRACKIDS_DELIMITER),
 				isPrivate = playlist.isPrivate,
-				posterFile = uploader.getMultipartOfFile(uri, "Image"),
+				posterFile = file,
 				ext = uploader.getFileExtension(uri) ?: throw Exception(),
 			)
 			response.code() == 200
@@ -161,7 +194,6 @@ class PlaylistsRepo @Inject constructor(
 			}
 		}
 		catch (e: Exception) {
-			Log.d("PlaylistRepo.kt", e.message.toString())
 			UserPlaylist.IdOnly(playlist_id)
 		}
 	}

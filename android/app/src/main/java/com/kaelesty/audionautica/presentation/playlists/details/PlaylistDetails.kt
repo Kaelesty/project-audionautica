@@ -31,6 +31,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,15 +55,26 @@ import com.kaelesty.audionautica.presentation.viewmodels.ViewModelFactory
 
 @Composable
 fun PlaylistDetails(
-	playlist: UserPlaylist.Entire,
+	playlistId: Int,
 	viewModelFactory: ViewModelFactory
 ) {
 
 	val vm = viewModel<PlaylistDetailsViewModel>(factory = viewModelFactory)
 	val playerViewModel = viewModel<PlayerViewModel>(factory = viewModelFactory)
-  
-	LaunchedEffect(key1 = playlist.id) {
-		vm.setPlaylist(playlist)
+
+	LaunchedEffect(key1 = playlistId) {
+		vm.setPlaylist(playlistId)
+	}
+
+	val playlist by vm.playlist.observeAsState(null)
+
+	if (playlist == null) {
+		Loading()
+		return
+	}
+
+	LaunchedEffect(key1 = (playlist as UserPlaylist.Entire).trackIds.size, key2 = playlistId) {
+		vm.loadTracks(playlist as UserPlaylist.Entire)
 	}
 
 	val playerState by playerViewModel.playerState.collectAsState()
@@ -77,13 +89,13 @@ fun PlaylistDetails(
 			is PlaylistDetailsViewModel.PlaylistDetailsState.TracksLoaded -> {
 				with(state as PlaylistDetailsViewModel.PlaylistDetailsState.TracksLoaded) {
 					TopPlaylistCard(
-						playlist = playlist,
+						playlist = playlist as UserPlaylist.Entire,
 						vm = vm,
 						playerState = playerState
 					)
 					Tracks(
 						tracks = tracks,
-						playlist = playlist,
+						playlist = playlist as UserPlaylist.Entire,
 						playerState = playerState,
 						vm = vm
 					)
@@ -92,7 +104,7 @@ fun PlaylistDetails(
 			}
 			is PlaylistDetailsViewModel.PlaylistDetailsState.LoadingTracks -> {
 				TopPlaylistCard(
-					playlist = (state as PlaylistDetailsViewModel.PlaylistDetailsState.LoadingTracks).playlist,
+					playlist = playlist as UserPlaylist.Entire,
 					vm = vm,
 					playerState = playerState
 				)

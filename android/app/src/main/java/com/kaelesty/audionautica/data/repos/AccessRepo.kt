@@ -9,6 +9,7 @@ import com.kaelesty.audionautica.data.remote.api.AccessApiService
 import com.kaelesty.audionautica.data.remote.entities.LoginDto
 import com.kaelesty.audionautica.data.remote.entities.RegisterDto
 import com.kaelesty.audionautica.data.repos.tools.AesTool
+import com.kaelesty.audionautica.data.repos.tools.CacheTool
 import com.kaelesty.audionautica.data.repos.tools.JwtTool
 import com.kaelesty.audionautica.di.ApplicationScope
 import com.kaelesty.audionautica.domain.repos.IAccessRepo
@@ -28,11 +29,12 @@ class AccessRepo @Inject constructor(
 	private val jwtTool: JwtTool,
 	private val aesTool: AesTool,
 	private val accessDao: AccessDao,
-	private val playlistsDao: PlaylistDao
+	private val cacheTool: CacheTool,
 ) : IAccessRepo {
 
 	private val logoutFlow = MutableSharedFlow<Unit>()
 
+	private var userEmail: String? = null
 
 	override suspend fun login(email: String, password: String): LoginRC {
 		try {
@@ -44,6 +46,7 @@ class AccessRepo @Inject constructor(
 					val jwt = response.body()?.jwt ?: throw IllegalStateException("EMPTY JWT")
 					jwtTool.saveToken(jwt)
 					saveLogin(email, password)
+					userEmail = email
 					LoginRC.OK
 				}
 
@@ -68,8 +71,13 @@ class AccessRepo @Inject constructor(
 
 	override suspend fun logout() {
 		jwtTool.delToken()
-		playlistsDao.nukeTable()
+		cacheTool.clearPlaylistsCache()
 		logoutFlow.emit(Unit)
+		userEmail = null
+	}
+
+	override fun getUserEmail(): String? {
+		return userEmail
 	}
 
 	override suspend fun getLogoutFlow(): SharedFlow<Unit> {
@@ -78,11 +86,13 @@ class AccessRepo @Inject constructor(
 
 	override suspend fun getUserInfo(): Pair<String, String>? {
 		return try {
-			val res = accessApiService.getUserInfo(jwtTool.getToken())
+			val res = accessApiService.checkAuth(
+				jwtTool.getToken()
+			)
 			when (res.code()) {
 				200 -> {
 					val body = res.body() ?: throw IOException()
-					Pair(body.email, body.username)
+					Pair(body.email, body.name)
 				}
 				else -> {
 					throw IOException()

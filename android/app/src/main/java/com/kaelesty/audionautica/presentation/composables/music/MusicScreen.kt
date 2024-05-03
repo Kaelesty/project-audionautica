@@ -83,6 +83,7 @@ fun MusicScreen(
 					onPlay = { vm.playTrack(it) },
 					onSaveTrack = { vm.saveTrack(it) },
 					libraryTracksLD = vm.getAllTracks(),
+					viewModelFactory = viewModelFactory
 				)
 			},
 			musicPlaylistsScreenContent = {
@@ -119,7 +120,7 @@ fun MusicScreen(
 				)
 			},
 			playlistDetailsContent = {
-				PlaylistDetails(playlist = it, viewModelFactory = viewModelFactory)
+				PlaylistDetails(playlistId = it.id, viewModelFactory = viewModelFactory)
 			},
 			settingsContent = {
 				Settings(isOffline = offlineMode, viewModelFactory = viewModelFactory)

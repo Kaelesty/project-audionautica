@@ -14,6 +14,8 @@ interface IAccessRepo {
 
 	suspend fun checkConnection(): CheckConnectionRC
 
+	fun getUserEmail(): String?
+
 	suspend fun checkAuth(): CheckAuthRC
 
 	suspend fun logout()

@@ -7,7 +7,9 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.kaelesty.audionautica.data.local.daos.PlaylistDao
 import com.kaelesty.audionautica.data.local.daos.AccessDao
+import com.kaelesty.audionautica.data.local.daos.LocalPlaylistDao
 import com.kaelesty.audionautica.data.local.daos.TrackDao
+import com.kaelesty.audionautica.data.local.dbmodels.LocalPlaylistDbModel
 import com.kaelesty.audionautica.data.local.dbmodels.LoginDbModel
 import com.kaelesty.audionautica.data.local.dbmodels.PlaylistDbModel
 import com.kaelesty.audionautica.data.local.dbmodels.TokenDbModel
@@ -17,7 +19,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 
 @Database(
-	entities = [PlaylistDbModel::class, TrackDbModel::class, TokenDbModel::class, LoginDbModel::class],
+	entities = [
+		PlaylistDbModel::class,
+		TrackDbModel::class,
+		TokenDbModel::class,
+		LoginDbModel::class,
+		LocalPlaylistDbModel::class,
+	],
 	version = 1,
 	exportSchema = false,
 )
@@ -27,8 +35,7 @@ abstract class MusicDatabase() : RoomDatabase() {
 	abstract fun playlistDao(): PlaylistDao
 	abstract fun trackDao(): TrackDao
 	abstract fun tokenDao(): AccessDao
-
-	private val dbSetupScope = CoroutineScope(Dispatchers.IO)
+	abstract fun localPlaylistDao(): LocalPlaylistDao
 
 	companion object {
 

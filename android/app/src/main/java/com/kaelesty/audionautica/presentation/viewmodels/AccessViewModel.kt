@@ -27,7 +27,7 @@ class AccessViewModel @Inject constructor(
 	private val checkAuthUseCase: CheckAuthUseCase,
 	private val getLoginsUseCase: GetLoginsUseCase,
 	private val removeLoginUseCase: RemoveLoginUseCase,
-	private val getPasswordUseCase: GetPasswordUseCase
+	private val getPasswordUseCase: GetPasswordUseCase,
 ): ViewModel() {
 
 	private val viewModelScope = CoroutineScope(Dispatchers.IO)
@@ -82,6 +82,7 @@ class AccessViewModel @Inject constructor(
 
 	fun autoLogin(login: String) {
 		viewModelScope.launch(Dispatchers.IO) {
+			_stateFlow.emit(AccessScreenState.Loading)
 			val password = getPasswordUseCase(login)
 			when (loginUseCase(login, password)) {
 				LoginRC.OK -> {

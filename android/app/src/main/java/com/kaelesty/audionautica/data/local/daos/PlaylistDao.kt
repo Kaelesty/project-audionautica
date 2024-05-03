@@ -18,4 +18,7 @@ interface PlaylistDao {
 
 	@Query("DELETE FROM playlists")
 	fun nukeTable()
+
+	@Query("SELECT * FROM `playlists` WHERE id = :id")
+	fun getLivePlaylist(id: Int): LiveData<PlaylistDbModel>
 }

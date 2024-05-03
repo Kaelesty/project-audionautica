@@ -32,11 +32,11 @@ class AccessActivity : ComponentActivity() {
 		super.onCreate(savedInstanceState)
 
 		intent.getStringExtra(MESSAGE_EXTRA_KEY)?.let {
-			Toast.makeText(
-				this@AccessActivity,
-				it,
-				Toast.LENGTH_LONG
-			).show()
+//			Toast.makeText(
+//				this@AccessActivity,
+//				it,
+//				Toast.LENGTH_LONG
+//			).show()
 		}
 
 		setContent {

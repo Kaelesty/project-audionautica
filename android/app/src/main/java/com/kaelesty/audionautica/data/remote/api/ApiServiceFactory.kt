@@ -10,7 +10,7 @@ import retrofit2.create
 object ApiServiceFactory {
 
 	private const val PROTOCOL = "https://"
-	private const val SERVER_URL = "adda-193-32-202-60.ngrok-free.app"
+	private const val SERVER_URL = "1697-193-32-202-60.ngrok-free.app"
 
 	const val ACCESS_URL = "$PROTOCOL$SERVER_URL/Auth/"
 	const val MUSIC_URL =  "$PROTOCOL$SERVER_URL/Music/"

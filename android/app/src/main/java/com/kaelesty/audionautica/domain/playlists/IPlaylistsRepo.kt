@@ -2,8 +2,13 @@ package com.kaelesty.audionautica.domain.playlists
 
 import android.net.Uri
 import androidx.lifecycle.LiveData
+import com.kaelesty.audionautica.domain.entities.Track
 
 interface IPlaylistsRepo {
+
+
+
+	suspend fun addTrackToPlaylist(trackId: Int, playlistId: Int): Boolean
 
 	suspend fun getPlaylists(): UserPlaylists
 
@@ -19,6 +24,10 @@ interface IPlaylistsRepo {
 	suspend fun loadEntirePlaylist(
 		playlist_id: Int
 	): UserPlaylist
+
+	fun loadLiveEntirePlaylist(
+		playlist_id: Int
+	): LiveData<UserPlaylist>
 
 	suspend fun updatePlaylistCollection()
 
