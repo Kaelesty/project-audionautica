@@ -10,6 +10,10 @@ import android.os.IBinder
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.media3.common.Player
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
+import com.google.common.util.concurrent.MoreExecutors
 import com.kaelesty.audionautica.domain.usecases.GetLogoutFlowUseCase
 import com.kaelesty.audionautica.presentation.composables.music.MusicScreen
 import com.kaelesty.audionautica.presentation.player.PlayerService
@@ -27,8 +31,10 @@ import javax.inject.Inject
 class MusicActivity : ComponentActivity() {
 
 
-	@Inject lateinit var viewModelFactory: ViewModelFactory
-	@Inject lateinit var getLogoutFlowUseCase: GetLogoutFlowUseCase
+	@Inject
+	lateinit var viewModelFactory: ViewModelFactory
+	@Inject
+	lateinit var getLogoutFlowUseCase: GetLogoutFlowUseCase
 
 	private val component by lazy {
 		(application as ModifiedApplication).component
@@ -48,6 +54,8 @@ class MusicActivity : ComponentActivity() {
 		}
 	}
 
+	lateinit var player: Player
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 
 		super.onCreate(savedInstanceState)
@@ -59,24 +67,20 @@ class MusicActivity : ComponentActivity() {
 			}
 		}
 
-		var binder: IBinder?
-
-		serviceConn = object : ServiceConnection {
-
-			override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
-				binder = p1 as PlayerService.MusicPlayerServiceBinder
-			}
-
-			override fun onServiceDisconnected(p0: ComponentName?) {
-				binder = null
-			}
-		}
 		isOffline = intent.getBooleanExtra(IS_OFFLINE_EXTRA_KEY, false)
-		bindService(
-			PlayerService.newIntent(this@MusicActivity),
-			serviceConn as ServiceConnection,
-			BIND_AUTO_CREATE
+
+		val sessionToken = SessionToken(
+			this@MusicActivity,
+			ComponentName(this@MusicActivity, PlayerService::class.java)
 		)
+		val mediaControllerFuture = MediaController.Builder(
+			this@MusicActivity,
+			sessionToken,
+		).buildAsync()
+
+		mediaControllerFuture.addListener({
+			player = mediaControllerFuture.get()
+		}, MoreExecutors.directExecutor())
 
 		setContent {
 			AudionauticaTheme {

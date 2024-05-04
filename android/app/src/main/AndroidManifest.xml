@@ -20,11 +20,6 @@
         android:theme="@style/Theme.Audionautica"
         tools:targetApi="31">
         <activity
-            android:name=".presentation.activities.AddPlaylistActivity"
-            android:exported="false"
-            android:label="@string/title_activity_add_playlist"
-            android:theme="@style/Theme.Audionautica" />
-        <activity
             android:name=".presentation.activities.AddTrackActivity"
             android:exported="false"
             android:label="@string/title_activity_add_track"
@@ -32,7 +27,6 @@
         <activity
             android:name=".presentation.activities.AccessActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.Audionautica">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -47,7 +41,16 @@
 
         <service
             android:name=".presentation.player.PlayerService"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback"
+            >
+
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService"/>
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+
+        </service>
     </application>
 
 </manifest>
