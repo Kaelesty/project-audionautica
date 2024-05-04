@@ -123,6 +123,10 @@ class PlaylistsRepo @Inject constructor(
 		}
 	}
 
+	override suspend fun nukeTable() {
+		dao.nukeTable()
+	}
+
 	override suspend fun updatePlaylistCollection() {
 		try {
 			val response = apiService.getPlaylists(

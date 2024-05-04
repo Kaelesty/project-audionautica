@@ -16,7 +16,6 @@ import javax.inject.Inject
 class PlaylistsViewModel @Inject constructor(
 	private val getPlaylistCollectionUseCase: GetPlaylistCollectionUseCase,
 	private val updatePlaylistCollectionUseCase: UpdatePlaylistCollectionUseCase,
-
 	private val nukePlaylistsCacheUseCase: NukePlaylistsCacheUseCase
 ): ViewModel() {
 
