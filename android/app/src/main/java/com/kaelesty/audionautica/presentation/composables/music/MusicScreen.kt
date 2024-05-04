@@ -22,6 +22,7 @@ import com.kaelesty.audionautica.presentation.navigation.rememberMusicNavigation
 import com.kaelesty.audionautica.presentation.playlists.details.PlaylistDetails
 import com.kaelesty.audionautica.presentation.playlists.upload.AddPlaylistScreen
 import com.kaelesty.audionautica.presentation.playlists.list.Playlists
+import com.kaelesty.audionautica.presentation.search.Search
 import com.kaelesty.audionautica.presentation.viewmodels.MusicViewModel
 import com.kaelesty.audionautica.presentation.viewmodels.ViewModelFactory
 import kotlinx.coroutines.flow.SharedFlow
@@ -78,11 +79,6 @@ fun MusicScreen(
 			else Screen.MusicLibrary.route,
 			musicSearchScreenContent = {
 				Search(
-					onSearch = { vm.search(it) },
-					tracksSearchResults = vm.tracksSearchResults,
-					onPlay = { vm.playTrack(it) },
-					onSaveTrack = { vm.saveTrack(it) },
-					libraryTracksLD = vm.getAllTracks(),
 					viewModelFactory = viewModelFactory
 				)
 			},

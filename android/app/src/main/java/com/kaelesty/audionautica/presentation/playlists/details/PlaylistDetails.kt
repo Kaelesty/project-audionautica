@@ -22,6 +22,8 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -99,7 +101,10 @@ fun PlaylistDetails(
 					TopPlaylistCard(
 						playlist = playlist as UserPlaylist.Entire,
 						vm = vm,
-						playerState = playerState
+						playerState = playerState,
+						onEnableTracksetEditing = {
+							editTracksetDialogState = true
+						}
 					)
 					Tracks(
 						tracks = tracks,
@@ -126,7 +131,10 @@ fun PlaylistDetails(
 				TopPlaylistCard(
 					playlist = playlist as UserPlaylist.Entire,
 					vm = vm,
-					playerState = playerState
+					playerState = playerState,
+					onEnableTracksetEditing = {
+						// nothing, tracks are loading
+					}
 				)
 				Loading()
 			}
@@ -197,9 +205,6 @@ fun Tracks(
 		LazyColumn {
 			itemsIndexed(
 				items = tracks,
-				key = { index, item ->
-					item.id
-				}
 			) { index, it ->
 				Card(
 					colors = CardDefaults.cardColors(
@@ -271,7 +276,8 @@ fun Tracks(
 fun TopPlaylistCard(
 	playlist: UserPlaylist.Entire,
 	vm: PlaylistDetailsViewModel,
-	playerState: PlayerState
+	playerState: PlayerState,
+	onEnableTracksetEditing: ()	-> Unit,
 ) {
 	Card(
 		colors = CardDefaults.cardColors(
@@ -354,11 +360,22 @@ fun TopPlaylistCard(
 				modifier = Modifier.height(120.dp),
 				contentAlignment = Alignment.Center
 			) {
+
+				var expanded by rememberSaveable {
+					mutableStateOf(false)
+				}
+
 				IconButton(
-					onClick = { },
+					onClick = { expanded = true},
 					modifier = Modifier.size(40.dp)
 				) {
 					Icon(Icons.Filled.MoreVert, contentDescription = "details of playlist")
+				}
+				DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+					if (playlist.isEditable) {
+						DropdownMenuItem(text = { Text("Edit track order") }, onClick = { onEnableTracksetEditing() })
+					}
+
 				}
 			}
 		}

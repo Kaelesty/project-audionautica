@@ -3,6 +3,7 @@ package com.kaelesty.audionautica.presentation.playlists.details
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -55,7 +56,7 @@ fun UpdatePlaylistTracksetDialog(
 		Card(
 			modifier = Modifier
 				.width(800.dp)
-				.height(250.dp)
+				.height(600.dp)
 				.padding(16.dp),
 			shape = RoundedCornerShape(16.dp),
 		) {
@@ -135,14 +136,14 @@ fun UpdatePlaylistTracksetDialog(
 					}
 				}
 			}
-
+			Spacer(modifier = Modifier.height(4.dp))
 			Button(
 				onClick = {
 					onSubmit(tracksetState.map { it.id })
 				},
 				modifier = Modifier
-					.weight(1f)
-					.padding(horizontal = 6.dp),
+					.fillMaxWidth()
+					.padding(horizontal = 60.dp),
 				shape = RoundedCornerShape(8.dp),
 				colors = ButtonDefaults.buttonColors(
 					containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -155,6 +156,7 @@ fun UpdatePlaylistTracksetDialog(
 					fontFamily = getFont()
 				)
 			}
+			Spacer(modifier = Modifier.height(4.dp))
 		}
 	}
 }
