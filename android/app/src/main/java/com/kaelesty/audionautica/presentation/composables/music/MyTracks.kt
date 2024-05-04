@@ -39,13 +39,11 @@ fun MyTracks(
 	//selectPlaylistDialog: MutableState<Track?>,
 	onDeleteTrack: (Track) -> Unit,
 	offlineMode: Boolean,
-	playerMediaController: MediaController?
 ) {
 
 	val tracks by libraryTracks.observeAsState(initial = listOf())
 
-	val playing = playerMediaController?.isPlaying() ?: false
-	val playingTrack = playerMediaController?.getCurrentTrack() ?: Track(-1, "", "", listOf())
+
 
 	var deleteTrackDialog by rememberSaveable {
 		mutableStateOf<Track?>(null)
@@ -69,19 +67,7 @@ fun MyTracks(
 				TrackCard(
 					track = track,
 					onClick = { clickedTrack ->
-						if (playing) {
-							if (track.id == clickedTrack.id) {
-								playerMediaController?.transportControls?.pause()
-							} else {
-								onPlay(clickedTrack)
-							}
-						} else {
-							if (playingTrack.id == clickedTrack.id) {
-								playerMediaController?.transportControls?.play()
-							} else {
-								onPlay(clickedTrack)
-							}
-						}
+
 					},
 					onAdd = {
 						//selectPlaylistDialog.value = it

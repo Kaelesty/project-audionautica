@@ -56,6 +56,7 @@ class FileUploaderTool @Inject constructor(
 		val file = tempFile
 //		val requestBody = MultipartBody
 //		return MultipartBody.Part.create(requestBody)
-		return MultipartBody.Part.createFormData("image", "tempfile", file.asRequestBody(MultipartBody.FORM))
+		val body = MultipartBody.Part.createFormData("image", "tempfile", file.asRequestBody(MultipartBody.FORM))
+		return body
 	}
 }

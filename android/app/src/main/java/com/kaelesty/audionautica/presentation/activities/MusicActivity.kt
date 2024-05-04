@@ -4,40 +4,37 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.media.MediaMetadata
-import android.media.session.MediaController
-import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
-import android.os.RemoteException
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.MutableState
-import com.kaelesty.audionautica.domain.entities.Track
+import androidx.media3.common.Player
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
+import com.google.common.util.concurrent.MoreExecutors
+import com.kaelesty.audionautica.domain.usecases.GetLogoutFlowUseCase
 import com.kaelesty.audionautica.presentation.composables.music.MusicScreen
 import com.kaelesty.audionautica.presentation.player.PlayerService
 import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
-import com.kaelesty.audionautica.presentation.viewmodels.MusicViewModel
 import com.kaelesty.audionautica.presentation.viewmodels.ViewModelFactory
 import com.kaelesty.audionautica.system.ModifiedApplication
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class MusicActivity : ComponentActivity() {
 
 
-	@Inject lateinit var viewModelFactory: ViewModelFactory
+	@Inject
+	lateinit var viewModelFactory: ViewModelFactory
+	@Inject
+	lateinit var getLogoutFlowUseCase: GetLogoutFlowUseCase
 
 	private val component by lazy {
 		(application as ModifiedApplication).component
@@ -48,14 +45,8 @@ class MusicActivity : ComponentActivity() {
 
 	private val scope = CoroutineScope(Dispatchers.IO)
 
-	private val playingFlow = MutableSharedFlow<Boolean>()
-	private val trackFlow = MutableSharedFlow<Track>()
-
 	private val _requestedImageFlow = MutableSharedFlow<Uri?>()
 	val requestedImageFlow: SharedFlow<Uri?> get() = _requestedImageFlow
-
-	private val _playerMediaControllerFlow: MutableStateFlow<MediaController?> = MutableStateFlow(null)
-	val playerMediaControllerFlow: StateFlow<MediaController?> get() = _playerMediaControllerFlow.asStateFlow()
 
 	val getImage = registerForActivityResult(ActivityResultContracts.GetContent()) {
 		scope.launch {
@@ -63,71 +54,33 @@ class MusicActivity : ComponentActivity() {
 		}
 	}
 
+	lateinit var player: Player
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 
 		super.onCreate(savedInstanceState)
 		component.inject(this)
 
-		var binder: IBinder?
-
-		serviceConn = object : ServiceConnection {
-
-			override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
-				binder = p1 as PlayerService.MusicPlayerServiceBinder
-				try {
-					val playerMediaController = MediaController(
-						this@MusicActivity,
-						(binder as PlayerService.MusicPlayerServiceBinder).getMediasessionToken()
-					)
-					playerMediaController.registerCallback(
-						object : MediaController.Callback() {
-							override fun onPlaybackStateChanged(state: PlaybackState?) {
-								super.onPlaybackStateChanged(state)
-								state?.let {
-									val playing = it.state == PlaybackState.STATE_PLAYING
-									scope.launch {
-										playingFlow.emit(playing)
-									}
-								}
-							}
-
-							override fun onMetadataChanged(metadata: MediaMetadata?) {
-								super.onMetadataChanged(metadata)
-								try {
-									val track = Track(
-										metadata?.getLong(PlayerService.CUSTOM_METADATA_KEY_ID)?.toInt() ?: throw RuntimeException("Metadata id not found"),
-										metadata.getString(MediaMetadata.METADATA_KEY_TITLE),
-										metadata.getString(MediaMetadata.METADATA_KEY_ARTIST),
-										metadata.getString(PlayerService.CUSTOM_METADATA_KEY_TAGS)
-											.split(PlayerService.CUSTOM_METADATA_TAGS_DELIMITER)
-									)
-									scope.launch {
-										trackFlow.emit(track)
-									}
-								}
-								catch (e: RuntimeException) {
-									Log.d("AudionauticaTag", e.message ?: "no message")
-								}
-							}
-						}
-					)
-					scope.launch { _playerMediaControllerFlow.emit(playerMediaController) }
-				} catch (e: RemoteException) {
-					scope.launch { _playerMediaControllerFlow.emit(null) }
-				}
-			}
-
-			override fun onServiceDisconnected(p0: ComponentName?) {
-				scope.launch { _playerMediaControllerFlow.emit(null) }
-				binder = null
+		scope.launch {
+			getLogoutFlowUseCase().collect {
+				launchAccessActivity()
 			}
 		}
+
 		isOffline = intent.getBooleanExtra(IS_OFFLINE_EXTRA_KEY, false)
-		bindService(
-			PlayerService.newIntent(this@MusicActivity),
-			serviceConn as ServiceConnection,
-			BIND_AUTO_CREATE
+
+		val sessionToken = SessionToken(
+			this@MusicActivity,
+			ComponentName(this@MusicActivity, PlayerService::class.java)
 		)
+		val mediaControllerFuture = MediaController.Builder(
+			this@MusicActivity,
+			sessionToken,
+		).buildAsync()
+
+		mediaControllerFuture.addListener({
+			player = mediaControllerFuture.get()
+		}, MoreExecutors.directExecutor())
 
 		setContent {
 			AudionauticaTheme {
@@ -135,7 +88,6 @@ class MusicActivity : ComponentActivity() {
 					viewModelFactory = viewModelFactory,
 					offlineMode = isOffline,
 					launchCreateTrackActivity = { launchAddTrackActivity() },
-					playerMediaControllerFlow = playerMediaControllerFlow,
 					onRequestImage = {
 						getImage.launch("image/*")
 					},
@@ -156,6 +108,15 @@ class MusicActivity : ComponentActivity() {
 		super.onDestroy()
 		serviceConn?.let { unbindService(it) }
 		scope.cancel()
+	}
+
+	private fun launchAccessActivity() {
+		startActivity(
+			AccessActivity.newIntent(
+				this@MusicActivity,
+				"Authorization expired!"
+			)
+		)
 	}
 
 	companion object {

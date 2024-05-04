@@ -1,4 +1,4 @@
-package com.kaelesty.audionautica.presentation.composables.dialogues
+package com.kaelesty.audionautica.presentation.playlists.addtracktoplaylist
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -29,22 +30,28 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.kaelesty.audionautica.domain.entities.Track
 import com.kaelesty.audionautica.domain.playlists.UserPlaylist
+import com.kaelesty.audionautica.presentation.getFont
 import com.kaelesty.audionautica.presentation.ui.fonts.SpaceGrotesk
+import com.kaelesty.audionautica.presentation.viewmodels.AccessViewModel_Factory
+import com.kaelesty.audionautica.presentation.viewmodels.ViewModelFactory
 
 @Composable
 fun AddTrackToPlalistDialog(
-	onDimissRequest: () -> Unit,
-	onAcceptRequest: (Int) -> Unit,
-	playlists: List<UserPlaylist.Entire>
+	onDismissRequest: () -> Unit,
+	track: Track,
+	viewmodelFactory: ViewModelFactory
 ) {
-	Dialog(
-		onDismissRequest = { onDimissRequest() }
-	) {
 
-		var selectedPosition by rememberSaveable {
-			mutableIntStateOf(0)
-		}
+	val vm: AddTrackToPlaylistViewModel = viewModel(factory = viewmodelFactory)
+
+	val playlists by vm.playlistCollection.observeAsState(listOf())
+
+	Dialog(
+		onDismissRequest = { onDismissRequest() }
+	) {
 
 		Card(
 			modifier = Modifier
@@ -57,7 +64,7 @@ fun AddTrackToPlalistDialog(
 				text = "Select Playlist",
 				fontSize = 24.sp,
 				fontStyle = FontStyle.Normal,
-				fontFamily = SpaceGrotesk,
+				fontFamily = getFont(),
 				fontWeight = FontWeight.SemiBold,
 				color = MaterialTheme.colorScheme.onSurface,
 				modifier = Modifier
@@ -74,10 +81,13 @@ fun AddTrackToPlalistDialog(
 						Row(
 							modifier = Modifier
 								.clickable {
-									selectedPosition = index
+									vm.addTrackToPlaylist(
+										trackId = track.id,
+										playlistId = item.id
+									)
 								}
 						) {
-							if (selectedPosition == index) {
+							if (track.id in item.trackIds) {
 								Icon(
 									imageVector = Icons.Filled.Check,
 									contentDescription = "Selected",
@@ -90,7 +100,7 @@ fun AddTrackToPlalistDialog(
 								text = item.title,
 								fontSize = 20.sp,
 								fontStyle = FontStyle.Normal,
-								fontFamily = SpaceGrotesk,
+								fontFamily = getFont(),
 								fontWeight = FontWeight.SemiBold,
 								color = MaterialTheme.colorScheme.onSurface,
 							)
@@ -100,28 +110,6 @@ fun AddTrackToPlalistDialog(
 				}
 			)
 			Spacer(modifier = Modifier.height(8.dp))
-			Row(
-				modifier = Modifier
-					.fillMaxWidth()
-					.padding(horizontal = 10.dp)
-					.padding(top = 8.dp)
-					.padding(bottom = 12.dp)
-			) {
-				Spacer(modifier = Modifier.weight(1f))
-				Text(
-					modifier = Modifier
-						.padding(end = 12.dp)
-						.clickable {
-							onAcceptRequest(
-								playlists[selectedPosition].id
-							)
-						},
-					text = "OK",
-					textAlign = TextAlign.End,
-					fontSize = 20.sp,
-					fontFamily = SpaceGrotesk,
-				)
-			}
 		}
 	}
 }

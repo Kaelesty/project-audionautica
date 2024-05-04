@@ -19,6 +19,7 @@ fun MusicNavGraph(
 	musicLibraryScreenContent: @Composable () -> Unit,
 	addPlaylistContent: @Composable () -> Unit,
 	playlistDetailsContent: @Composable (UserPlaylist.Entire) -> Unit,
+	settingsContent: @Composable () -> Unit,
 ) {
 	NavHost(
 		navController = navHostController,
@@ -56,6 +57,10 @@ fun MusicNavGraph(
 
 		composable(Screen.MusicLibrary.route) {
 			musicLibraryScreenContent()
+		}
+
+		composable(Screen.Settings.route) {
+			settingsContent()
 		}
 	}
 }

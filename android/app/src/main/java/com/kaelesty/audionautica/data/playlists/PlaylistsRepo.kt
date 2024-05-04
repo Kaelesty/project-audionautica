@@ -6,6 +6,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import com.kaelesty.audionautica.data.local.daos.PlaylistDao
 import com.kaelesty.audionautica.data.mappers.PlaylistMapper
+import com.kaelesty.audionautica.data.remote.entities.SearchDto
+import com.kaelesty.audionautica.data.repos.AccessRepo
+import com.kaelesty.audionautica.data.repos.tools.CacheTool
 import com.kaelesty.audionautica.data.repos.tools.FileUploaderTool
 import com.kaelesty.audionautica.data.repos.tools.JwtTool
 import com.kaelesty.audionautica.data.repos.tools.UrlTool
@@ -21,10 +24,104 @@ class PlaylistsRepo @Inject constructor(
 	private val jwtTool: JwtTool,
 	private val urlTool: UrlTool,
 	private val uploader: FileUploaderTool,
-	private val playlistMapper: PlaylistMapper
+	private val playlistMapper: PlaylistMapper,
+	private val accessRepo: AccessRepo,
+	private val cacheTool: CacheTool,
 ): IPlaylistsRepo {
 
-	val PLAYLIST_TRACKIDS_DELIMITER = "/"
+	private val PLAYLIST_TRACKIDS_DELIMITER = "/"
+
+	override suspend fun nukeTable() {
+		cacheTool.clearPlaylistsCache()
+	}
+
+	override suspend fun updatePlaylistTrackset(playlistId: Int, trackIds: List<Int>): Boolean {
+		return try {
+			val response = apiService.updatePlaylistTrackset(
+				token = jwtTool.getToken(),
+				body = UpdatePlaylistTracksetRequest(
+					playlistId, trackIds
+				)
+			)
+			when (response.code()) {
+				200 -> {
+					updatePlaylistById(playlistId)
+					true
+				}
+				418 -> {
+					accessRepo.logout()
+					false
+				}
+				else -> {
+					false
+				}
+			}
+		} catch (e: Exception) {
+			false
+		}
+	}
+
+	override suspend fun searchPlaylists(query: String): List<UserPlaylist.Entire> {
+		return try {
+			val response = apiService.searchPlaylists(
+				token = jwtTool.getToken(),
+				body = SearchDto(
+					query
+				)
+			)
+			when (response.code()) {
+				200 -> {
+					response.body()?.playlists?.map { playlistMapper.IdResponseToDomain(
+						res = it,
+						imageUrl = urlTool.getPlaylistPosterUrl(
+							id = it.id,
+							token = jwtTool.getToken()
+						)
+					) } ?: listOf()
+				}
+				418 -> {
+					accessRepo.logout()
+					throw IOException()
+				}
+				else -> {
+					throw IOException()
+				}
+			}
+		} catch (e: Exception) {
+			listOf()
+		}
+	}
+
+	override suspend fun addTrackToPlaylist(trackId: Int, playlistId: Int): Boolean {
+		return try {
+			val response = apiService.addTrackToPlayList(
+				token = jwtTool.getToken(),
+				body = AddTrackToPlaylistRequest(
+					track_id = trackId,
+					playlist_id = playlistId,
+				)
+			)
+			if (response.code() == 418) {
+				accessRepo.logout()
+			}
+			if (response.code() == 200) {
+				updatePlaylistById(playlistId)
+				true
+			}
+			false
+		} catch (e: Exception) {
+			false
+		}
+	}
+
+	private suspend fun updatePlaylistById(playlistId: Int) {
+		val playlist = loadEntirePlaylist(playlistId)
+		if (playlist is UserPlaylist.Entire) {
+			dao.updatePlaylist(
+				playlistMapper.domainToDbModel(playlist)
+			)
+		}
+	}
 
 	override suspend fun updatePlaylistCollection() {
 		try {
@@ -35,14 +132,12 @@ class PlaylistsRepo @Inject constructor(
 				200 -> {
 					response.body()?.let {
 						(it.created + it.liked).forEach { id ->
-							val playlist = loadEntirePlaylist(id)
-							if (playlist is UserPlaylist.Entire) {
-								dao.updatePlaylist(
-									playlistMapper.domainToDbModel(playlist)
-								)
-							}
+							updatePlaylistById(id)
 						}
 					}
+				}
+				418 -> {
+					accessRepo.logout()
 				}
 				else -> {
 
@@ -75,6 +170,10 @@ class PlaylistsRepo @Inject constructor(
 						)
 					}
 				}
+				418 -> {
+					accessRepo.logout()
+					return UserPlaylists.Error
+				}
 				else -> {
 					return UserPlaylists.Error
 				}
@@ -85,15 +184,20 @@ class PlaylistsRepo @Inject constructor(
 		return UserPlaylists.Error
 	}
 
+	override fun loadLiveEntirePlaylist(playlistId: Int): LiveData<UserPlaylist> {
+		return dao.getLivePlaylist(playlistId).map { playlistMapper.DbModelToDomain(it) ?: UserPlaylist.IdOnly(playlistId) }
+	}
+
 	override suspend fun uploadPlaylist(playlist: UserPlaylist.Entire, uri: Uri): Boolean {
 		return try {
+			val file = uploader.getMultipartOfFile(uri, "Image")
 			val response = apiService.uploadPlaylist(
 				title = playlist.title,
 				desc = playlist.desc,
 				token = jwtTool.getToken(),
 				trackIds = playlist.trackIds.joinToString(PLAYLIST_TRACKIDS_DELIMITER),
 				isPrivate = playlist.isPrivate,
-				posterFile = uploader.getMultipartOfFile(uri, "Image"),
+				posterFile = file,
 				ext = uploader.getFileExtension(uri) ?: throw Exception(),
 			)
 			response.code() == 200
@@ -110,6 +214,9 @@ class PlaylistsRepo @Inject constructor(
 					playlist_id = playlist_id.toString()
 				)
 			)
+			if (response.code() == 418) {
+				accessRepo.logout()
+			}
 			return response.code() == 200
 		} catch (e: Exception) {
 			false
@@ -135,13 +242,16 @@ class PlaylistsRepo @Inject constructor(
 						)
 					)
 				}
+				418 -> {
+					accessRepo.logout()
+					throw IOException()
+				}
 				else -> {
 					throw IOException()
 				}
 			}
 		}
 		catch (e: Exception) {
-			Log.d("PlaylistRepo.kt", e.message.toString())
 			UserPlaylist.IdOnly(playlist_id)
 		}
 	}

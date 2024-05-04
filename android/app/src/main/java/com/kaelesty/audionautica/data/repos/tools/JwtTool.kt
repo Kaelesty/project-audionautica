@@ -1,28 +1,28 @@
 package com.kaelesty.audionautica.data.repos.tools
 
 import android.util.Log
-import com.kaelesty.audionautica.data.local.daos.TokenDao
+import com.kaelesty.audionautica.data.local.daos.AccessDao
 import com.kaelesty.audionautica.data.local.dbmodels.TokenDbModel
 import javax.inject.Inject
 
 class JwtTool @Inject constructor(
-	private val tokenDao: TokenDao,
+	private val accessDao: AccessDao,
 ) {
 
 	fun saveToken(jwt: String) {
 		Log.d("AudionauticaTag", "Saved: $jwt")
-		tokenDao.saveToken(
+		accessDao.saveToken(
 			TokenDbModel(0, jwt)
 		)
 	}
 
 	fun delToken() {
-		tokenDao.dropToken()
+		accessDao.dropToken()
 	}
 
 	fun getToken(): String {
-		val jwt = tokenDao.getToken().jwt
+		val jwt = accessDao.getToken()?.jwt
 		Log.d("AudionauticaTag", "Loaded: $jwt")
-		return jwt
+		return jwt ?: ""
 	}
 }

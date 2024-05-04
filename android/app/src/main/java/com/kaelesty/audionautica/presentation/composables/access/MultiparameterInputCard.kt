@@ -43,10 +43,10 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kaelesty.audionautica.presentation.getFont
 import com.kaelesty.audionautica.presentation.ui.fonts.SpaceGrotesk
 import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
 
-@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun MultiparameterInputCard(
 	title: String = "Multiparameter Input Card",
@@ -75,7 +75,7 @@ fun MultiparameterInputCard(
 				text = title,
 				fontSize = 24.sp,
 				fontStyle = FontStyle.Normal,
-				fontFamily = SpaceGrotesk,
+				fontFamily = getFont(),
 				fontWeight = FontWeight.SemiBold,
 				color = colorScheme.onSurface,
 				modifier = Modifier
@@ -96,7 +96,7 @@ fun MultiparameterInputCard(
 				leftAction?.let {
 					Text(
 						text = it.name,
-						fontFamily = SpaceGrotesk,
+						fontFamily = getFont(),
 						fontSize = 14.sp,
 						modifier = Modifier
 							.padding(horizontal = 12.dp)
@@ -111,7 +111,7 @@ fun MultiparameterInputCard(
 				rightAction?.let {
 					Text(
 						text = it.name,
-						fontFamily = SpaceGrotesk,
+						fontFamily = getFont(),
 						fontSize = 14.sp,
 						modifier = Modifier
 							.padding(horizontal = 12.dp)
@@ -144,7 +144,7 @@ fun MultiparameterInputCard(
 				Text(
 					mainAction.name,
 					color = colorScheme.onSurface,
-					fontFamily = SpaceGrotesk
+					fontFamily = getFont()
 				)
 			}
 			errorMessage?.let {
@@ -153,7 +153,7 @@ fun MultiparameterInputCard(
 					text = it,
 					color = Color.Red,
 					fontSize = 16.sp,
-					fontFamily = SpaceGrotesk,
+					fontFamily = getFont(),
 					modifier = Modifier
 						.padding(horizontal = 12.dp)
 				)
@@ -184,7 +184,7 @@ fun TextInput(
 			Text(
 				hint,
 				color = colorScheme.onSurface,
-				fontFamily = SpaceGrotesk
+				fontFamily = getFont()
 			)
 		},
 		singleLine = true,
