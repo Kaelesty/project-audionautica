@@ -342,6 +342,17 @@ class PlayListDeleteId(APIView):
             print(e)
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
+class PlayListTracksUpdate(APIView):
+    def post(self, request):
+        if not check_token(request):
+            return Response(status=status.HTTP_418_IM_A_TEAPOT)
+        playlist_id = request.data["playlist_id"]
+        tracks_id = request.data["tracks_id"]
+        playlist = PlayList.objects.get(id=playlist_id)
+        playlist.tracksid = tracks_id
+        return Response(status=status.HTTP_200_OK)
+
+
 
 class GetPlayListPoster(APIView):
     def get(self, request):
