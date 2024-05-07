@@ -7,16 +7,14 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.kaelesty.audionautica.data.local.daos.PlaylistDao
 import com.kaelesty.audionautica.data.local.daos.AccessDao
-import com.kaelesty.audionautica.data.local.daos.LocalPlaylistDao
+import com.kaelesty.audionautica.data.localplaylists.LocalPlaylistDao
 import com.kaelesty.audionautica.data.local.daos.TrackDao
-import com.kaelesty.audionautica.data.local.dbmodels.LocalPlaylistDbModel
+import com.kaelesty.audionautica.data.localplaylists.LocalPlaylistDbModel
 import com.kaelesty.audionautica.data.local.dbmodels.LoginDbModel
 import com.kaelesty.audionautica.data.local.dbmodels.PlaylistDbModel
 import com.kaelesty.audionautica.data.local.dbmodels.TokenDbModel
 import com.kaelesty.audionautica.data.local.dbmodels.TrackDbModel
 import com.kaelesty.audionautica.data.local.typeconverters.ListIntConverter
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 
 @Database(
 	entities = [

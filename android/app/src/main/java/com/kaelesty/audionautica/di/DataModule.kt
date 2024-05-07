@@ -2,7 +2,7 @@ package com.kaelesty.audionautica.di
 
 import com.kaelesty.audionautica.data.local.daos.PlaylistDao
 import com.kaelesty.audionautica.data.local.daos.AccessDao
-import com.kaelesty.audionautica.data.local.daos.LocalPlaylistDao
+import com.kaelesty.audionautica.data.localplaylists.LocalPlaylistDao
 import com.kaelesty.audionautica.data.local.daos.TrackDao
 import com.kaelesty.audionautica.data.local.dbs.MusicDatabase
 import com.kaelesty.audionautica.data.player.PlayerController

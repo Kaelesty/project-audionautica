@@ -63,9 +63,7 @@ class PlaylistMapper @Inject constructor() {
 		desc = res.description,
 		isEditable = res.isEditable,
 		isPrivate = res.isPrivate,
-		trackIds = res.trackIds.split(TRACK_IDS_STRINGIFICATION_DELIMITER)
-			.filter { it != "" }
-			.map { it.toInt()},
+		trackIds = trackIdsStringToList(res.trackIds),
 		likes = res.likes,
 		imageUrl = imageUrl
 	)
@@ -79,10 +77,12 @@ class PlaylistMapper @Inject constructor() {
 		desc = res.description,
 		isEditable = res.isEditable,
 		isPrivate = res.isPrivate,
-		trackIds = res.trackIds.split(TRACK_IDS_STRINGIFICATION_DELIMITER)
-			.filter { it != "" }
-			.map { it.toInt()},
+		trackIds = trackIdsStringToList(res.trackIds),
 		likes = res.likes,
 		imageUrl = imageUrl
 	)
+
+	fun trackIdsStringToList(trackIds: String) = trackIds.split(TRACK_IDS_STRINGIFICATION_DELIMITER)
+		.filter { it != "" }
+		.map { it.toInt()}
 }

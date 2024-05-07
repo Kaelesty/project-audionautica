@@ -1,12 +1,11 @@
-package com.kaelesty.audionautica.data.local.daos
+package com.kaelesty.audionautica.data.localplaylists
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.kaelesty.audionautica.data.local.dbmodels.LocalPlaylistDbModel
-import com.kaelesty.audionautica.data.local.dbmodels.PlaylistDbModel
+import com.kaelesty.audionautica.data.localplaylists.LocalPlaylistDbModel
 
 @Dao
 interface LocalPlaylistDao {

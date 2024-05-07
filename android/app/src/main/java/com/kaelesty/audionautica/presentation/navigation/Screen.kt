@@ -11,11 +11,12 @@ sealed class Screen(
 	companion object {
 
 		const val KEY_PLAYLIST = "playlist"
+		const val KEY_LIST_SOURCE = "source"
 
 		private const val ROUTE_MUSIC_SEARCH = "music_search"
 		private const val ROUTE_PLAYLISTS_ORIGIN = "playlists"
 
-		private const val ROUTE_PLAYLISTS_LIST = "playlists_list"
+		private const val ROUTE_PLAYLISTS_LIST = "playlists_list/{$KEY_LIST_SOURCE}"
 		private const val ROUTE_PLAYLISTS_CREATE = "playlists_create"
 		private const val ROUTE_PLAYLISTS_DETAILS = "playlists_details/{$KEY_PLAYLIST}"
 
@@ -27,7 +28,26 @@ sealed class Screen(
 	object MusicSearch: Screen(ROUTE_MUSIC_SEARCH)
 
 	object Playlists: Screen(ROUTE_PLAYLISTS_ORIGIN)
-	object PlaylistsList: Screen(ROUTE_PLAYLISTS_LIST)
+	object PlaylistsList: Screen(ROUTE_PLAYLISTS_LIST) {
+
+		enum class PlaylistsSource(val str: String) {
+			Remote("remote"), Local("local");
+
+			companion object {
+				fun fromString(string: String) = when(string) {
+					Remote.str -> Remote
+					Local.str -> Local
+					else -> throw IllegalArgumentException("Could not convert $string to PlaylistsSource")
+				}
+			}
+		}
+
+		private const val ROUTE = "playlists_list"
+
+		fun getRouteWithArgs(source: PlaylistsSource) = "$ROUTE/${source.str}"
+	}
+
+
 	object PlaylistsCreate: Screen(ROUTE_PLAYLISTS_CREATE)
 
 	object PlaylistsDetails: Screen(ROUTE_PLAYLISTS_DETAILS) {

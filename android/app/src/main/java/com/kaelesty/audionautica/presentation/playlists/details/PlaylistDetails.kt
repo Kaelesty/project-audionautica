@@ -67,10 +67,6 @@ fun PlaylistDetails(
 	val vm = viewModel<PlaylistDetailsViewModel>(factory = viewModelFactory)
 	val playerViewModel = viewModel<PlayerViewModel>(factory = viewModelFactory)
   
-	LaunchedEffect(key1 = playlist.id) {
-		vm.setPlaylist(playlist)
-	}
-
 	LaunchedEffect(key1 = playlistId) {
 		vm.setPlaylist(playlistId)
 	}

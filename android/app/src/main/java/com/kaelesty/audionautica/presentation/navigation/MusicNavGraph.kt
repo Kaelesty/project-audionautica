@@ -15,7 +15,7 @@ fun MusicNavGraph(
 	navHostController: NavHostController,
 	startDestination: String,
 	musicSearchScreenContent: @Composable () -> Unit,
-	musicPlaylistsScreenContent: @Composable () -> Unit,
+	musicPlaylistsScreenContent: @Composable (Screen.PlaylistsList.PlaylistsSource) -> Unit,
 	musicLibraryScreenContent: @Composable () -> Unit,
 	addPlaylistContent: @Composable () -> Unit,
 	playlistDetailsContent: @Composable (UserPlaylist.Entire) -> Unit,
@@ -34,8 +34,18 @@ fun MusicNavGraph(
 			startDestination = Screen.PlaylistsList.route,
 			route = Screen.Playlists.route
 		) {
-			composable(Screen.PlaylistsList.route) {
-				musicPlaylistsScreenContent()
+			composable(
+				route = Screen.PlaylistsList.route,
+				arguments = listOf(
+					navArgument(Screen.KEY_LIST_SOURCE) {
+						type = NavType.StringType
+					}
+				)
+			) {
+				val str = it.arguments?.getString(Screen.KEY_LIST_SOURCE) ?: Screen.PlaylistsList.PlaylistsSource.Remote.str
+				musicPlaylistsScreenContent(
+					Screen.PlaylistsList.PlaylistsSource.fromString(str)
+				)
 			}
 			composable(Screen.PlaylistsCreate.route) {
 				addPlaylistContent()

@@ -91,7 +91,19 @@ fun MusicScreen(
 					},
 					navigateToDetailsScreen = {
 						navigationState.navHostController.navigate(Screen.PlaylistsDetails.getRouteWithArgs(it))
-					}
+					},
+					source = it,
+					navigateToLocalList = {
+						navigationState.navHostController.navigate(Screen.PlaylistsList.getRouteWithArgs(
+							Screen.PlaylistsList.PlaylistsSource.Local
+						))
+					},
+					navigateToRemoteList = {
+						navigationState.navHostController.navigate(Screen.PlaylistsList.getRouteWithArgs(
+							Screen.PlaylistsList.PlaylistsSource.Remote
+						))
+					},
+
 				)
 			},
 			musicLibraryScreenContent = {
