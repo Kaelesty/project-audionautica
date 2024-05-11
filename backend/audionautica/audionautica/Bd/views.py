@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.exceptions import AuthenticationFailed
 from .models import Users, Traks, PlayList
+from django.db.models import Q
 from .serializers import (
     UsersSerializer,
     RegisterSerializer,
@@ -244,44 +245,60 @@ class TrackDeleteId(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
+# class TrackSearch(APIView):
+#     def post(self, request):
+#         if not check_token(request):
+#             return Response(status=status.HTTP_418_IM_A_TEAPOT)
+#         query = request.data["query"].lower()
+#         result = Traks.objects.filter(artist=query)
+#         all_tracks = Traks.objects.all()
+#         list = []
+#         response = []
+#         json_response = {}
+#         for i in range(Traks.objects.count()):
+#             res = []
+#             res.append(all_tracks[i].title)
+#             res.append(all_tracks[i].artist)
+#             res.append(all_tracks[i].tags)
+#             res.append(str(all_tracks[i].pk))
+#             list.append(res)
+#         for i in range(len(list)):
+#             string = ''.join(list[i])
+#             if query in string:
+#                 response.append(list[i])
+#         if len(response) == 0:
+#             dikt = {}
+#             dikt["tracks"] = []
+#             return Response(dikt)
+#         else:
+#             array = []
+#             for i in range(len(response)):
+#                 track = {}
+#                 track['title'] = response[i][0]
+#                 track['artist'] = response[i][1]
+#                 track['tags'] = response[i][2]
+#                 track['id'] = response[i][3]
+#                 array.append(track)
+#             print(array)
+#             json_response['tracks'] = array
+#         return Response(json_response)
+
 class TrackSearch(APIView):
     def post(self, request):
         if not check_token(request):
             return Response(status=status.HTTP_418_IM_A_TEAPOT)
-        query = request.data["query"].lower()
-        result = Traks.objects.filter(artist=query)
-        all_tracks = Traks.objects.all()
-        list = []
-        response = []
-        json_response = {}
-        for i in range(Traks.objects.count()):
-            res = []
-            res.append(all_tracks[i].title)
-            res.append(all_tracks[i].artist)
-            res.append(all_tracks[i].tags)
-            res.append(str(all_tracks[i].pk))
-            list.append(res)
-        for i in range(len(list)):
-            string = ''.join(list[i])
-            if query in string:
-                response.append(list[i])
-        if len(response) == 0:
-            dikt = {}
-            dikt["tracks"] = []
-            return Response(dikt)
-        else:
-            array = []
-            for i in range(len(response)):
-                track = {}
-                track['title'] = response[i][0]
-                track['artist'] = response[i][1]
-                track['tags'] = response[i][2]
-                track['id'] = response[i][3]
-                array.append(track)
-            print(array)
-            json_response['tracks'] = array
+        query = request.data["query"]
+        result = Traks.objects.filter(Q(title__icontains=query) | Q(artist__icontains=query) | Q(tags__icontains=query)).all()
+        array = []
+        for i in result:
+            track = {}
+            track["id"] = i.id
+            track["title"] = i.title
+            track["artist"] = i.artist
+            track["tags"] = i.tags
+            array.append(track)
+        json_response = {'tracks': array}
         return Response(json_response)
-
 
 class TrackInfoId(APIView):
     def post(self, request):
@@ -496,8 +513,19 @@ class PlayListSearch(APIView):
         if not check_token(request):
             return Response(status=status.HTTP_418_IM_A_TEAPOT)
         query = request.data["query"]
-        result = PlayList.objects.filter(Q(title__icontains=query) | Q(description__icontains=query))
-        json_response['playlists'] = result
+        result = PlayList.objects.filter(Q(title__icontains=query) | Q(description__icontains=query)).all()
+        array = []
+        for i in result:
+            playlist = {}
+            playlist["id"] = i.id
+            playlist["title"] = i.title
+            playlist["creatorid"] =i.creatorid
+            playlist["description"] =i.description
+            playlist["tracksid"] =i.tracksid
+            playlist["liked"] =i.liked
+            playlist["isprivat"] =i.isprivat
+            array.append(playlist)
+        json_response = {'playlists': array}
         return Response(json_response)
 
 
