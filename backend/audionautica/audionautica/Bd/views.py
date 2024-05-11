@@ -350,6 +350,7 @@ class PlayListTracksUpdate(APIView):
         tracks_id = request.data["tracks_id"]
         playlist = PlayList.objects.get(id=playlist_id)
         playlist.tracksid = tracks_id
+        playlist.save()
         return Response(status=status.HTTP_200_OK)
 
 
@@ -460,34 +461,43 @@ class DisLikePlayList(APIView):
             return Response(status=status.HTTP_200_OK)
 
 
+# class PlayListSearch(APIView):
+#     def post(self, request):
+#         if not check_token(request):
+#             return Response(status=status.HTTP_418_IM_A_TEAPOT)
+#         query = request.data["query"].lower()
+#         result = PlayList.objects.filter(title=query)
+#         all_playlists = PlayList.objects.all()
+#         list = []
+#         response = []
+#         json_response = {}
+#         for i in range(PlayList.objects.count()):
+#             res = []
+#             res.append(all_playlists[i].title)
+#             list.append(res)
+#         for i in range(len(list)):
+#             string = ''.join(list[i])
+#             if query in string:
+#                 response.append(list[i])
+#         if len(response) == 0:
+#             return HttpResponse('<h1>PlayList not exist</h1>')
+#         else:
+#             array = []
+#             for i in range(len(response)):
+#                 playlist = {}
+#                 playlist['title'] = response[i][0]
+#                 array.append(playlist)
+#             print(array)
+#             json_response['playlists'] = array
+#         return Response(json_response)
+
 class PlayListSearch(APIView):
     def post(self, request):
         if not check_token(request):
             return Response(status=status.HTTP_418_IM_A_TEAPOT)
-        query = request.data["query"].lower()
-        result = PlayList.objects.filter(title=query)
-        all_playlists = PlayList.objects.all()
-        list = []
-        response = []
-        json_response = {}
-        for i in range(PlayList.objects.count()):
-            res = []
-            res.append(all_playlists[i].title)
-            list.append(res)
-        for i in range(len(list)):
-            string = ''.join(list[i])
-            if query in string:
-                response.append(list[i])
-        if len(response) == 0:
-            return HttpResponse('<h1>PlayList not exist</h1>')
-        else:
-            array = []
-            for i in range(len(response)):
-                playlist = {}
-                playlist['title'] = response[i][0]
-                array.append(playlist)
-            print(array)
-            json_response['playlists'] = array
+        query = request.data["query"]
+        result = PlayList.objects.filter(Q(title__icontains=query) | Q(description__icontains=query))
+        json_response['playlists'] = result
         return Response(json_response)
 
 
