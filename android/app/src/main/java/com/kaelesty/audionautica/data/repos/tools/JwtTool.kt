@@ -21,8 +21,8 @@ class JwtTool @Inject constructor(
 	}
 
 	fun getToken(): String {
-		val jwt = accessDao.getToken().jwt
+		val jwt = accessDao.getToken()?.jwt
 		Log.d("AudionauticaTag", "Loaded: $jwt")
-		return jwt
+		return jwt ?: ""
 	}
 }

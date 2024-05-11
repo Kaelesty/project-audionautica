@@ -17,7 +17,7 @@ interface AccessDao {
 	fun dropToken()
 
 	@Query("SELECT * from token WHERE id = 0")
-	fun getToken(): TokenDbModel
+	fun getToken(): TokenDbModel?
 
 	@Insert(onConflict = OnConflictStrategy.REPLACE)
 	fun saveLogin(dbModel: LoginDbModel)

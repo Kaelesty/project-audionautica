@@ -38,11 +38,13 @@ fun MusicNavigationBar(
 			NavigationItem.MusicSearch,
 			NavigationItem.MusicPlaylists,
 			NavigationItem.MusicLibrary,
+			NavigationItem.Settings,
 		)
 	} else {
 		listOf(
 			NavigationItem.MusicPlaylists,
 			NavigationItem.MusicLibrary,
+			NavigationItem.Settings,
 		)
 	}
 

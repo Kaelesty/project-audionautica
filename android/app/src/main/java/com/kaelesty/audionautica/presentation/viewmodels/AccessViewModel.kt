@@ -1,7 +1,6 @@
 package com.kaelesty.audionautica.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.kaelesty.audionautica.domain.returncodes.CheckAuthRC
 import com.kaelesty.audionautica.domain.returncodes.CheckConnectionRC
 import com.kaelesty.audionautica.domain.returncodes.LoginRC
@@ -13,6 +12,7 @@ import com.kaelesty.audionautica.domain.usecases.GetPasswordUseCase
 import com.kaelesty.audionautica.domain.usecases.LoginUseCase
 import com.kaelesty.audionautica.domain.usecases.RegisterUseCase
 import com.kaelesty.audionautica.domain.usecases.RemoveLoginUseCase
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,8 +27,10 @@ class AccessViewModel @Inject constructor(
 	private val checkAuthUseCase: CheckAuthUseCase,
 	private val getLoginsUseCase: GetLoginsUseCase,
 	private val removeLoginUseCase: RemoveLoginUseCase,
-	private val getPasswordUseCase: GetPasswordUseCase
+	private val getPasswordUseCase: GetPasswordUseCase,
 ): ViewModel() {
+
+	private val viewModelScope = CoroutineScope(Dispatchers.IO)
 
 	enum class RunMusicActivityMode {
 		ONLINE, OFFLINE
@@ -43,17 +45,36 @@ class AccessViewModel @Inject constructor(
 		data class Normal(val errorMessage: String): AccessScreenState()
 
 		data class ChooseLogin(val logins: List<String>, val errorMessage: String? = null): AccessScreenState()
+
+		class Initial(val autoAuth: Boolean = true): AccessScreenState()
 	}
 
-	private val _stateFlow = MutableStateFlow<AccessScreenState>(AccessScreenState.Loading)
+	private val _stateFlow = MutableStateFlow<AccessScreenState>(AccessScreenState.Initial())
 	val stateFlow: StateFlow<AccessScreenState> get() = _stateFlow.asStateFlow()
+
+	fun toDefaultAuth() {
+		viewModelScope.launch(Dispatchers.IO) {
+			_stateFlow.emit(
+				AccessScreenState.Normal("")
+			)
+		}
+	}
+
+	fun resetAfterFinish() {
+		viewModelScope.launch(Dispatchers.IO) {
+			_stateFlow.emit(
+				AccessScreenState.Initial(false)
+			)
+		}
+	}
 
 	fun deleteLogin(login: String, message: String? = null) {
 		viewModelScope.launch(Dispatchers.IO) {
 			removeLoginUseCase(login)
 			_stateFlow.emit(
 				AccessScreenState.ChooseLogin(
-					logins = getLoginsUseCase()
+					logins = getLoginsUseCase(),
+					errorMessage = message,
 				)
 			)
 		}
@@ -61,9 +82,9 @@ class AccessViewModel @Inject constructor(
 
 	fun autoLogin(login: String) {
 		viewModelScope.launch(Dispatchers.IO) {
+			_stateFlow.emit(AccessScreenState.Loading)
 			val password = getPasswordUseCase(login)
-			val res = loginUseCase(login, password)
-			when (res) {
+			when (loginUseCase(login, password)) {
 				LoginRC.OK -> {
 					_stateFlow.emit(AccessScreenState.Finish(RunMusicActivityMode.ONLINE))
 				}
@@ -128,7 +149,22 @@ class AccessViewModel @Inject constructor(
 		}
 	}
 
-	fun checkConnectionAndAuth() {
+	fun checkConnectionAndAuth(autoAuth: Boolean = true) {
+
+		suspend fun showLogins() {
+			val logins = getLoginsUseCase()
+			if (logins.isNotEmpty()) {
+				_stateFlow.emit(
+					AccessScreenState.ChooseLogin(logins)
+				)
+			}
+			else {
+				_stateFlow.emit(
+					AccessScreenState.Normal(errorMessage = "")
+				)
+			}
+		}
+
 		viewModelScope.launch(Dispatchers.IO) {
 			_stateFlow.emit(AccessScreenState.Loading)
 			val res = checkConnectionUseCase()
@@ -137,26 +173,19 @@ class AccessViewModel @Inject constructor(
 					_stateFlow.emit(AccessScreenState.Finish(RunMusicActivityMode.OFFLINE))
 				}
 				CheckConnectionRC.OK -> {
-					val res = checkAuthUseCase()
-					when(res) {
-						CheckAuthRC.NOT_OK -> {
-							val logins = getLoginsUseCase()
-							if (logins.isNotEmpty()) {
-								_stateFlow.emit(
-									AccessScreenState.ChooseLogin(logins)
-								)
+					if (autoAuth) {
+						when(checkAuthUseCase()) {
+							CheckAuthRC.NOT_OK -> {
+								showLogins()
 							}
-							else {
-								_stateFlow.emit(
-									AccessScreenState.Normal(errorMessage = "")
-								)
+							CheckAuthRC.OK -> {
+								_stateFlow.emit(AccessScreenState.Finish(RunMusicActivityMode.ONLINE))
 							}
-						}
-						CheckAuthRC.OK -> {
-							_stateFlow.emit(AccessScreenState.Finish(RunMusicActivityMode.ONLINE))
 						}
 					}
-
+					else {
+						showLogins()
+					}
 				}
 			}
 		}

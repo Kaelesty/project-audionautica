@@ -4,24 +4,20 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.media.MediaMetadata
-import android.media.session.MediaController
-import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
-import android.os.RemoteException
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.MutableState
-import com.kaelesty.audionautica.domain.entities.Track
-import com.kaelesty.audionautica.domain.playlists.NukePlaylistsCacheUseCase
+import androidx.media3.common.Player
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
+import com.google.common.util.concurrent.MoreExecutors
+import com.kaelesty.audionautica.domain.usecases.GetLogoutFlowUseCase
 import com.kaelesty.audionautica.presentation.composables.music.MusicScreen
 import com.kaelesty.audionautica.presentation.player.PlayerService
 import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
-import com.kaelesty.audionautica.presentation.viewmodels.MusicViewModel
 import com.kaelesty.audionautica.presentation.viewmodels.ViewModelFactory
 import com.kaelesty.audionautica.system.ModifiedApplication
 import kotlinx.coroutines.CoroutineScope
@@ -29,17 +25,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class MusicActivity : ComponentActivity() {
 
 
-	@Inject lateinit var viewModelFactory: ViewModelFactory
+	@Inject
+	lateinit var viewModelFactory: ViewModelFactory
+	@Inject
+	lateinit var getLogoutFlowUseCase: GetLogoutFlowUseCase
 
 	private val component by lazy {
 		(application as ModifiedApplication).component
@@ -59,29 +55,33 @@ class MusicActivity : ComponentActivity() {
 		}
 	}
 
+	lateinit var player: Player
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 
 		super.onCreate(savedInstanceState)
 		component.inject(this)
 
-		var binder: IBinder?
-
-		serviceConn = object : ServiceConnection {
-
-			override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
-				binder = p1 as PlayerService.MusicPlayerServiceBinder
-			}
-
-			override fun onServiceDisconnected(p0: ComponentName?) {
-				binder = null
+		scope.launch {
+			getLogoutFlowUseCase().collect {
+				launchAccessActivity()
 			}
 		}
+
 		isOffline = intent.getBooleanExtra(IS_OFFLINE_EXTRA_KEY, false)
-		bindService(
-			PlayerService.newIntent(this@MusicActivity),
-			serviceConn as ServiceConnection,
-			BIND_AUTO_CREATE
+
+		val sessionToken = SessionToken(
+			this@MusicActivity,
+			ComponentName(this@MusicActivity, PlayerService::class.java)
 		)
+		val mediaControllerFuture = MediaController.Builder(
+			this@MusicActivity,
+			sessionToken,
+		).buildAsync()
+
+		mediaControllerFuture.addListener({
+			player = mediaControllerFuture.get()
+		}, MoreExecutors.directExecutor())
 
 		setContent {
 			AudionauticaTheme {
@@ -109,6 +109,15 @@ class MusicActivity : ComponentActivity() {
 		super.onDestroy()
 		serviceConn?.let { unbindService(it) }
 		scope.cancel()
+	}
+
+	private fun launchAccessActivity() {
+		startActivity(
+			AccessActivity.newIntent(
+				this@MusicActivity,
+				"Authorization expired!"
+			)
+		)
 	}
 
 	companion object {

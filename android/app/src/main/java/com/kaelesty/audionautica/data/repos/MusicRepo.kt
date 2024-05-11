@@ -48,6 +48,7 @@ class MusicRepo @Inject constructor(
 	private val application: Application,
 	private val jwtTool: JwtTool,
 	private val uploader: FileUploaderTool,
+	private val accessRepo: AccessRepo,
 ) : IMusicRepo {
 
 	private val _tracksQueue = MutableSharedFlow<TracksToPlay>()
@@ -119,8 +120,16 @@ class MusicRepo @Inject constructor(
 				token = jwtTool.getToken(),
 				DownloadTrackDto(id)
 			)
-			val body = response.body() ?: throw IOException("Empty body!")
-			saveFile(body, id)
+			when (response.code()) {
+				200 -> {
+					val body = response.body() ?: throw IOException("Empty body!")
+					saveFile(body, id)
+				}
+				418 -> {
+					accessRepo.logout()
+				}
+				else -> throw Exception()
+			}
 
 		} catch (e: Exception) {
 			Log.d("AudionauticaTag", e.message.toString())
@@ -181,6 +190,10 @@ class MusicRepo @Inject constructor(
 			)
 			return when (request.code()) {
 				200 -> UploadTrackRC.OK
+				418 -> {
+					accessRepo.logout()
+					UploadTrackRC.SERVER_ERROR
+				}
 				else -> UploadTrackRC.SERVER_ERROR
 			}
 		} catch (e: IOException) {
@@ -198,6 +211,9 @@ class MusicRepo @Inject constructor(
 			response.body()?.let { body ->
 				if (response.code() == 200) {
 					return body.tracks.map { trackMapper.dtoToDomain(it) }
+				}
+				else if (response.code() == 418) {
+					accessRepo.logout()
 				}
 			}
 			throw IllegalStateException("Tracks search failed.")
@@ -328,6 +344,10 @@ class MusicRepo @Inject constructor(
 			when (response.code()) {
 				200 -> {
 					return trackMapper.infoIdResponseToDomain(id, response.body() ?: throw IOException())
+				}
+				418 -> {
+					accessRepo.logout()
+					throw IOException()
 				}
 				else -> {
 					throw IOException()

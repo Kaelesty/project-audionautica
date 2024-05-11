@@ -22,6 +22,8 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +33,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,15 +60,30 @@ import com.kaelesty.audionautica.presentation.viewmodels.ViewModelFactory
 
 @Composable
 fun PlaylistDetails(
-	playlist: UserPlaylist.Entire,
+	playlistId: Int,
 	viewModelFactory: ViewModelFactory
 ) {
 
 	val vm = viewModel<PlaylistDetailsViewModel>(factory = viewModelFactory)
 	val playerViewModel = viewModel<PlayerViewModel>(factory = viewModelFactory)
   
-	LaunchedEffect(key1 = playlist.id) {
-		vm.setPlaylist(playlist)
+	LaunchedEffect(key1 = playlistId) {
+		vm.setPlaylist(playlistId)
+	}
+
+	val playlist by vm.playlist.observeAsState(null)
+
+	var editTracksetDialogState by rememberSaveable {
+		mutableStateOf(false)
+	}
+
+	if (playlist == null) {
+		Loading()
+		return
+	}
+
+	LaunchedEffect(key1 = (playlist as UserPlaylist.Entire).trackIds.size, key2 = playlistId) {
+		vm.loadTracks(playlist as UserPlaylist.Entire)
 	}
 
 	val playerState by playerViewModel.playerState.collectAsState()
@@ -74,27 +95,46 @@ fun PlaylistDetails(
 			is PlaylistDetailsViewModel.PlaylistDetailsState.Empty -> {
 				Loading()
 			}
+
 			is PlaylistDetailsViewModel.PlaylistDetailsState.TracksLoaded -> {
 				with(state as PlaylistDetailsViewModel.PlaylistDetailsState.TracksLoaded) {
 					TopPlaylistCard(
-						playlist = playlist,
+						playlist = playlist as UserPlaylist.Entire,
 						vm = vm,
-						playerState = playerState
+						playerState = playerState,
+						onEnableTracksetEditing = {
+							editTracksetDialogState = true
+						}
 					)
 					Tracks(
 						tracks = tracks,
-						playlist = playlist,
+						playlist = playlist as UserPlaylist.Entire,
 						playerState = playerState,
 						vm = vm
 					)
+					if (editTracksetDialogState) {
+						UpdatePlaylistTracksetDialog(
+							onSubmit = {
+								vm.updatePlaylistTrackset(it)
+								editTracksetDialogState = false
+							},
+							onDismiss = { editTracksetDialogState = false },
+							tracks = tracks,
+							playlist = playlist as UserPlaylist.Entire
+						)
+					}
 				}
 
 			}
+
 			is PlaylistDetailsViewModel.PlaylistDetailsState.LoadingTracks -> {
 				TopPlaylistCard(
-					playlist = (state as PlaylistDetailsViewModel.PlaylistDetailsState.LoadingTracks).playlist,
+					playlist = playlist as UserPlaylist.Entire,
 					vm = vm,
-					playerState = playerState
+					playerState = playerState,
+					onEnableTracksetEditing = {
+						// nothing, tracks are loading
+					}
 				)
 				Loading()
 			}
@@ -126,9 +166,7 @@ fun Tracks(
 						)
 					}
 				}
-			}
-
-			else {
+			} else {
 				Card(
 					colors = CardDefaults.cardColors(
 						containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
@@ -140,8 +178,7 @@ fun Tracks(
 				) {
 					Column(
 						modifier = Modifier
-							.padding(16.dp)
-						,
+							.padding(16.dp),
 						horizontalAlignment = Alignment.CenterHorizontally
 					) {
 						Text(
@@ -168,9 +205,6 @@ fun Tracks(
 		LazyColumn {
 			itemsIndexed(
 				items = tracks,
-				key = { index, item ->
-					item.id
-				}
 			) { index, it ->
 				Card(
 					colors = CardDefaults.cardColors(
@@ -222,7 +256,8 @@ fun Tracks(
 						}
 						if (it.id == playerState.meta?.id && playlist.id == playerState.playlistId) {
 							Icon(
-								Icons.Filled.KeyboardArrowLeft, contentDescription = "current track cursor",
+								Icons.Filled.KeyboardArrowLeft,
+								contentDescription = "current track cursor",
 								modifier = Modifier
 									.size(30.dp)
 							)
@@ -241,7 +276,8 @@ fun Tracks(
 fun TopPlaylistCard(
 	playlist: UserPlaylist.Entire,
 	vm: PlaylistDetailsViewModel,
-	playerState: PlayerState
+	playerState: PlayerState,
+	onEnableTracksetEditing: ()	-> Unit,
 ) {
 	Card(
 		colors = CardDefaults.cardColors(
@@ -324,11 +360,22 @@ fun TopPlaylistCard(
 				modifier = Modifier.height(120.dp),
 				contentAlignment = Alignment.Center
 			) {
+
+				var expanded by rememberSaveable {
+					mutableStateOf(false)
+				}
+
 				IconButton(
-					onClick = {  },
+					onClick = { expanded = true},
 					modifier = Modifier.size(40.dp)
 				) {
 					Icon(Icons.Filled.MoreVert, contentDescription = "details of playlist")
+				}
+				DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+					if (playlist.isEditable) {
+						DropdownMenuItem(text = { Text("Edit track order") }, onClick = { onEnableTracksetEditing() })
+					}
+
 				}
 			}
 		}

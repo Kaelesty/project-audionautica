@@ -5,6 +5,7 @@ import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class NavigationItem(
@@ -29,5 +30,11 @@ sealed class NavigationItem(
 		Screen.MusicLibrary,
 		icon = Icons.Outlined.FavoriteBorder,
 		description = "Library Navigation Icon",
+	)
+
+	object Settings: NavigationItem(
+		Screen.Settings,
+		icon = Icons.Outlined.Settings,
+		description = "Settings Icon"
 	)
 }
