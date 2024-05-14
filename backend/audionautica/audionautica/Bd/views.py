@@ -513,6 +513,9 @@ class PlayListSearch(APIView):
         if not check_token(request):
             return Response(status=status.HTTP_418_IM_A_TEAPOT)
         query = request.data["query"]
+        payload = jwt.decode(request.headers["token"], config.secret_key, algorithms=['HS256'])
+        user = Users.objects.filter(id=payload["id"]).first()
+        user_liked_playlists = list(map(int, list(filter(lambda x: x != "", user.likedplaylist.split("/")))))
         result = PlayList.objects.filter(Q(title__icontains=query) | Q(description__icontains=query)).all()
         array = []
         for i in result:
@@ -524,6 +527,7 @@ class PlayListSearch(APIView):
             playlist["tracksid"] =i.tracksid
             playlist["liked"] =i.liked
             playlist["isprivat"] =i.isprivat
+            playlist["inCollection"] = (payload["id"] == int(i.creatorid)) or (i.id in user_liked_playlists)
             array.append(playlist)
         json_response = {'playlists': array}
         return Response(json_response)
@@ -554,7 +558,7 @@ class PlayListInfoId(APIView):
         playlist_id = request.data["id"]
         playlist = PlayList.objects.filter(id=playlist_id).first()
         payload = jwt.decode(request.headers["token"], config.secret_key, algorithms=['HS256'])
-        user = Users.objaect.filter(id=payload.id).first()
+        user = Users.objects.filter(id=payload["id"]).first()
         user_liked_playlists = list(map(int, list(filter(lambda x: x != "", user.likedplaylist.split("/")))))
         dickt = {}
         dickt["title"] = playlist.title
