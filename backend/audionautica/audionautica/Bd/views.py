@@ -553,6 +553,9 @@ class PlayListInfoId(APIView):
             return Response(status=status.HTTP_418_IM_A_TEAPOT)
         playlist_id = request.data["id"]
         playlist = PlayList.objects.filter(id=playlist_id).first()
+        payload = jwt.decode(request.headers["token"], config.secret_key, algorithms=['HS256'])
+        user = Users.objaect.filter(id=payload.id).first()
+        user_liked_playlists = list(map(int, list(filter(lambda x: x != "", user.likedplaylist.split("/")))))
         dickt = {}
         dickt["title"] = playlist.title
         dickt["description"] = playlist.description
@@ -560,8 +563,7 @@ class PlayListInfoId(APIView):
         dickt["liked"] = playlist.liked
         dickt["isprivat"] = playlist.isprivat == "True"
         dickt["creator_id"] = playlist.creatorid
-        payload = jwt.decode(request.headers["token"], config.secret_key, algorithms=['HS256'])
-        dickt["editable"] = payload["id"] == int(playlist.creatorid)
+        dickt["inCollection"] = (payload["id"] == int(playlist.creatorid)) or (playlist.id in user_liked_playlists)
         return Response(dickt)
 
 
