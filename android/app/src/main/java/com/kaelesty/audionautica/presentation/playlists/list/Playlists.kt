@@ -70,7 +70,7 @@ fun Playlists(
 			.fillMaxHeight(),
 		content = {
 			items(
-				items = playlists,
+				items = playlists.filter { it.inCollection },
 				key = {
 					it.id
 				}

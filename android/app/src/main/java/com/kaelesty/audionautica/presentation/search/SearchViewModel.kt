@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kaelesty.audionautica.data.player.PlayerController
 import com.kaelesty.audionautica.domain.entities.Track
+import com.kaelesty.audionautica.domain.playlists.SearchPlaylistsUseCase
 import com.kaelesty.audionautica.domain.playlists.UserPlaylist
 import com.kaelesty.audionautica.domain.usecases.GetAllTracksUseCase
 import com.kaelesty.audionautica.domain.usecases.SaveTrackUseCase
@@ -19,6 +20,7 @@ class SearchViewModel @Inject constructor(
 	private val tracksSearchTracksUseCase: SearchTracksUseCase,
 	private val pc: PlayerController,
 	private val saveTrackUseCase: SaveTrackUseCase,
+	private val searchPlaylistsUseCase: SearchPlaylistsUseCase
 ): ViewModel() {
 
 	private val _stateFlow = MutableStateFlow<SearchState>(SearchState.Initial)
@@ -39,14 +41,10 @@ class SearchViewModel @Inject constructor(
 	}
 
 	private fun searchPlaylists(query: String) {
-		// if (query.length < 3) return
+		if (query.length < 3) return
 		viewModelScope.launch(Dispatchers.IO) {
 			_stateFlow.emit(SearchState.Loading)
-
-
-			// TODO("search playlists")
-
-
+			_stateFlow.emit(SearchState.PlaylistsResult(searchPlaylistsUseCase(query)))
 		}
 	}
 

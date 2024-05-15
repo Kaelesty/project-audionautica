@@ -1,12 +1,9 @@
 package com.kaelesty.audionautica.data.mappers
 
 
-import com.kaelesty.audionautica.data.local.dbmodels.PlaylistDbModel
+import com.kaelesty.audionautica.data.local.dbmodels.PlaylistCacheDbModel
 import com.kaelesty.audionautica.data.playlists.EntirePlaylistResponse
 import com.kaelesty.audionautica.data.playlists.IdEntirePlaylistResponse
-import com.kaelesty.audionautica.data.playlists.UserPlaylistResponse
-import com.kaelesty.audionautica.data.remote.api.ApiServiceFactory
-import com.kaelesty.audionautica.data.repos.tools.UrlTool
 import com.kaelesty.audionautica.domain.playlists.UserPlaylist
 import javax.inject.Inject
 
@@ -14,7 +11,7 @@ class PlaylistMapper @Inject constructor() {
 
 	val TRACK_IDS_STRINGIFICATION_DELIMITER = "/"
 
-	fun DbModelToDomain(dbModel: PlaylistDbModel): UserPlaylist.Entire? {
+	fun DbModelToDomain(dbModel: PlaylistCacheDbModel): UserPlaylist.Entire? {
 		return UserPlaylist.Entire(
 			id = dbModel.id,
 			title = dbModel.title ?: return null,
@@ -24,11 +21,12 @@ class PlaylistMapper @Inject constructor() {
 			imageUrl = dbModel.imageUrl ?: return null,
 			trackIds = dbModel.trackIds ?: return null,
 			likes = dbModel.likes ?: return null,
+			inCollection = dbModel.inUserCollection ?: return null
 		)
 	}
 
-	fun domainToDbModel(domain: UserPlaylist.Entire): PlaylistDbModel {
-		return PlaylistDbModel(
+	fun domainToDbModel(domain: UserPlaylist.Entire): PlaylistCacheDbModel {
+		return PlaylistCacheDbModel(
 			id = domain.id,
 			likes = domain.likes,
 			trackIds = domain.trackIds,
@@ -36,12 +34,13 @@ class PlaylistMapper @Inject constructor() {
 			title = domain.title,
 			imageUrl = domain.imageUrl,
 			isPrivate = domain.isPrivate,
-			isEditable = domain.isEditable
+			isEditable = domain.isEditable,
+			inUserCollection = domain.inCollection
 		)
 	}
 
-	fun domainToDbModel(domain: UserPlaylist.IdOnly): PlaylistDbModel {
-		return PlaylistDbModel(
+	fun domainToDbModel(domain: UserPlaylist.IdOnly): PlaylistCacheDbModel {
+		return PlaylistCacheDbModel(
 			id = domain.id,
 			likes = null,
 			trackIds = null,
@@ -49,7 +48,8 @@ class PlaylistMapper @Inject constructor() {
 			title = null,
 			imageUrl = null,
 			isPrivate = null,
-			isEditable = null
+			isEditable = null,
+			inUserCollection = null
 		)
 	}
 
@@ -65,12 +65,14 @@ class PlaylistMapper @Inject constructor() {
 		isPrivate = res.isPrivate,
 		trackIds = trackIdsStringToList(res.trackIds),
 		likes = res.likes,
-		imageUrl = imageUrl
+		imageUrl = imageUrl,
+		inCollection = res.inCollection
 	)
 
 	fun IdResponseToDomain(
 		res: IdEntirePlaylistResponse,
 		imageUrl: String,
+		inCollection: Boolean
 	) = UserPlaylist.Entire(
 		id = res.id,
 		title = res.title,
@@ -79,7 +81,8 @@ class PlaylistMapper @Inject constructor() {
 		isPrivate = res.isPrivate,
 		trackIds = trackIdsStringToList(res.trackIds),
 		likes = res.likes,
-		imageUrl = imageUrl
+		imageUrl = imageUrl,
+		inCollection = inCollection
 	)
 
 	fun trackIdsStringToList(trackIds: String) = trackIds.split(TRACK_IDS_STRINGIFICATION_DELIMITER)

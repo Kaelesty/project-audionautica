@@ -10,7 +10,7 @@ sealed class Screen(
 
 	companion object {
 
-		const val KEY_PLAYLIST = "playlist"
+		const val KEY_PLAYLIST_ID = "playlist_id"
 		const val KEY_LIST_SOURCE = "source"
 
 		private const val ROUTE_MUSIC_SEARCH = "music_search"
@@ -18,7 +18,7 @@ sealed class Screen(
 
 		private const val ROUTE_PLAYLISTS_LIST = "playlists_list/{$KEY_LIST_SOURCE}"
 		private const val ROUTE_PLAYLISTS_CREATE = "playlists_create"
-		private const val ROUTE_PLAYLISTS_DETAILS = "playlists_details/{$KEY_PLAYLIST}"
+		private const val ROUTE_PLAYLISTS_DETAILS = "playlists_details/{$KEY_PLAYLIST_ID}"
 
 		private const val ROUTE_MUSIC_LIBRARY = "music_library"
 
@@ -54,8 +54,8 @@ sealed class Screen(
 
 		private const val ROUTE = "playlists_details"
 
-		fun getRouteWithArgs(playlist: UserPlaylist.Entire): String {
-			return "$ROUTE/${Gson().toJson(playlist).encode()}"
+		fun getRouteWithArgs(playlistId: Int): String {
+			return "$ROUTE/${playlistId}"
 		}
 	}
 

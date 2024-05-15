@@ -79,7 +79,10 @@ fun MusicScreen(
 			else Screen.MusicLibrary.route,
 			musicSearchScreenContent = {
 				Search(
-					viewModelFactory = viewModelFactory
+					viewModelFactory = viewModelFactory,
+					onNavigateToPlaylistDetails = {
+						navigationState.navHostController.navigate(Screen.PlaylistsDetails.getRouteWithArgs(it.id))
+					}
 				)
 			},
 			musicPlaylistsScreenContent = {
@@ -90,7 +93,7 @@ fun MusicScreen(
 						navigationState.navHostController.navigate(Screen.PlaylistsCreate.route)
 					},
 					navigateToDetailsScreen = {
-						navigationState.navHostController.navigate(Screen.PlaylistsDetails.getRouteWithArgs(it))
+						navigationState.navHostController.navigate(Screen.PlaylistsDetails.getRouteWithArgs(it.id))
 					},
 					source = it,
 					navigateToLocalList = {
@@ -128,7 +131,14 @@ fun MusicScreen(
 				)
 			},
 			playlistDetailsContent = {
-				PlaylistDetails(playlistId = it.id, viewModelFactory = viewModelFactory)
+				PlaylistDetails(
+					playlistId = it,
+					viewModelFactory = viewModelFactory,
+					isOffline = offlineMode,
+					onFinish = {
+						navigationState.navHostController.popBackStack()
+					}
+				)
 			},
 			settingsContent = {
 				Settings(isOffline = offlineMode, viewModelFactory = viewModelFactory)

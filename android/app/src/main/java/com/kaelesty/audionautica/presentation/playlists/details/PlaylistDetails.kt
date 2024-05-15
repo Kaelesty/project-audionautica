@@ -30,7 +30,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -45,6 +47,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.kaelesty.audionautica.R
@@ -61,17 +64,19 @@ import com.kaelesty.audionautica.presentation.viewmodels.ViewModelFactory
 @Composable
 fun PlaylistDetails(
 	playlistId: Int,
-	viewModelFactory: ViewModelFactory
+	viewModelFactory: ViewModelFactory,
+	isOffline: Boolean,
+	onFinish: () -> Unit,
 ) {
 
 	val vm = viewModel<PlaylistDetailsViewModel>(factory = viewModelFactory)
 	val playerViewModel = viewModel<PlayerViewModel>(factory = viewModelFactory)
-  
+
 	LaunchedEffect(key1 = playlistId) {
 		vm.setPlaylist(playlistId)
 	}
 
-	val playlist by vm.playlist.observeAsState(null)
+	val playlist by vm.playlist.collectAsState()
 
 	var editTracksetDialogState by rememberSaveable {
 		mutableStateOf(false)
@@ -79,64 +84,74 @@ fun PlaylistDetails(
 
 	if (playlist == null) {
 		Loading()
-		return
-	}
+	} else {
+		LaunchedEffect(key1 = (playlist as UserPlaylist.Entire).trackIds.size, key2 = playlistId) {
+			vm.loadTracks(playlist as UserPlaylist.Entire)
+		}
 
-	LaunchedEffect(key1 = (playlist as UserPlaylist.Entire).trackIds.size, key2 = playlistId) {
-		vm.loadTracks(playlist as UserPlaylist.Entire)
-	}
+		val playerState by playerViewModel.playerState.collectAsState()
 
-	val playerState by playerViewModel.playerState.collectAsState()
+		val state by vm.stateFlow.collectAsState()
 
-	val state by vm.stateFlow.collectAsState()
+		Column {
+			when (state) {
+				is PlaylistDetailsViewModel.PlaylistDetailsState.Empty -> {
+					Loading()
+				}
 
-	Column {
-		when (state) {
-			is PlaylistDetailsViewModel.PlaylistDetailsState.Empty -> {
-				Loading()
-			}
+				is PlaylistDetailsViewModel.PlaylistDetailsState.TracksLoaded -> {
+					with(state as PlaylistDetailsViewModel.PlaylistDetailsState.TracksLoaded) {
+						TopPlaylistCard(
+							playlist = playlist as UserPlaylist.Entire,
+							vm = vm,
+							playerState = playerState,
+							onEnableTracksetEditing = {
+								editTracksetDialogState = true
+							},
+							isOffline = isOffline,
+							onDeletePlaylist = {
+								playlist?.id?.let {
+									vm.deletePlaylist(it)
+									onFinish()
+								}
+							}
+						)
+						Tracks(
+							tracks = tracks,
+							playlist = playlist as UserPlaylist.Entire,
+							playerState = playerState,
+							vm = vm
+						)
+						if (editTracksetDialogState) {
+							UpdatePlaylistTracksetDialog(
+								onSubmit = {
+									vm.updatePlaylistTrackset(it)
+									editTracksetDialogState = false
+								},
+								onDismiss = { editTracksetDialogState = false },
+								tracks = tracks,
+								playlist = playlist as UserPlaylist.Entire
+							)
+						}
+					}
 
-			is PlaylistDetailsViewModel.PlaylistDetailsState.TracksLoaded -> {
-				with(state as PlaylistDetailsViewModel.PlaylistDetailsState.TracksLoaded) {
+				}
+
+				is PlaylistDetailsViewModel.PlaylistDetailsState.LoadingTracks -> {
 					TopPlaylistCard(
 						playlist = playlist as UserPlaylist.Entire,
 						vm = vm,
 						playerState = playerState,
 						onEnableTracksetEditing = {
-							editTracksetDialogState = true
+							// nothing, tracks are loading
+						},
+						isOffline = isOffline,
+						onDeletePlaylist = {
+							// nothing
 						}
 					)
-					Tracks(
-						tracks = tracks,
-						playlist = playlist as UserPlaylist.Entire,
-						playerState = playerState,
-						vm = vm
-					)
-					if (editTracksetDialogState) {
-						UpdatePlaylistTracksetDialog(
-							onSubmit = {
-								vm.updatePlaylistTrackset(it)
-								editTracksetDialogState = false
-							},
-							onDismiss = { editTracksetDialogState = false },
-							tracks = tracks,
-							playlist = playlist as UserPlaylist.Entire
-						)
-					}
+					Loading()
 				}
-
-			}
-
-			is PlaylistDetailsViewModel.PlaylistDetailsState.LoadingTracks -> {
-				TopPlaylistCard(
-					playlist = playlist as UserPlaylist.Entire,
-					vm = vm,
-					playerState = playerState,
-					onEnableTracksetEditing = {
-						// nothing, tracks are loading
-					}
-				)
-				Loading()
 			}
 		}
 	}
@@ -277,8 +292,46 @@ fun TopPlaylistCard(
 	playlist: UserPlaylist.Entire,
 	vm: PlaylistDetailsViewModel,
 	playerState: PlayerState,
-	onEnableTracksetEditing: ()	-> Unit,
+	isOffline: Boolean,
+	onEnableTracksetEditing: () -> Unit,
+	onDeletePlaylist: () -> Unit,
 ) {
+
+	var playlistDeletionDialog by rememberSaveable {
+		mutableStateOf(false)
+	}
+
+	if (playlistDeletionDialog) {
+		ConfirmPlaylistDeletionDialog(
+			onAccept = {
+				onDeletePlaylist()
+			},
+			onDismiss = { playlistDeletionDialog = false },
+			playlist = playlist
+		)
+	}
+
+	val dropdownMenuOptions: MutableList<Pair<String, () -> Unit>> = mutableListOf()
+
+	if (playlist.inCollection) {
+		if (playlist.isEditable) {
+			dropdownMenuOptions.add(Pair("Edit trackset", onEnableTracksetEditing))
+			dropdownMenuOptions.add(Pair("Delete Playlist", onDeletePlaylist))
+		} else {
+			dropdownMenuOptions.add(Pair("Remove from collection") {
+				vm.removePlaylistFromCollection(
+					playlist.id
+				)
+			})
+		}
+	} else {
+		dropdownMenuOptions.add(Pair("Add to collection") {
+			vm.addPlaylistToCollection(
+				playlist.id
+			)
+		})
+	}
+
 	Card(
 		colors = CardDefaults.cardColors(
 			containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
@@ -366,14 +419,14 @@ fun TopPlaylistCard(
 				}
 
 				IconButton(
-					onClick = { expanded = true},
+					onClick = { expanded = true },
 					modifier = Modifier.size(40.dp)
 				) {
 					Icon(Icons.Filled.MoreVert, contentDescription = "details of playlist")
 				}
 				DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-					if (playlist.isEditable) {
-						DropdownMenuItem(text = { Text("Edit track order") }, onClick = { onEnableTracksetEditing() })
+					dropdownMenuOptions.forEach {
+						DropdownMenuItem(text = { Text(it.first) }, onClick = { it.second() })
 					}
 
 				}

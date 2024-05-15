@@ -11,14 +11,14 @@ import com.kaelesty.audionautica.data.localplaylists.LocalPlaylistDao
 import com.kaelesty.audionautica.data.local.daos.TrackDao
 import com.kaelesty.audionautica.data.localplaylists.LocalPlaylistDbModel
 import com.kaelesty.audionautica.data.local.dbmodels.LoginDbModel
-import com.kaelesty.audionautica.data.local.dbmodels.PlaylistDbModel
+import com.kaelesty.audionautica.data.local.dbmodels.PlaylistCacheDbModel
 import com.kaelesty.audionautica.data.local.dbmodels.TokenDbModel
 import com.kaelesty.audionautica.data.local.dbmodels.TrackDbModel
 import com.kaelesty.audionautica.data.local.typeconverters.ListIntConverter
 
 @Database(
 	entities = [
-		PlaylistDbModel::class,
+		PlaylistCacheDbModel::class,
 		TrackDbModel::class,
 		TokenDbModel::class,
 		LoginDbModel::class,

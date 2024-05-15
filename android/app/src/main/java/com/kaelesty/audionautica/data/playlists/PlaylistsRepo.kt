@@ -76,7 +76,8 @@ class PlaylistsRepo @Inject constructor(
 						imageUrl = urlTool.getPlaylistPosterUrl(
 							id = it.id,
 							token = jwtTool.getToken()
-						)
+						),
+						inCollection = it.inCollection
 					) } ?: listOf()
 				}
 				418 -> {
@@ -90,6 +91,47 @@ class PlaylistsRepo @Inject constructor(
 		} catch (e: Exception) {
 			listOf()
 		}
+	}
+
+	override suspend fun dislikePlaylist(playlistId: Int): Boolean {
+		return try {
+			val response = apiService.dislikePlaylist(
+				token = jwtTool.getToken(),
+				body = PlaylistIdRequest(
+					playlist_id = playlistId.toString()
+				)
+			)
+			if (response.code() == 418) {
+				accessRepo.logout()
+			}
+			return response.code() == 200
+		} catch (e: Exception) {
+			false
+		}
+	}
+
+	override suspend fun deletePlaylist(playlistId: Int): Boolean {
+		return try {
+			val response = apiService.deletePlaylist(
+				token = jwtTool.getToken(),
+				body = PlaylistIdRequest(
+					playlist_id = playlistId.toString()
+				)
+			)
+			if (response.code() == 418) {
+				accessRepo.logout()
+			}
+			return response.code() == 200
+		} catch (e: Exception) {
+			false
+		}
+	}
+
+	override suspend fun loadCachedPlaylist(playlistId: Int, update: Boolean): UserPlaylist.Entire? {
+		if (update) {
+			updatePlaylistById(playlistId)
+		}
+		return playlistMapper.DbModelToDomain(dao.getPlaylist(playlistId))
 	}
 
 	override suspend fun addTrackToPlaylist(trackId: Int, playlistId: Int): Boolean {
@@ -239,7 +281,7 @@ class PlaylistsRepo @Inject constructor(
 						imageUrl = urlTool.getPlaylistPosterUrl(
 							id = playlist_id,
 							token = jwtTool.getToken()
-						)
+						),
 					)
 				}
 				418 -> {

@@ -1,15 +1,12 @@
 package com.kaelesty.audionautica.domain.playlists
 
-import android.net.Uri
-
-
 
 sealed class UserPlaylist(
 	val id: Int
 ) {
 
 	class IdOnly(
-		id: Int
+		id: Int,
 	): UserPlaylist(id)
 
 	class Entire(
@@ -20,6 +17,7 @@ sealed class UserPlaylist(
 		val imageUrl: String,
 		val desc: String,
 		val isPrivate: Boolean,
-		val likes: Int
+		val likes: Int,
+		val inCollection: Boolean,
 	): UserPlaylist(id)
 }

@@ -6,7 +6,7 @@ import androidx.room.TypeConverters
 import com.kaelesty.audionautica.data.local.typeconverters.ListIntConverter
 
 @Entity(tableName = "playlists")
-class PlaylistDbModel(
+class PlaylistCacheDbModel(
 	@PrimaryKey val id: Int,
 	val title: String?,
 	val desc: String?,
@@ -14,4 +14,5 @@ class PlaylistDbModel(
 	val imageUrl: String?,
 	val isPrivate: Boolean?,
 	val likes: Int?,
+	val inUserCollection: Boolean?,
 	@field:TypeConverters(ListIntConverter::class) val trackIds: List<Int>?)

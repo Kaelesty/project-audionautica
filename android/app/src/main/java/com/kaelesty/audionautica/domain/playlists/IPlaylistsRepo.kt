@@ -16,7 +16,15 @@ interface IPlaylistsRepo {
 	): Boolean
 
 	suspend fun likePlaylist(
-		playlist_id: Int
+		playlistId: Int
+	): Boolean
+
+	suspend fun dislikePlaylist(
+		playlistId: Int
+	): Boolean
+
+	suspend fun deletePlaylist(
+		playlistId: Int
 	): Boolean
 
 	suspend fun loadEntirePlaylist(
@@ -26,6 +34,11 @@ interface IPlaylistsRepo {
 	fun loadLiveEntirePlaylist(
 		playlist_id: Int
 	): LiveData<UserPlaylist>
+
+	suspend fun loadCachedPlaylist(
+		playlist_id: Int,
+		update: Boolean = false
+	): UserPlaylist.Entire?
 
 	suspend fun updatePlaylistCollection()
 

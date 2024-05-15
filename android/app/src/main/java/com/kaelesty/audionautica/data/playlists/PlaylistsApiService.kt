@@ -32,6 +32,12 @@ interface PlaylistsApiService {
 		@Body body: PlaylistIdRequest
 	): Response<ResponseBody>
 
+	@POST("DisLikePlayList/")
+	suspend fun dislikePlaylist(
+		@Header("token") token: String,
+		@Body body: PlaylistIdRequest
+	): Response<ResponseBody>
+
 	@POST("UserPlayList/")
 	suspend fun getPlaylists(
 		@Header("token") token: String,
@@ -49,7 +55,7 @@ interface PlaylistsApiService {
 		@Body body: AddTrackToPlaylistRequest
 	): Response<ResponseBody>
 
-	@POST("Search/")
+	@POST("PlayListSearch/")
 	suspend fun searchPlaylists(
 		@Header("token") token: String,
 		@Body body: SearchDto
@@ -59,5 +65,11 @@ interface PlaylistsApiService {
 	suspend fun updatePlaylistTrackset(
 		@Header("token") token: String,
 		@Body body: UpdatePlaylistTracksetRequest
+	): Response<ResponseBody>
+
+	@POST("DeleteId/")
+	suspend fun deletePlaylist(
+		@Header("token") token: String,
+		@Body body: PlaylistIdRequest
 	): Response<ResponseBody>
 }

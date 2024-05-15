@@ -7,6 +7,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kaelesty.audionautica.data.player.PlayerController
 import com.kaelesty.audionautica.domain.entities.Track
+import com.kaelesty.audionautica.domain.playlists.DeletePlaylistUseCase
+import com.kaelesty.audionautica.domain.playlists.DislikePlaylistUseCase
+import com.kaelesty.audionautica.domain.playlists.LikePlaylistUseCase
+import com.kaelesty.audionautica.domain.playlists.LoadCachedPlaylistUseCase
 import com.kaelesty.audionautica.domain.playlists.LoadLiveEntirePlaylistUseCase
 import com.kaelesty.audionautica.domain.playlists.UpdatePlaylistTracksetUseCase
 import com.kaelesty.audionautica.domain.playlists.UserPlaylist
@@ -20,9 +24,12 @@ import javax.inject.Inject
 
 class PlaylistDetailsViewModel @Inject constructor(
 	private val getTrackByIdCase: GetTrackByIdCase,
-	private val getLiveEntirePlaylistUseCase: LoadLiveEntirePlaylistUseCase,
+	private val getCachedPlaylistUseCase: LoadCachedPlaylistUseCase,
 	private val pqc: PlayerController,
-	private val updatePlaylistTracksetUseCase: UpdatePlaylistTracksetUseCase
+	private val updatePlaylistTracksetUseCase: UpdatePlaylistTracksetUseCase,
+	private val likePlaylistUseCase: LikePlaylistUseCase,
+	private val dislikePlaylistUseCase: DislikePlaylistUseCase,
+	private val deletePlaylistUseCase: DeletePlaylistUseCase,
 ) : ViewModel() {
 
 	private val _stateFlow: MutableStateFlow<PlaylistDetailsState> =
@@ -31,12 +38,39 @@ class PlaylistDetailsViewModel @Inject constructor(
 
 	private val scope = CoroutineScope(Dispatchers.IO)
 
-	private var _playlist: LiveData<UserPlaylist> = MutableLiveData(null)
-	val playlist: LiveData<UserPlaylist> get() = _playlist
+	private var _playlist: MutableStateFlow<UserPlaylist.Entire?> = MutableStateFlow(null)
+	val playlist: StateFlow<UserPlaylist.Entire?> get() = _playlist
 
 	fun setPlaylist(playlistId: Int) {
 		scope.launch(Dispatchers.IO) {
-			_playlist = getLiveEntirePlaylistUseCase(playlistId)
+			val cached = getCachedPlaylistUseCase(playlistId, update = true)
+			_playlist.emit(cached)
+		}
+	}
+
+	fun removePlaylistFromCollection(playlistId: Int) {
+		scope.launch(Dispatchers.IO) {
+			if (dislikePlaylistUseCase(playlistId)) {
+				_playlist.emit(
+					getCachedPlaylistUseCase(playlistId, update = true)
+				)
+			}
+		}
+	}
+
+	fun addPlaylistToCollection(playlistId: Int) {
+		scope.launch(Dispatchers.IO) {
+			if (likePlaylistUseCase(playlistId)) {
+				_playlist.emit(
+					getCachedPlaylistUseCase(playlistId, update = true)
+				)
+			}
+		}
+	}
+
+	fun deletePlaylist(playlistId: Int) {
+		scope.launch(Dispatchers.IO) {
+			deletePlaylistUseCase(playlistId)
 		}
 	}
 

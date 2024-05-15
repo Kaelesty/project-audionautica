@@ -1,9 +1,11 @@
 package com.kaelesty.audionautica.presentation.search
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -21,11 +23,13 @@ import com.kaelesty.audionautica.domain.playlists.UserPlaylist
 import com.kaelesty.audionautica.presentation.composables.music.TrackCard
 import com.kaelesty.audionautica.presentation.playlists.addtracktoplaylist.AddTrackToPlalistDialog
 import com.kaelesty.audionautica.presentation.playlists.details.Loading
+import com.kaelesty.audionautica.presentation.playlists.list.PlaylistCard
 import com.kaelesty.audionautica.presentation.viewmodels.ViewModelFactory
 
 @Composable
 fun Search(
-	viewModelFactory: ViewModelFactory
+	viewModelFactory: ViewModelFactory,
+	onNavigateToPlaylistDetails: (UserPlaylist.Entire) -> Unit
 ) {
 
 	val vm = viewModel<SearchViewModel>(factory = viewModelFactory)
@@ -38,14 +42,21 @@ fun Search(
 			is SearchState.Initial -> {
 
 			}
+
 			is SearchState.Loading -> {
 				Loading()
 			}
+
 			is SearchState.TracksResult -> {
 				TracksList(vm, (state as SearchState.TracksResult).tracks, viewModelFactory)
 			}
+
 			is SearchState.PlaylistsResult -> {
-				PlaylistsList(vm, (state as SearchState.PlaylistsResult).playlists)
+				PlaylistsList(
+					vm,
+					(state as SearchState.PlaylistsResult).playlists,
+					onNavigateToPlaylistDetails
+				)
 			}
 		}
 	}
@@ -99,7 +110,19 @@ fun TracksList(
 @Composable
 fun PlaylistsList(
 	vm: SearchViewModel,
-	playlists: List<UserPlaylist.Entire>
+	playlists: List<UserPlaylist.Entire>,
+	onNavigateToPlaylistDetails: (UserPlaylist.Entire) -> Unit
 ) {
-
+	playlists.forEach {
+		Box(
+			modifier = Modifier
+				.height(144.dp)
+				.padding(horizontal = 8.dp)
+				.padding(bottom = 10.dp)
+		) {
+			PlaylistCard(state = it, onShowPlaylistDetails = {
+				onNavigateToPlaylistDetails(it)
+			})
+		}
+	}
 }

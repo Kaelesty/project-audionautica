@@ -18,7 +18,7 @@ fun MusicNavGraph(
 	musicPlaylistsScreenContent: @Composable (Screen.PlaylistsList.PlaylistsSource) -> Unit,
 	musicLibraryScreenContent: @Composable () -> Unit,
 	addPlaylistContent: @Composable () -> Unit,
-	playlistDetailsContent: @Composable (UserPlaylist.Entire) -> Unit,
+	playlistDetailsContent: @Composable (Int) -> Unit,
 	settingsContent: @Composable () -> Unit,
 ) {
 	NavHost(
@@ -53,14 +53,14 @@ fun MusicNavGraph(
 			composable(
 				route = Screen.PlaylistsDetails.route,
 				arguments = listOf(
-					navArgument(Screen.KEY_PLAYLIST) {
-						type = NavType.StringType
+					navArgument(Screen.KEY_PLAYLIST_ID) {
+						type = NavType.IntType
 					}
 				)
 			) {
-				val json = it.arguments?.getString(Screen.KEY_PLAYLIST)
+				val id = it.arguments?.getInt(Screen.KEY_PLAYLIST_ID) ?: -1
 				playlistDetailsContent(
-					Gson().fromJson(json, UserPlaylist.Entire::class.java)
+					id
 				)
 			}
 		}

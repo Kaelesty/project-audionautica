@@ -68,7 +68,8 @@ class PlaylistUploadViewModel @Inject constructor(
 					isPrivate = isPrivate,
 					desc = desc,
 					imageUrl = "",
-					likes = 0
+					likes = 0,
+					inCollection = false
 				),
 				uri
 			)

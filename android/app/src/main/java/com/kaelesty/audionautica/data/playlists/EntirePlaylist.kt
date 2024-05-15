@@ -8,7 +8,8 @@ data class EntirePlaylistResponse(
 	@SerializedName("likes") val likes: Int,
 	@SerializedName("isprivat") val isPrivate: Boolean,
 	@SerializedName("editable") val isEditable: Boolean,
-	@SerializedName("tracksid") val trackIds: String
+	@SerializedName("tracksid") val trackIds: String,
+	@SerializedName("inCollection") val inCollection: Boolean,
 )
 
 data class EntirePlaylistRequest(
@@ -22,5 +23,6 @@ data class IdEntirePlaylistResponse(
 	@SerializedName("likes") val likes: Int,
 	@SerializedName("isprivat") val isPrivate: Boolean,
 	@SerializedName("editable") val isEditable: Boolean,
-	@SerializedName("tracksid") val trackIds: String
+	@SerializedName("tracksid") val trackIds: String,
+	@SerializedName("inCollection") val inCollection: Boolean = false
 )
