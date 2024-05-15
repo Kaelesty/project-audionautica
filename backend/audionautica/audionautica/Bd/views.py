@@ -328,6 +328,7 @@ class PlayListUpload(APIView):
             playlist.description = request.headers["description"]
             playlist.tracksid = request.headers["tracksid"]
             playlist.isprivat = request.headers["isprivat"]
+            playlist.liked = "0"
             playlist.save()
             playlist.image = config.file_path_posters + str(playlist.id) + ext
             playlist.save()
@@ -527,6 +528,7 @@ class PlayListSearch(APIView):
             playlist["tracksid"] =i.tracksid
             playlist["liked"] =i.liked
             playlist["isprivat"] =i.isprivat
+            playlis["editable"] = payload["id"] == int(i.creatorid)
             playlist["inCollection"] = (payload["id"] == int(i.creatorid)) or (i.id in user_liked_playlists)
             array.append(playlist)
         json_response = {'playlists': array}
@@ -567,6 +569,7 @@ class PlayListInfoId(APIView):
         dickt["liked"] = playlist.liked
         dickt["isprivat"] = playlist.isprivat == "True"
         dickt["creator_id"] = playlist.creatorid
+        dickt["editable"] = payload["id"] == int(playlist.creatorid)
         dickt["inCollection"] = (payload["id"] == int(playlist.creatorid)) or (playlist.id in user_liked_playlists)
         return Response(dickt)
 
