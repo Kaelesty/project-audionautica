@@ -35,6 +35,7 @@ def create_playlist(x):
     playlist.isprivat = 'True'
     playlist.image = config.file_path_posters + "kitty.jpg"
     playlist.liked = "0"
+    playlist.description = "Your favorite playlist"
     playlist.save()
     return playlist.id
 
@@ -517,9 +518,11 @@ class PlayListSearch(APIView):
         payload = jwt.decode(request.headers["token"], config.secret_key, algorithms=['HS256'])
         user = Users.objects.filter(id=payload["id"]).first()
         user_liked_playlists = list(map(int, list(filter(lambda x: x != "", user.likedplaylist.split("/")))))
-        result = PlayList.objects.filter(Q(title__icontains=query) | Q(description__icontains=query)).all()
+        result = PlayList.objects.filter((Q(title__icontains=query) | Q(description__icontains=query)) & (Q(isprivat="False") | Q(creatorid=payload["id"]))).all()
         array = []
         for i in result:
+            if i.id not in user_liked_playlists:
+                continue
             playlist = {}
             playlist["id"] = i.id
             playlist["title"] = i.title
@@ -528,7 +531,7 @@ class PlayListSearch(APIView):
             playlist["tracksid"] =i.tracksid
             playlist["liked"] =i.liked
             playlist["isprivat"] =i.isprivat
-            playlis["editable"] = payload["id"] == int(i.creatorid)
+            playlist["editable"] = payload["id"] == int(i.creatorid)
             playlist["inCollection"] = (payload["id"] == int(i.creatorid)) or (i.id in user_liked_playlists)
             array.append(playlist)
         json_response = {'playlists': array}
