@@ -45,6 +45,7 @@ class PlaylistDetailsViewModel @Inject constructor(
 		scope.launch(Dispatchers.IO) {
 			val cached = getCachedPlaylistUseCase(playlistId, update = true)
 			_playlist.emit(cached)
+			loadTracks(cached as UserPlaylist.Entire)
 		}
 	}
 

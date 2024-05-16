@@ -27,7 +27,8 @@ private val DarkColorScheme = darkColorScheme(
 	surfaceVariant = BackgroundGradientDarkEnd,
 	outline = CardBorderDark,
 	onSurface = TextDark,
-	primaryContainer = ButtonDark
+	primaryContainer = ButtonDark,
+
 )
 
 private val LightColorScheme = lightColorScheme(

@@ -9,15 +9,20 @@ import android.os.Bundle
 import android.os.IBinder
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.common.util.concurrent.MoreExecutors
 import com.kaelesty.audionautica.domain.usecases.GetLogoutFlowUseCase
 import com.kaelesty.audionautica.presentation.composables.music.MusicScreen
 import com.kaelesty.audionautica.presentation.player.PlayerService
 import com.kaelesty.audionautica.presentation.ui.theme.AudionauticaTheme
+import com.kaelesty.audionautica.presentation.ui.theme.StatusBarColor
 import com.kaelesty.audionautica.presentation.viewmodels.ViewModelFactory
 import com.kaelesty.audionautica.system.ModifiedApplication
 import kotlinx.coroutines.CoroutineScope
@@ -68,6 +73,8 @@ class MusicActivity : ComponentActivity() {
 			}
 		}
 
+		//enableEdgeToEdge()
+
 		isOffline = intent.getBooleanExtra(IS_OFFLINE_EXTRA_KEY, false)
 
 		val sessionToken = SessionToken(
@@ -85,6 +92,15 @@ class MusicActivity : ComponentActivity() {
 
 		setContent {
 			AudionauticaTheme {
+
+				val systemUiController = rememberSystemUiController()
+				SideEffect {
+					systemUiController.setStatusBarColor(
+						color = StatusBarColor, // color of top of picture
+						darkIcons = false
+					)
+				}
+
 				MusicScreen(
 					viewModelFactory = viewModelFactory,
 					offlineMode = isOffline,

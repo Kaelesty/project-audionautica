@@ -16,6 +16,8 @@ val BackgroundGradientLightEnd = Color(192, 192, 222)
 
 val BackgroundGradientDarkStart = Color(48, 48, 48)
 
+val StatusBarColor = Color(3, 19, 32)
+
 val BackgroundGradientDarkEnd = Color(80, 80, 100)
 
 val ButtonDark = Color(70, 70, 90)

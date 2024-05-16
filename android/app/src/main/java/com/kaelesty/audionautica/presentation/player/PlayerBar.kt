@@ -3,6 +3,7 @@ package com.kaelesty.audionautica.presentation.player
 import android.media.session.MediaController
 import android.os.Build
 import android.util.Log
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -90,6 +91,7 @@ fun PlayerBar(
 			.clickable {
 				expanded = ! expanded
 			}
+			.animateContentSize()
 	) {
 		Column {
 			Row(

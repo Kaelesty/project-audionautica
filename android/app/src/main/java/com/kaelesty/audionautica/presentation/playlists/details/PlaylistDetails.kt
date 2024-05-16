@@ -85,9 +85,9 @@ fun PlaylistDetails(
 	if (playlist == null) {
 		Loading()
 	} else {
-		LaunchedEffect(key1 = (playlist as UserPlaylist.Entire).trackIds.size, key2 = playlistId) {
-			vm.loadTracks(playlist as UserPlaylist.Entire)
-		}
+//		LaunchedEffect(key1 = (playlist as UserPlaylist.Entire).trackIds.size, key2 = playlistId) {
+//			vm.loadTracks(playlist as UserPlaylist.Entire)
+//		}
 
 		val playerState by playerViewModel.playerState.collectAsState()
 
