@@ -18,7 +18,7 @@ const AlbumCoverBig = ({ coverSrc }) => {
       {isOpen && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content">
-            <button className="close-button" onClick={closeModal}>&times;</button>
+            <button className="closecover-button" onClick={closeModal}>&times;</button>
             <img src={coverSrc} alt="Album Cover" className="cover-image" />
           </div>
         </div>

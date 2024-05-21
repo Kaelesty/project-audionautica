@@ -17,7 +17,7 @@ const Track = ({id, title, artist, onPlayClick}) =>{
   }
 
   const addQueueButtClick = (id, title, artist) => {
-    addTrackToQueue({id, title, artist}) 
+    addTrackToQueue({id, title, artist, cover: null}) 
   }
 
   return (

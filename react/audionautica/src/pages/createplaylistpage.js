@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./createplaylistpage.css"
 import { useNavigate } from "react-router-dom"; 
 import createPlaylist from "../requests/createplaylist";
+import LoaderIcon from "../components/search/download";
 
 const PlaylistForm = () => {
     const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ const PlaylistForm = () => {
     });
     const navigate = useNavigate(); 
     const [previewPic, setPreviewPic] = useState()
+    const [loading, setLoading] = useState(false)
 
     const handleChange = (event) => {
         const { name, value, type, checked } = event.target;
@@ -46,13 +48,19 @@ const PlaylistForm = () => {
         if (formData.title.trim() === "") {
             return;
         }
-        const status = await createPlaylist(formData)
-
-        console.log(formData);
-        if (status===200){
-            navigate(-1);
-        } 
-        console.log(status);
+        try{
+            setLoading(true)
+            const status = await createPlaylist(formData)
+            console.log(formData);
+            if (status===200){
+                navigate(-1);
+            } 
+            console.log(status);
+        }
+        finally{
+            setLoading(false)
+        }
+        
     };
 
     return (
@@ -82,6 +90,7 @@ const PlaylistForm = () => {
                         type="file"
                         accept="image/*"
                         onChange={handleImageChange}
+                        required
                     />
                     {formData.image && (
                         <img src={previewPic} alt="Preview" className="image-preview" />
@@ -98,7 +107,8 @@ const PlaylistForm = () => {
                         />
                     </label>
                 </div>
-                <button className="submit-button" type="submit">Создать плейлист</button>
+                {!loading && <button className="submit-button" type="submit">Создать плейлист</button>}
+                {loading && <LoaderIcon/>}
             </form>
         </div>
     );

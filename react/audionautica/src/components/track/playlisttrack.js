@@ -4,6 +4,8 @@ import PlaylistAddMenu from "./playlistaddmenu.js"
 import addTrackToPlaylist from "../../requests/addtracktoplaylist.js"
 import getUserPlaylists from "../../requests/getuserplaylists.js"
 import deleteTrackFromPlaylist from "../../requests/deltrackfromplaylist.js"
+import BackURL from "../../urls.js"
+import token from "../../token.js"
 
 const PlaylistTrack = ({id, title, artist, onPlayClick, playlistId, update}) =>{
   const [isOnTrack, setIsOnTrack] = useState(false)
@@ -21,7 +23,7 @@ const PlaylistTrack = ({id, title, artist, onPlayClick, playlistId, update}) =>{
   }
 
   const addQueueButtClick = (id, title, artist) => {
-    addTrackToQueue({id, title, artist}) 
+    addTrackToQueue({id, title, artist, cover: BackURL + "/PlayList/GetPoster/?id=" + playlistId + "&token=" + token.getToken()}) 
   }
 
   const deleteTrack = async (id) => {

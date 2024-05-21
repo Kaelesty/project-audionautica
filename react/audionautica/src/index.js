@@ -11,21 +11,21 @@ import HomePage from './pages/home';
 import PlaylistPage from './pages/playlistpage';
 import NotFoundPage from './pages/notfound';
 import PlaylistForm from './pages/createplaylistpage';
+import LoadTrackForm from './pages/loadtrackpage';
+import "./fonts/font.css"
+import BackURL from './urls';
 
 export const Context = React.createContext();
 
 const App = () => { 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [currentTrack, setCurrentTrack] = useState(null)
-  const [currTrackTitle, setCurrTrackTitle] = useState("")
-  const [currTrackArtist, setCurrTrackArtist] = useState("")
   const [createdPlaylists, setCreatedPlaylists] = useState([])
   const [savedPlaylists, setSavedPlaylists] = useState([])
+  
+  //BackURL.setUrl(window.location.href.slice(0,-6)) //для запуска на эндпоинте
+  BackURL.setUrl("https://defb-193-32-202-124.ngrok-free.app") //для ввода вручную
 
   const contextValue = {isLoggedIn, setIsLoggedIn, 
-                        currentTrack, setCurrentTrack,
-                        currTrackTitle, setCurrTrackTitle,
-                        currTrackArtist, setCurrTrackArtist,
                         createdPlaylists, setCreatedPlaylists,
                         savedPlaylists, setSavedPlaylists}
   
@@ -42,6 +42,7 @@ const App = () => {
             <Route path="search/" element={<SearchBar/>} />
             <Route path="playlist/:id" element={<PlaylistPage/>}/>
             <Route path="createplaylist/" element={<PlaylistForm/>}/>
+            <Route path="loadtrack/" element={<LoadTrackForm/>}/>
           </Route>
           <Route path='*' element={<NotFoundPage/>}/>
         </Routes>

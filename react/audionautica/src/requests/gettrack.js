@@ -47,7 +47,7 @@ async function getTrackById(id, currentTrack, setCurrentTrack, abort, setAbort) 
       
   
       const reader = response.body.getReader();
-      const totalSize = +response.headers.get('Content-Length');
+      //const totalSize = +response.headers.get('Content-Length');
       const initialChunkSize = 1024*10;
       let loaded = 0;
 
@@ -91,7 +91,7 @@ async function getTrackById(id, currentTrack, setCurrentTrack, abort, setAbort) 
             currentTrack.pause()
           }
           audio.play();
-          console.log("first chunk appended, progress ", loaded / totalSize)
+          //console.log("first chunk appended, progress ", loaded / totalSize)
           setCurrentTrack(audio)
           
           appendData();
@@ -99,7 +99,7 @@ async function getTrackById(id, currentTrack, setCurrentTrack, abort, setAbort) 
         }
         else{
           appendData();
-          console.log("data appended, progress ", loaded / totalSize, abort)
+          //console.log("data appended, progress ", loaded / totalSize, abort)
         }
       };
       

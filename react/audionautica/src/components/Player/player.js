@@ -1,22 +1,22 @@
-import React, {useState, useContext, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import VolumeSlider from './volumeslider';
 import AlbumCoverBig from './albumcoverbig';
 import ProgressBar from './progressbar.js';
 import AlbumCover from './../icons/nopic.png';
-import { Context } from '../../index.js';
 import useQueue from '../queue/queue.js';
 import getTrackById from '../../requests/gettrack.js';
 import './player.css';
 
 
-const MusicPlayer = ({albumCover, isSidebarOpen, setIsSidebarOpen}) => {
+const MusicPlayer = ({isSidebarOpen, setIsSidebarOpen}) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const {repeatMode, setRepeatMode} = useQueue();
   const [volume, setVolume] = useState(0.5);
   const [abort, setAbort] = useState(null);
-  const {currentTrack, setCurrentTrack} = useContext(Context)
-  const {currTrackTitle, setCurrTrackTitle} = useContext(Context)
-  const {currTrackArtist, setCurrTrackArtist} = useContext(Context)
+  const [currentTrack, setCurrentTrack] = useState(null)
+  const [currTrackTitle, setCurrTrackTitle] = useState()
+  const [currTrackArtist, setCurrTrackArtist] = useState()
+  const [currTrackCover, setCurrTrackCover] = useState(AlbumCover)
   const {queue, nextTrack, prevTrack, currentId} = useQueue()
 
   useEffect(() => {
@@ -48,6 +48,12 @@ const MusicPlayer = ({albumCover, isSidebarOpen, setIsSidebarOpen}) => {
       setTrack()
       setCurrTrackArtist(queue[currentId].artist)
       setCurrTrackTitle(queue[currentId].title)
+      if (queue[currentId].cover){
+        setCurrTrackCover(queue[currentId].cover)
+      }
+      else{
+        setCurrTrackCover(AlbumCover)
+      }
     }
     // eslint-disable-next-line
   }, [queue[currentId]]);
@@ -118,7 +124,7 @@ const MusicPlayer = ({albumCover, isSidebarOpen, setIsSidebarOpen}) => {
     <>
       <div className="music-player">
           <div className="album-cover">
-            <img src={AlbumCover} alt="Album Cover"/>
+            <img src={currTrackCover} alt="Album Cover"/>
           </div>
         <div className="song-details">
           <h3>{currTrackTitle}</h3>
@@ -162,12 +168,12 @@ const MusicPlayer = ({albumCover, isSidebarOpen, setIsSidebarOpen}) => {
             <VolumeSlider volumeChange={handleVolumeChange} />
         </div>
         <div className='progress-bar-container'>
-          <ProgressBar />
+          <ProgressBar currentTrack={currentTrack}/>
         </div>
       </div>
 
       <AlbumCoverBig
-        coverSrc={AlbumCover}
+        coverSrc={currTrackCover}
       />
    </>
     )

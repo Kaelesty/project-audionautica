@@ -7,22 +7,19 @@
     background-color: #333;
     transition: right 0.3s ease;
     overflow-y: scroll;
-    overflow-x: hidden;
-    scrollbar-width: thin; 
+    overflow-x: hidden; 
+    scrollbar-width: auto; 
     scrollbar-color: transparent; 
     -ms-overflow-style: none; 
   }
-
   .sidebar::-webkit-scrollbar {
     width: 6px;
   }
-
   .sidebar::-webkit-scrollbar-thumb {
-    background-color: #e0e0e0; 
+    background-color: #ececec;
     border-radius: 5px;
-  } 
-
-  .sidebar::-webkit-scrollbar-thumb:hover {
+   } 
+   .sidebar::-webkit-scrollbar-thumb:hover {
     background-color: #ececec;
   }
 

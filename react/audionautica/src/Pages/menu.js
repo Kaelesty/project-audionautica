@@ -6,15 +6,10 @@ import "./menu.css"
 
 
 const Menu = () => {
-  const {isLoggedIn, setIsLoggedIn} = useContext(Context);
-  const { currentTrack, setCurrentTrack} = useContext(Context)  
+  const {isLoggedIn, setIsLoggedIn} = useContext(Context); 
 
   const handleLogout = () => {
     token.removeToken()
-    if (currentTrack){ 
-      currentTrack.pause()
-      setCurrentTrack(null)
-    }
     setIsLoggedIn(false)
   }
 
@@ -26,7 +21,6 @@ const Menu = () => {
             <button onClick={handleLogout}>Выход</button>
           </Link>
           <Link to="/home">Домой</Link>
-          <Link to="/rec">Рекомендации</Link>
           <Link to="/search">Поиск</Link>
         </>
       ) : (

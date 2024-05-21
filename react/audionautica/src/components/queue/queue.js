@@ -14,6 +14,7 @@ export function QueueProvider({ children }) {
   
   useEffect(() => {
     queueRef.current = queue;
+    console.log(queue)
   }, [queue]);
 
   const addTrackToQueue = (track) => {

@@ -20,6 +20,7 @@
     height: 190px;
     padding: 5px;
     border-radius: 10px;
+    pointer-events: none;
     object-fit: cover;
     -webkit-user-drag: none;
     user-select: none;
@@ -27,11 +28,13 @@
     -webkit-user-select: none;
     -ms-user-select: none;
   }
+
   .playlist-pluscover{
-    width: 80px;
-    height: 80px;
-    padding: 60px;
+    width: 60px;
+    height: 60px;
+    padding: 70px;
     border-radius: 10px;
+    pointer-events: none;
     object-fit: cover;
     -webkit-user-drag: none;
     user-select: none;

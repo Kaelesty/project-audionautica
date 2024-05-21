@@ -1,9 +1,7 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Context } from '../../index.js';
+import React, { useState, useEffect } from 'react';
 import './progressbar.css'
 
-const ProgressBar = () => {
-  const { currentTrack } = useContext(Context);
+const ProgressBar = ({currentTrack}) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 

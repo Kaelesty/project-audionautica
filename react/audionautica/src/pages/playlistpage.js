@@ -14,7 +14,6 @@ import token from '../token';
 import "./playlistpage.css"
 
 
-
 const PlaylistPage = () => {
   const { id } = useParams();
   const {gotoTrack, setQueuePlaylist} = useQueue()
@@ -54,7 +53,8 @@ const PlaylistPage = () => {
         const tracksData = fullTracksData.map(track =>({
           id: track.id,
           title: track.title,
-          artist: track.artist
+          artist: track.artist,
+          cover: BackURL + "/PlayList/GetPoster/?id=" + id + "&token=" + token.getToken()
       }));
         setTracks(tracksData)
       } catch (error) {
