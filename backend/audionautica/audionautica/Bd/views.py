@@ -521,8 +521,6 @@ class PlayListSearch(APIView):
         result = PlayList.objects.filter((Q(title__icontains=query) | Q(description__icontains=query)) & (Q(isprivat="False") | Q(creatorid=payload["id"]))).all()
         array = []
         for i in result:
-            if i.id not in user_liked_playlists:
-                continue
             playlist = {}
             playlist["id"] = i.id
             playlist["title"] = i.title
