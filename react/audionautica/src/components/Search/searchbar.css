@@ -51,10 +51,11 @@
 .results-playlist-container{
   position: absolute;
   display: grid;
+  height: auto;
+  max-height: calc(100vh - 50px - 125px - 67px); 
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
   margin-top: 10px;
   width: 100%;
-  height: calc(100vh - 50px - 125px - 67px); 
   top: 50px;
   overflow-y: scroll;
   overflow-x: hidden; 

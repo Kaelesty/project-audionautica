@@ -18,7 +18,7 @@ async function createPlaylist(data) {
            
             body: formData
         });
-        console.log("Отправлен запрос на создание плейлиста");
+        //console.log("Отправлен запрос на создание плейлиста");
         return response.status
     } catch (error) {
         console.error('Ошибка:', error);

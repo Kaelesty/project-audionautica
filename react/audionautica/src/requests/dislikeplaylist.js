@@ -18,7 +18,7 @@ async function dislikePlaylist(playlist_id) {
             return null;
         }
         
-        console.log("Дизлайк плейлиста ", playlist_id);
+        //console.log("Дизлайк плейлиста ", playlist_id);
     } catch (error) {
         console.error('Ошибка:', error);
         return null;

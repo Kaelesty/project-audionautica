@@ -18,7 +18,7 @@ async function getPlaylistTracksById(playlist_id) {
             return null;
         }
         
-        console.log("Отправлен запрос на получение треков плейлиста");
+        //console.log("Отправлен запрос на получение треков плейлиста");
         const data = await response.json();
         return data.tracks // {tracks: Array(6)}
     } catch (error) {

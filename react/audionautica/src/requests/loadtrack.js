@@ -16,7 +16,7 @@ async function loadTrack(data) {
             },
             body: formData
         });
-        console.log("Отправлен запрос на загрузку трека");
+        //console.log("Отправлен запрос на загрузку трека");
         return response.status
     } catch (error) {
         console.error('Ошибка:', error);

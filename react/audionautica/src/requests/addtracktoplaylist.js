@@ -21,7 +21,7 @@ async function addTrackToPlaylist(trackId, playlistId) {
             return null;
         }
 
-        console.log("Отправлен запрос на добавление трека в плейлист с id", playlistId);
+        //console.log("Отправлен запрос на добавление трека в плейлист с id", playlistId);
 
     } catch (error) {
         console.error('Ошибка:', error);

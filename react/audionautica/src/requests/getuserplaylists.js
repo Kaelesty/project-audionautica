@@ -11,7 +11,7 @@ async function getUserPlaylists() {
             },       
         });
         
-        console.log("Отправлен запрос на получение плейлистов пользователя");
+        //console.log("Отправлен запрос на получение плейлистов пользователя");
         const data = await response.json();
         return data // Object { liked: [], created: [] }
     } catch (error) {

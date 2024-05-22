@@ -18,22 +18,20 @@ const PlaylistPage = () => {
   const { id } = useParams();
   const {gotoTrack, setQueuePlaylist} = useQueue()
   const [isLoading, setIsLoading] = useState(true)
-  const [playlistTitle, setPlaylistTitle] = useState("")
   const [playlistCreator, setPlaylistCreator] = useState("")
-  const [playlistDiscription, setPlaylistDiscription] = useState("")
   const [tracks, setTracks] = useState([])
   const [update, setUpdate] = useState(false)
-  const {savedPlaylists} = useContext(Context)
+  const {savedPlaylists, setSavedPlaylists} = useContext(Context)
   const [liked, setLiked] = useState(savedPlaylists.some(playlist => playlist.id === parseInt(id)))
+  const [currentPlaylist, setCurrentPlaylist] = useState() 
 
   useEffect(()=>{
     const fetchPlaylist= async () => {
       try {
         const response = await getPlaylistById(id);
         const creator = await getUsernameById(response.creator_id)
-        setPlaylistTitle(response.title);      
+        setCurrentPlaylist({cover: null, title: response.title, creator: creator, id: parseInt(id)})  
         setPlaylistCreator(creator);
-        setPlaylistDiscription(response.description)
       
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -78,11 +76,14 @@ const PlaylistPage = () => {
   const likePlaylistClick = async () => {
     if (liked){
       await dislikePlaylist(id)
+      setSavedPlaylists(savedPlaylists.filter(playlist => playlist.id !== id))
     }
     else {
       await likePlaylist(id)
+      setSavedPlaylists(prevPlaylists => [...prevPlaylists, currentPlaylist]);
     }
     setLiked(!liked)
+    console.log(savedPlaylists)
   }
 
   const onUpdate = () => {
@@ -98,7 +99,7 @@ const PlaylistPage = () => {
           <div className="playlistpage-header">
             <img className="playlistpage-cover" src={BackURL + "/PlayList/GetPoster/?id=" + id + "&token=" + token.getToken()} alt="Обложка плейлиста"/>
             <div className="playlistpage-info">
-              <h1 className="playlistpage-title">{playlistTitle}</h1>
+              <h1 className="playlistpage-title">{currentPlaylist.title}</h1>
               <p className="playlistpage-creator">Создатель: {playlistCreator}</p>
             </div>
             <div className='pprightside-container'>
@@ -109,7 +110,7 @@ const PlaylistPage = () => {
 
             </div>
           </div>
-          <p>{playlistDiscription}</p>
+          <p>{currentPlaylist.description}</p>
           {tracks && tracks.length > 0 ? (
           <ul className="tracklist"> 
           {tracks.map((track, index) => (

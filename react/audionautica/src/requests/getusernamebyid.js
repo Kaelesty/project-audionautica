@@ -16,7 +16,7 @@ async function getUsernameById(id) {
             console.error('Пользователь не найден');
             return null;
         }
-        console.log("Запрос на получение данных пользователя");
+        //console.log("Запрос на получение данных пользователя");
         const result = await response.json()
         return result.username
     } catch (error) {

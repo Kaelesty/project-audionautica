@@ -14,7 +14,7 @@ export function QueueProvider({ children }) {
   
   useEffect(() => {
     queueRef.current = queue;
-    console.log(queue)
+    //console.log(queue)
   }, [queue]);
 
   const addTrackToQueue = (track) => {
@@ -22,7 +22,6 @@ export function QueueProvider({ children }) {
   };
 
   const setQueueTrack = (track) =>{
-    console.log([track])
     setQueue([track]);
     setCurrentId(0)
   }
@@ -44,7 +43,7 @@ export function QueueProvider({ children }) {
 
   const nextTrack = () => {
     let newId = currentId;
-    console.log(queueRef.current);
+    //console.log(queueRef.current);
     if (repeatMode === 0){
       if (currentId === queueRef.current.length - 1){
         return;

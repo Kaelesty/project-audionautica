@@ -21,7 +21,7 @@ async function deleteTrackFromPlaylist(trackId, playlistId) {
             return null;
         }
 
-        console.log("Отправлен запрос на удаление трека из плейлиста с id", playlistId);
+        //console.log("Отправлен запрос на удаление трека из плейлиста с id", playlistId);
 
     } catch (error) {
         console.error('Ошибка:', error);

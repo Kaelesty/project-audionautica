@@ -11,6 +11,10 @@ const Playlist = ({ cover, title, creator, id }) => {
   const navigate = useNavigate();
   const {setQueuePlaylist} = useQueue();
 
+  if (cover === null){  
+    cover = nopic
+  }
+  
   const playlistClick = () => {
     navigate(`/playlist/${id}`);
   }
@@ -28,7 +32,8 @@ const Playlist = ({ cover, title, creator, id }) => {
           return {
             id: id,
             title: track.title,
-            artist: track.artist
+            artist: track.artist,
+            cover: cover,
           };
         }));
         setQueuePlaylist(tracksData)
@@ -38,9 +43,7 @@ const Playlist = ({ cover, title, creator, id }) => {
     }
   }
 
-  if (cover === null){  
-    cover = nopic
-  }
+  
 
   return (
     <div

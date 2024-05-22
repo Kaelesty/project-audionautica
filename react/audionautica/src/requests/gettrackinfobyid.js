@@ -16,7 +16,7 @@ async function getTrackInfoById(id) {
             console.error('Трек не найден');
             return null;
         }
-        console.log("Запрос на получение информации о треке");
+        //console.log("Запрос на получение информации о треке");
         const result = await response.json()
         return result
     } catch (error) {
