@@ -85,6 +85,15 @@ const SearchBar = () => {
     setQueueTrack({id, title, artist, cover: null})
   }
   
+  const setSearchModeTrack = () =>{
+    setSearchMode(false)
+    setIsSearchModeOpen(false)
+  }
+
+  const setSearchModePlaylist = () =>{
+    setSearchMode(true)
+    setIsSearchModeOpen(false)
+  }
   return (
     <div className="search-bar">
     <div className="input-container">
@@ -107,8 +116,8 @@ const SearchBar = () => {
           onMouseEnter={() => setIsSearchModeOpen(true)}
           onMouseLeave={() => setIsSearchModeOpen(false)}
         >
-        <button onClick={() => setSearchMode(true)}>Поиск по плейлистам</button>
-        <button onClick={() => setSearchMode(false)}>Поиск по трекам</button>
+        <button onClick={setSearchModePlaylist}>Поиск по плейлистам</button>
+        <button onClick={setSearchModeTrack}>Поиск по трекам</button>
       </div>)}
     </div>
     </div>

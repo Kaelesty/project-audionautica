@@ -23,7 +23,7 @@ const App = () => {
   const [savedPlaylists, setSavedPlaylists] = useState([])
   
   //BackURL.setUrl(window.location.href.slice(0,-6)) //для запуска на эндпоинте
-  BackURL.setUrl("https://911d-193-32-202-124.ngrok-free.app") //для ввода вручную
+  BackURL.setUrl("https://b4f9-193-32-202-124.ngrok-free.app") //для ввода вручную
 
   const contextValue = {isLoggedIn, setIsLoggedIn, 
                         createdPlaylists, setCreatedPlaylists,
