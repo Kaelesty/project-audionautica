@@ -3,6 +3,7 @@
     border: 1px solid #aaaaaa;;
     width: 200px;
     transform: translateX(587px) translateY(13px);
+    z-index: 99;
   }
   
   .add-menu button {
@@ -10,6 +11,7 @@
     padding: 5px 10px;
     background-color: #f0f0f0;
     border: none;
+    border-radius: 0px;
     cursor: pointer;
   }
   .add-menu button:hover {

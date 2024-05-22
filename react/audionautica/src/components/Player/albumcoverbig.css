@@ -1,17 +1,16 @@
 .modal-overlay {
     position: absolute;
     left: 0px;
-    bottom: 125px;
+    bottom: 124px;
     animation: slideIn 0.7s forwards;
     z-index: 0;
   }
   
   .modal-content {
     background-color: #fff;
-    padding: 20px;
+    padding: 10px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    
   }
  
   .open-button {
@@ -30,18 +29,25 @@
 
   .closecover-button {
     position: absolute;
+    text-align: center;
+    align-items: center;
     width: 44px;
-    top: 5px;
-    right: 5px;
+    border-radius: 50px;
+    height: auto;
+    overflow: hidden;
+    top: 0px;
+    right: 0px;
     background: none;
     border: none;
     font-size: 24px;
     color: #555;
+    background-color: #ffffff;
     cursor: pointer;
   }
   
   .cover-image {
-    width: 300px; 
+    width: 300px;
+    border-radius: 5px; 
     height: auto;
     -webkit-user-drag: none;
     user-select: none;
@@ -49,6 +55,7 @@
     -webkit-user-select: none;
     -ms-user-select: none;
   }
+
   @keyframes slideIn {
     from {
       transform: translateY(100%);

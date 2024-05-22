@@ -18,10 +18,14 @@ const Menu = () => {
       {isLoggedIn ? (
         <>
           <Link to="/login" className='ButtonLink'>
-            <button onClick={handleLogout}>Выход</button>
+            <button className='logout-button' onClick={handleLogout}></button>
           </Link>
-          <Link to="/home">Домой</Link>
-          <Link to="/search">Поиск</Link>
+          <Link to="/home">
+            <button className='home-button'> </button>
+          </Link>
+          <Link to="/search">
+            <button className='search-button'></button>
+          </Link>
         </>
       ) : (
         <>
